@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.app" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!-- Tema para la Splash Screen -->
+    <style name="Theme.Splash" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/purple_900</item> <!-- Fondo negro -->
+        <item name="android:statusBarColor">@color/purple_900</item> <!-- Barra de estado negra -->
+        <item name="android:navigationBarColor">@color/purple_900</item> <!-- Barra de navegación negra -->
+    </style>
+
+</resources>

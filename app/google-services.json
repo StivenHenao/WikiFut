@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "484975439694",
+    "project_id": "fir-lite-53f01",
+    "storage_bucket": "fir-lite-53f01.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:484975439694:android:e8a958bf6fc455de93781f",
+        "android_client_info": {
+          "package_name": "com.wikifut.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBaQOaGgS4tzkwNT12El3A6HmHbqHqqkOw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
