@@ -1,6 +1,8 @@
 package com.wikifut.app
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -11,11 +13,17 @@ import com.wikifut.app.presentation.Home.HomePartidosScreen
 import com.wikifut.app.presentation.initial.InitialScreen
 import com.wikifut.app.presentation.login.LoginScreen
 import com.wikifut.app.presentation.signup.SignUpScreen
+import com.wikifut.app.presentation.Teams.TeamsScreen
+import com.wikifut.app.presentation.Teams.TeamsViewModel
+import android.util.Log
+import com.google.gson.Gson
+import com.wikifut.app.model.Team
 
 
 @Composable
 fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) {
     val isUserLoggedIn = auth.currentUser != null
+    //val startDestination = "Teams"
     val startDestination = if (isUserLoggedIn) "home" else "initial"
 
     NavHost(navController = navHostController, startDestination = startDestination) {
@@ -52,11 +60,23 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
         }
         composable("home") {
             val homePartidosViewModel: HomePartidosViewModel = hiltViewModel()
-            HomePartidosScreen(viewModel = homePartidosViewModel, navigateToInitial = {
-                navHostController.navigate("initial") {
+            HomePartidosScreen(
+                viewModel = homePartidosViewModel,
+                navigateToTeam = {teamJson -> navHostController.navigate("teamScreen/$teamJson")},
+                navigateToInitial = { navHostController.navigate("initial") {
                     popUpTo("home") { inclusive = true }
                 }
+
+
             })
+        }
+        composable("teamScreen/{teamJson}") { backStackEntry ->
+            val json = backStackEntry.arguments?.getString("teamJson") ?: ""
+            val team = Gson().fromJson(json, Team::class.java) // Deserializa el objeto
+
+            TeamsScreen(team) {
+                navHostController.popBackStack() // Función para volver atrás
+            }
         }
 
     }

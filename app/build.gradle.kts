@@ -24,8 +24,8 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        buildConfigField("String", "X_RAPIDAPI_KEY", "\"${project.findProperty("X_RAPIDAPI_KEY") ?: ""}\"")
-        buildConfigField("String", "CLIENT_ID_FIREBASE", "\"${project.findProperty("CLIENT_ID_FIREBASE") ?: ""}\"")
+        buildConfigField("String", "X_RAPIDAPI_KEY", "\"1dd8dbbf888cb3450585dbdfb8ef06d3\"")
+        buildConfigField("String", "CLIENT_ID_FIREBASE", "\"484975439694-379d8t68to2ubfoclms6em5jt30arog2.apps.googleusercontent.com\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
