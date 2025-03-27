@@ -1,5 +1,6 @@
 package com.wikifut.app.presentation.Home
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,16 +24,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
+import com.google.gson.Gson
 import com.wikifut.app.R
 import com.wikifut.app.model.Partido
 import java.util.*
 import com.wikifut.app.utils.convertirHoraAColombia
 import com.wikifut.app.utils.formatFechaParaApi
 import com.wikifut.app.utils.obtenerFechaActual
-
+import com.wikifut.app.model.Team
 @Composable
 fun HomePartidosScreen(
     viewModel: HomePartidosViewModel = hiltViewModel(),
+    navigateToTeam: (String) -> Unit = {},
     navigateToInitial: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsState()
@@ -78,7 +81,15 @@ fun HomePartidosScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             LazyColumn {
-                items(partidosFiltrados) { partido -> PartidoCard(partido) }
+                items(partidosFiltrados) { partido ->
+                    PartidoCard(
+                        partido,
+                        onTeamClick = { team ->
+                            val teamJson = Uri.encode(Gson().toJson(team))
+                            navigateToTeam(teamJson)
+                        }
+                    )
+                }
             }
 
             if (partidosFiltrados.isEmpty()) {
@@ -224,7 +235,7 @@ fun DatePickerDialog(
 
 
 @Composable
-fun PartidoCard(partido: Partido) {
+fun PartidoCard(partido: Partido, onTeamClick: (Team) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -266,7 +277,9 @@ fun PartidoCard(partido: Partido) {
                 ) {
 
                     Column(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { onTeamClick(partido.teams.home) }, // Navegar al equipo local,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         AsyncImage(
@@ -296,7 +309,9 @@ fun PartidoCard(partido: Partido) {
 
 
                     Column(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { onTeamClick(partido.teams.away) }, // Navegar al equipo visitante,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         AsyncImage(

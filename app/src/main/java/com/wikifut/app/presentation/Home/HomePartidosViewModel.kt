@@ -77,9 +77,6 @@ class HomePartidosViewModel @Inject constructor(
 
         // 667, // Friendly Clubs HAY MUCHOS
         10, // Friendly International
-
-
-
     )
 
     init {
