@@ -6,7 +6,7 @@ class PlayerRepository @Inject constructor(
     private val playerApi: PlayerApi
 ) {
 
-    suspend fun getPlayer(playerId: Int): PlayerDataResponse {
-        return playerApi.getPlayer(player = playerId)
+    suspend fun getPlayer(playerId: Int, season: Int): PlayerDataResponse {
+        return playerApi.getPlayer(player = playerId, season = season)
     }
 }

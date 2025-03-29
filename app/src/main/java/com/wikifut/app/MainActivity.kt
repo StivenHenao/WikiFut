@@ -36,8 +36,8 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ){
                     //NavigationWrapper(navHostController, auth)
-                    //NavigationWrapper(navHostController = navHostController, auth = auth)
-                    PlayerScreen(276)
+                    NavigationWrapper(navHostController = navHostController, auth = auth)
+                    //PlayerScreen(276, 2019)
                 }
             }
         }

@@ -16,8 +16,8 @@ import okhttp3.Response
 
 @Module
 @InstallIn(SingletonComponent::class)
-object AppModule {
 
+object AppModule {
     @Provides
     @Singleton
     fun provideApiKeyInterceptor(): Interceptor {
