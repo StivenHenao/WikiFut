@@ -18,19 +18,19 @@ class PlayerViewModel @Inject constructor(
     private val _playerData = MutableLiveData<PlayerDataResponse?>() // Guarda los datos de la API
     val playerData: LiveData<PlayerDataResponse?> get() = _playerData
 
-    private val _loading = MutableLiveData<Boolean>() // Indica si la API está cargando
+    private val _loading = MutableLiveData<Boolean>()
     val loading: LiveData<Boolean> get() = _loading
 
-    private val _error = MutableLiveData<String?>() // Guarda errores en caso de que fallen las peticiones
+    private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> get() = _error
 
 
-    fun fetchPlayerData(playerId: Int) {
-        _loading.value = true // Se activa el loading
+    fun fetchPlayerData(playerId: Int, season: Int) {
+        _loading.value = true
 
         viewModelScope.launch {
             try {
-                val response = playerApi.getPlayer(playerId) // Llamada a la API
+                val response = playerApi.getPlayer(playerId, season) // Llamada a la API
                 _playerData.value = response
                 _error.value = null
             } catch (e: Exception) {

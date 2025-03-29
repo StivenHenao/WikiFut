@@ -32,7 +32,7 @@ class HomePartidosViewModel @Inject constructor(
 
         45, // FA Cup (Inglaterra)
         48, // EFL Cup (Inglaterra)
-        39,  // Premier League (Inglaterra)
+        39,  // Premier com.wikifut.app.model.League (Inglaterra)
         140, // España - La Liga
         143, // España - Copa del Rey
         556, // España - Supercopa
@@ -62,15 +62,15 @@ class HomePartidosViewModel @Inject constructor(
         253, // USA - MLS
         257, // USA - US Open Cup
 
-        307, // Arabia - Pro League
+        307, // Arabia - Pro com.wikifut.app.model.League
 
-        2, // Champions League
-        3, // Europa League
-        848, // Conference League
+        2, // Champions com.wikifut.app.model.League
+        3, // Europa com.wikifut.app.model.League
+        848, // Conference com.wikifut.app.model.League
         13, // Copa Libertadores
         11, // Copa Sudamericana
 
-        5, // Nations League
+        5, // Nations com.wikifut.app.model.League
         31, // CONCACAF - Qualifiers
         34, // CONMEBOL - Qualifiers
         32, // UEFA - Qualifiers
