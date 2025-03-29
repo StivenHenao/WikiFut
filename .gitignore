@@ -16,6 +16,8 @@
 local.properties
 gradle.properties
 /app/src/google-services.json
+.idea/
+
 
 # Created by https://www.toptal.com/developers/gitignore/api/androidstudio,java,kotlin,firebase
 # Edit at https://www.toptal.com/developers/gitignore?templates=androidstudio,java,kotlin,firebase
