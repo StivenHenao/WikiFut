@@ -14,9 +14,9 @@ import androidx.navigation.compose.rememberNavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+import com.wikifut.app.presentation.player.PlayerScreen
 import com.wikifut.app.ui.theme.WikifutTheme
 import dagger.hilt.android.AndroidEntryPoint
-
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -35,8 +35,9 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ){
-                    NavigationWrapper(navHostController, auth)
+                    //NavigationWrapper(navHostController, auth)
                     //NavigationWrapper(navHostController = navHostController, auth = auth)
+                    PlayerScreen(276)
                 }
             }
         }

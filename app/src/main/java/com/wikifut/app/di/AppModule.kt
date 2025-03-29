@@ -1,6 +1,7 @@
 package com.wikifut.app.di
 
 import com.wikifut.app.api.PartidosApi
+import com.wikifut.app.api.PlayerApi
 import com.wikifut.app.utils.Constans
 import dagger.Module
 import dagger.Provides
@@ -45,6 +46,13 @@ object AppModule {
     @Singleton
     fun provideApi(retrofit: Retrofit): PartidosApi {
         return retrofit.create(PartidosApi::class.java)
+    }
+
+    // Nuevo provider para PlayerApi
+    @Provides
+    @Singleton
+    fun providePlayerApi(retrofit: Retrofit): PlayerApi {
+        return retrofit.create(PlayerApi::class.java)
     }
 
     class ApiKeyInterceptor(private val apiKey: String) : Interceptor {
