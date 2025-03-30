@@ -78,6 +78,10 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
                 navHostController.popBackStack() // Función para volver atrás
             }
         }
+        composable("ligas") {
+            val ligasViewModel = hiltViewModel<com.wikifut.app.presentation.Ligas.LigasViewModel>()
+            com.wikifut.app.presentation.Ligas.LigasScreen(viewModel = ligasViewModel)
+        }
 
     }
 }

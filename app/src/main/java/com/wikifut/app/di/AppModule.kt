@@ -1,5 +1,6 @@
 package com.wikifut.app.di
 
+import com.wikifut.app.api.LigaApi
 import com.wikifut.app.api.PartidosApi
 import com.wikifut.app.api.PlayerApi
 import com.wikifut.app.utils.Constans
@@ -54,6 +55,11 @@ object AppModule {
     fun providePlayerApi(retrofit: Retrofit): PlayerApi {
         return retrofit.create(PlayerApi::class.java)
     }
+
+    // ✅ NUEVO: LigaApi para LigasRepository
+    @Provides
+    fun provideLigaApi(retrofit: Retrofit): LigaApi =
+        retrofit.create(LigaApi::class.java)
 
     class ApiKeyInterceptor(private val apiKey: String) : Interceptor {
         override fun intercept(chain: Interceptor.Chain): Response {
