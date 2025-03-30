@@ -19,20 +19,45 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.wikifut.app.model.LigaData
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+
 
 @Composable
 fun LigasScreen(viewModel: LigasViewModel = hiltViewModel()) {
-    val ligas = viewModel.ligas.value
+    val ligas = viewModel.ligasFiltradas.value
+    val query = viewModel.searchQuery.value
 
-    LazyColumn(
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(ligas) { liga ->
-            LigaItem(liga)
+    Column(modifier = Modifier.fillMaxSize()) {
+        OutlinedTextField(
+            value = query,
+            onValueChange = { viewModel.actualizarBusqueda(it) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            placeholder = { Text("Buscar por liga o país") },
+            singleLine = true,
+            trailingIcon = {
+                IconButton(onClick = { /* podrías limpiar aquí si quieres */ }) {
+                    Icon(imageVector = Icons.Default.Search, contentDescription = "Buscar")
+                }
+            }
+        )
+
+        LazyColumn(
+            contentPadding = PaddingValues(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(ligas) { liga ->
+                LigaItem(liga)
+            }
         }
     }
 }
+
 
 @Composable
 fun LigaItem(liga: LigaData) {

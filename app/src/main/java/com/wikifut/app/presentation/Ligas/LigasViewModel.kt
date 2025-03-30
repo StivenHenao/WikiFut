@@ -23,30 +23,46 @@ class LigasViewModel @Inject constructor(
         obtenerLigas()
     }
 
+    var searchQuery = mutableStateOf("")
+        private set
+
+    var ligasFiltradas = mutableStateOf<List<LigaData>>(emptyList())
+        private set
+
+    fun actualizarBusqueda(query: String) {
+        searchQuery.value = query
+        filtrarLigas()
+    }
+
+    private fun filtrarLigas() {
+        val query = searchQuery.value.lowercase()
+
+        ligasFiltradas.value = if (query.isBlank()) {
+            // Muestra destacadas si no hay búsqueda
+            _ligas.value
+        } else {
+            todasLasLigas.value.filter { liga ->
+                liga.league.name.lowercase().contains(query) ||
+                        liga.country.name.lowercase().contains(query)
+            }
+        }
+    }
+
+
+    private val todasLasLigas = mutableStateOf<List<LigaData>>(emptyList())
+
     private fun obtenerLigas() {
         viewModelScope.launch {
             val resultado = repository.obtenerLigas()
             resultado?.let {
-                val ligasImportantes = listOf(39, 140, 135, 61, 78, 128, 71, 239) // IDs destacados
-
-                _ligas.value = it.filter { liga ->
-                    liga.league.id in ligasImportantes
-                }.map { liga ->
-                    // Asegurar que muestres solo la temporada actual
-                    LigaData(
-                        league = LigaInfo(
-                            id = liga.league.id,
-                            name = liga.league.name,
-                            logo = liga.league.logo,
-                            season = liga.league.season // temporada actual
-                        ),
-                        country = PaisInfo(
-                            name = liga.country.name,
-                            flag = liga.country.flag
-                        )
-                    )
+                todasLasLigas.value = it
+                _ligas.value = it.filter { liga -> // por si quieres seguir mostrando solo destacadas al inicio
+                    liga.league.id in listOf(39, 140, 135, 61, 78, 128, 71, 239)
                 }
+                filtrarLigas()
             }
         }
     }
+
+
 }
