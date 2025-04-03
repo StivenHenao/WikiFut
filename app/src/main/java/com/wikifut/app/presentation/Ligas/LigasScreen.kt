@@ -1,6 +1,7 @@
 package com.wikifut.app.presentation.Ligas
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -24,14 +25,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.navigation.NavHostController
 
 
 @Composable
-fun LigasScreen(viewModel: LigasViewModel = hiltViewModel()) {
+fun LigasScreen(
+    viewModel: LigasViewModel = hiltViewModel(),
+    navController: NavHostController
+) {
     val ligas = viewModel.ligasFiltradas.value
     val query = viewModel.searchQuery.value
 
     Column(modifier = Modifier.fillMaxSize()) {
+
+        // 🔍 Buscador
         OutlinedTextField(
             value = query,
             onValueChange = { viewModel.actualizarBusqueda(it) },
@@ -41,30 +48,37 @@ fun LigasScreen(viewModel: LigasViewModel = hiltViewModel()) {
             placeholder = { Text("Buscar por liga o país") },
             singleLine = true,
             trailingIcon = {
-                IconButton(onClick = { /* podrías limpiar aquí si quieres */ }) {
+                IconButton(onClick = {}) {
                     Icon(imageVector = Icons.Default.Search, contentDescription = "Buscar")
                 }
             }
         )
 
+        // 📋 Lista de Ligas
         LazyColumn(
             contentPadding = PaddingValues(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(ligas) { liga ->
-                LigaItem(liga)
+                LigaItem(liga = liga) {
+                    // 🚀 Navegar al detalle de la liga
+                    navController.navigate("ligaDetalle/${liga.league.id}/${liga.league.season}")
+                }
             }
         }
     }
 }
 
-
 @Composable
-fun LigaItem(liga: LigaData) {
+fun LigaItem(
+    liga: LigaData,
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(100.dp),
+            .height(100.dp)
+            .clickable { onClick() }, // 👈 click en toda la tarjeta
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E))
     ) {
@@ -100,7 +114,7 @@ fun LigaItem(liga: LigaData) {
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // (Opcional) Bandera del país
+            // Bandera del país (si existe)
             liga.country.flag?.let { flagUrl ->
                 AsyncImage(
                     model = flagUrl,
