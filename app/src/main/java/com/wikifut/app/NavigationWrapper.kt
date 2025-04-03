@@ -18,7 +18,7 @@ import com.wikifut.app.presentation.Teams.TeamsViewModel
 import android.util.Log
 import com.google.gson.Gson
 import com.wikifut.app.model.Team
-import com.wikifut.app.presentation.Liga.LigaDetalleScreen
+import com.wikifut.app.presentation.LigaDetalle.LigaDetalleScreen
 import com.wikifut.app.presentation.Ligas.LigasScreen
 import com.wikifut.app.presentation.Ligas.LigasViewModel
 
@@ -88,7 +88,11 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
         composable("ligaDetalle/{leagueId}/{season}") { backStackEntry ->
             val leagueId = backStackEntry.arguments?.getString("leagueId")?.toIntOrNull() ?: return@composable
             val season = backStackEntry.arguments?.getString("season")?.toIntOrNull() ?: return@composable
-            LigaDetalleScreen(leagueId = leagueId, season = season)
+            LigaDetalleScreen(
+                leagueId = leagueId,
+                season = season,
+                navController = navHostController // 👈 importante para el botón "Atrás"
+            )
         }
 
     }
