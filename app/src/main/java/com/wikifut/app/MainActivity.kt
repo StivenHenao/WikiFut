@@ -17,6 +17,7 @@ import com.google.firebase.auth.auth
 import com.wikifut.app.ui.theme.WikifutTheme
 import dagger.hilt.android.AndroidEntryPoint
 
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 

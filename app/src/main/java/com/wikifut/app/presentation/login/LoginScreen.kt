@@ -96,21 +96,12 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color(0xFF6650a4))
     ) {
         Image(
             painter = painterResource(id = R.drawable.fondo_login_register),
             contentDescription = "Fondo",
             modifier = Modifier.fillMaxSize()
-        )
-        Icon(
-            painter = painterResource(id = R.drawable.ic_back_24),
-            contentDescription = "Back",
-            tint = Color.White,
-            modifier = Modifier
-                .padding(24.dp)
-                .size(24.dp)
-                .align(Alignment.TopStart)
-                .clickable { navigateToInitial() }
         )
 
         Column(
@@ -203,7 +194,7 @@ fun LoginScreen(
                     .fillMaxWidth(0.8f)
                     .border(2.dp, White, RoundedCornerShape(20.dp)),
                 shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.Transparent)
+                colors = ButtonDefaults.outlinedButtonColors(containerColor = Color(0xFF0E0414))
             ) {
                 Image(
                     painter = painterResource(id = R.mipmap.google_ic),
@@ -224,6 +215,23 @@ fun LoginScreen(
             TextButton(onClick = { navigateToSignUp() }) {
                 Text(
                     "¿No tienes cuenta? Crea una",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = White
+                )
+            }
+
+            Divider(
+                color = Color.White,
+                thickness = 1.dp,
+                modifier = Modifier
+                    .width(200.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
+
+            TextButton(onClick = { navigateToSignUp() }) {
+                Text(
+                    "Recuperar contraseña",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = White
