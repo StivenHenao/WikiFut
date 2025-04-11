@@ -9,24 +9,29 @@ data class StandingsLeague(
 )
 
 data class LeagueStandings(
+    val id: Int,
+    val name: String,
+    val country: String,
+    val logo: String,
+    val season: Int,
     val standings: List<List<StandingTeam>>
 )
 
 data class StandingTeam(
     val rank: Int,
-    val team: TeamData,
+    val team: TeamInfo,
     val points: Int,
     val goalsDiff: Int,
-    val all: AllStats
+    val all: TeamStats
 )
 
-data class TeamData(
+data class TeamInfo(
     val id: Int,
     val name: String,
     val logo: String
 )
 
-data class AllStats(
+data class TeamStats(
     val played: Int,
     val win: Int,
     val draw: Int,

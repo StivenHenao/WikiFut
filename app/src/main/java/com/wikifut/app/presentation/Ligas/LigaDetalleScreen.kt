@@ -15,6 +15,7 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.wikifut.app.model.StandingTeam
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.wikifut.app.presentation.Ligas.LigaDetalleViewModel
 
 @Composable
@@ -27,11 +28,15 @@ fun LigaDetalleScreen(
     // Estado para el tab seleccionado
     var selectedTab by remember { mutableStateOf(0) }
 
+    val nombreLiga = viewModel.nombreLiga.value
     // Estado global de tabla
     val tabla = viewModel.tabla.value
 
+    val temporada = viewModel.temporada.value
+
     // Llamar solo una vez
     LaunchedEffect(Unit) {
+        viewModel.obtenerTemporadaActual(leagueId)
         viewModel.cargarTabla(leagueId, season)
     }
 
@@ -55,7 +60,7 @@ fun LigaDetalleScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Liga $leagueId", // ❗ Puedes reemplazarlo con un ViewModel más adelante
+                text = nombreLiga.ifEmpty { "Liga" },
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -66,7 +71,7 @@ fun LigaDetalleScreen(
             )
         }
 
-        // 🔁 Tabs
+        // 🧭 Tabs: Tabla | Estadísticas | Temporada
         TabRow(selectedTabIndex = selectedTab) {
             Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }) {
                 Text("Tabla", modifier = Modifier.padding(12.dp))
@@ -75,7 +80,7 @@ fun LigaDetalleScreen(
                 Text("Estadísticas", modifier = Modifier.padding(12.dp))
             }
             Tab(selected = selectedTab == 2, onClick = { selectedTab = 2 }) {
-                Text("Temporada", modifier = Modifier.padding(12.dp))
+                Text("Temporada actual: $temporada", modifier = Modifier.padding(16.dp))
             }
         }
 
@@ -90,16 +95,60 @@ fun LigaDetalleScreen(
 
 @Composable
 fun TablaPosiciones(tabla: List<StandingTeam>) {
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
-        items(tabla) { team ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("${team.rank}. ${team.team.name}")
-                Text("${team.points} pts")
+
+    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp)) {
+        // 🧾 Encabezados
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text("Pos", modifier = Modifier.weight(0.5f), fontWeight = FontWeight.Bold)
+            Text("Equipo", modifier = Modifier.weight(2f), fontWeight = FontWeight.Bold)
+            Text("PJ", modifier = Modifier.weight(0.7f), fontWeight = FontWeight.Bold)
+            Text("G", modifier = Modifier.weight(0.7f), fontWeight = FontWeight.Bold)
+            Text("E", modifier = Modifier.weight(0.7f), fontWeight = FontWeight.Bold)
+            Text("P", modifier = Modifier.weight(0.7f), fontWeight = FontWeight.Bold)
+            Text("Pts", modifier = Modifier.weight(0.8f), fontWeight = FontWeight.Bold)
+        }
+
+        Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
+
+        // 📋 Lista de equipos
+        LazyColumn {
+            items(tabla) { team ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // 🥇 Posición
+                    Text("${team.rank}", modifier = Modifier.weight(0.5f))
+
+                    // 🛡️ Logo + nombre
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(2f)
+                    ) {
+                        AsyncImage(
+                            model = team.team.logo,
+                            contentDescription = team.team.name,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .padding(end = 8.dp)
+                        )
+                        Text(team.team.name, maxLines = 1)
+                    }
+
+                    // 📊 Estadísticas
+                    Text("${team.all.played}", modifier = Modifier.weight(0.7f))
+                    Text("${team.all.win}", modifier = Modifier.weight(0.7f))
+                    Text("${team.all.draw}", modifier = Modifier.weight(0.7f))
+                    Text("${team.all.lose}", modifier = Modifier.weight(0.7f))
+                    Text("${team.points}", modifier = Modifier.weight(0.8f), fontWeight = FontWeight.SemiBold)
+                }
             }
         }
     }

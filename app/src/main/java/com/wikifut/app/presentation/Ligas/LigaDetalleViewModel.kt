@@ -9,21 +9,46 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
+import com.wikifut.app.api.LigaDetalleApi
+import com.wikifut.app.api.SeasonApi
 
 @HiltViewModel
 class LigaDetalleViewModel @Inject constructor(
     private val repository: LigaDetalleRepository
 ): ViewModel() {
 
+    @Inject lateinit var seasonApi: SeasonApi
+    @Inject lateinit var ligaDetalleApi: LigaDetalleApi
+
+    private val _nombreLiga = mutableStateOf("")
+    val nombreLiga: State<String> = _nombreLiga
+
     private val _tabla = mutableStateOf<List<StandingTeam>>(emptyList())
     val tabla: State<List<StandingTeam>> = _tabla
+
+    private val _temporada = mutableStateOf(0)
+    val temporada: State<Int> = _temporada
 
     fun cargarTabla(leagueId: Int, season: Int) {
         viewModelScope.launch {
             val result = repository.getStandings(leagueId, season)
-            result?.response?.firstOrNull()?.league?.standings?.firstOrNull()?.let {
-                _tabla.value = it
+            result?.response?.firstOrNull()?.league?.standings?.firstOrNull()?.let { posiciones ->
+                _tabla.value = posiciones
+                _nombreLiga.value = result.response.first().league.name
+                _temporada.value = result.response.first().league.season
             }
         }
     }
+
+    fun obtenerTemporadaActual(leagueId: Int) {
+        viewModelScope.launch {
+            val result = ligaDetalleApi.getLigaDetalle(leagueId)
+            if (result.isSuccessful) {
+                val seasons = result.body()?.response?.firstOrNull()?.seasons ?: emptyList()
+                val temporadaActual = seasons.find { it.current }?.year ?: 0
+                _temporada.value = temporadaActual
+            }
+        }
+    }
+
 }

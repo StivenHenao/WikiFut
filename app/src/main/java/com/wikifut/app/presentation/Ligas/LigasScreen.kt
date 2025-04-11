@@ -61,8 +61,8 @@ fun LigasScreen(
         ) {
             items(ligas) { liga ->
                 LigaItem(liga = liga) {
-                    // 🚀 Navegar al detalle de la liga
-                    navController.navigate("ligaDetalle/${liga.league.id}/${liga.league.season}")
+                    val temporadaActual = liga.seasons.find { it.current }?.year ?: 2024
+                    navController.navigate("ligaDetalle/${liga.league.id}/$temporadaActual")
                 }
             }
         }
@@ -106,7 +106,7 @@ fun LigaItem(
                     color = Color.White
                 )
                 Text(
-                    text = "${liga.country.name} • Temp. ${liga.league.season}",
+                    text = "${liga.country.name} • Temp. ${liga.seasons.find { it.current }?.year ?: "?"}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.LightGray
                 )

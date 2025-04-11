@@ -5,8 +5,9 @@ data class LigasResponse(
 )
 
 data class LigaData(
-    val league: LigaInfo,
-    val country: PaisInfo
+    val league: LeagueInfo,
+    val country: CountryInfo,
+    val seasons: List<SeasonInfo> = emptyList()
 )
 
 data class LigaInfo(
@@ -20,3 +21,4 @@ data class PaisInfo(
     val name: String,
     val flag: String?
 )
+
