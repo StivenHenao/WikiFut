@@ -36,14 +36,17 @@ import com.wikifut.app.utils.Constans.CLIENT_ID_FIREBASE
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import com.google.android.gms.auth.api.identity.BeginSignInResult
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 @Composable
 fun SignUpScreen(
-    auth: FirebaseAuth,
-    navigateToInitial: () -> Unit = {},
-    navigateToLogin: () -> Unit = {},
-    navigateToHome: () -> Unit = {}
+    //auth: FirebaseAuth,
+    //navigateToInitial: () -> Unit = {},
+    //navigateToLogin: () -> Unit = {},
+    //navigateToHome: () -> Unit = {}
 ) {
     val context = LocalContext.current
     var email by remember { mutableStateOf("") }
@@ -75,7 +78,7 @@ fun SignUpScreen(
                 val googleIdToken = credential.googleIdToken
                 googleIdToken?.let { token: String ->
                     val firebaseCredential = GoogleAuthProvider.getCredential(token, null)
-                    auth.signInWithCredential(firebaseCredential)
+                    /*auth.signInWithCredential(firebaseCredential)
                         .addOnCompleteListener { task ->
                             isLoading = false
                             if (task.isSuccessful) {
@@ -85,7 +88,7 @@ fun SignUpScreen(
                                 errorMessage = "Error al iniciar sesión con Google. Inténtalo de nuevo."
                                 Log.e("GoogleSignIn", "Error en autenticación con Google", task.exception)
                             }
-                        }
+                        }*/
                 }
             } catch (e: Exception) {
                 isLoading = false
@@ -98,24 +101,12 @@ fun SignUpScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(Color(0xFF3A1E4D), Color(0xFF1D0B27)),
-                    startY = 0f,
-                    endY = 600f
-                )
-            )
-            .statusBarsPadding()
+            .background(Color(0xFF6650a4))
     ) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_back_24),
-            contentDescription = "Back",
-            tint = Color.White,
-            modifier = Modifier
-                .padding(24.dp)
-                .size(24.dp)
-                .align(Alignment.TopStart)
-                .clickable(onClick = navigateToInitial)
+        Image(
+            painter = painterResource(id = R.drawable.fondo_login_register),
+            contentDescription = "Fondo",
+            modifier = Modifier.fillMaxSize()
         )
 
         Column(
@@ -124,24 +115,16 @@ fun SignUpScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .size(310.dp, 180.dp)
-                    .background(Color.White, shape = RoundedCornerShape(110.dp))
-                    .clip(RoundedCornerShape(110.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.wikifutlogo),
-                    contentDescription = "Logo Wikifut",
-                    modifier = Modifier
-                        .size(110.dp)
-                        .scale(1.5f)
-                        .clip(RoundedCornerShape(110.dp))
-                )
-            }
+            Spacer(modifier = Modifier.height(190.dp))
+            TextField(
+                value = email,
+                onValueChange = { email = it },
+                placeholder = { Text("Nombre de usuario") },
+                modifier = Modifier.fillMaxWidth(0.8f),
+                shape = RoundedCornerShape(20.dp)
+            )
 
-            Spacer(modifier = Modifier.height(70.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             TextField(
                 value = email,
@@ -159,7 +142,6 @@ fun SignUpScreen(
                 passwordVisible = passwordVisible,
                 onPasswordVisibilityToggle = { passwordVisible = !passwordVisible }
             )
-
             Spacer(modifier = Modifier.height(10.dp))
 
             if (errorMessage != null) {
@@ -187,7 +169,7 @@ fun SignUpScreen(
                     isLoading = true
                     errorMessage = null
 
-                    auth.createUserWithEmailAndPassword(email, password)
+                    /*auth.createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener { task ->
                             isLoading = false
                             if (task.isSuccessful) {
@@ -202,7 +184,7 @@ fun SignUpScreen(
                                 }
                                 Log.i("wikifut", "Error al crear usuario")
                             }
-                        }
+                        }*/
                 },
                 modifier = Modifier.fillMaxWidth(0.8f),
                 shape = RoundedCornerShape(20.dp),
@@ -235,7 +217,7 @@ fun SignUpScreen(
                     .fillMaxWidth(0.8f)
                     .border(2.dp, White, RoundedCornerShape(20.dp)),
                 shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.Transparent)
+                colors = ButtonDefaults.outlinedButtonColors(containerColor = Color(0xFF0E0414))
             ) {
                 Image(
                     painter = painterResource(id = R.mipmap.google_ic),
@@ -253,7 +235,9 @@ fun SignUpScreen(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            TextButton(onClick = { navigateToLogin() }) {
+            TextButton(onClick = {
+                //navigateToLogin()
+            }) {
                 Text(
                     "¿Ya tienes cuenta? Iniciar Sesión",
                     fontSize = 16.sp,
@@ -292,5 +276,15 @@ fun PasswordTextField(
                 )
             }
         }
+    )
+}
+@Preview
+@Composable
+fun SignUpScreenPreview() {
+    SignUpScreen(
+        /*auth = Firebase.auth,
+        navigateToInitial = {},
+        navigateToLogin = {},
+        navigateToHome = {}*/
     )
 }
