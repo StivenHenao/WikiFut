@@ -43,10 +43,10 @@ import com.google.firebase.auth.auth
 
 @Composable
 fun SignUpScreen(
-    //auth: FirebaseAuth,
-    //navigateToInitial: () -> Unit = {},
-    //navigateToLogin: () -> Unit = {},
-    //navigateToHome: () -> Unit = {}
+    auth: FirebaseAuth,
+    navigateToInitial: () -> Unit = {},
+    navigateToLogin: () -> Unit = {},
+    navigateToHome: () -> Unit = {}
 ) {
     val context = LocalContext.current
     var email by remember { mutableStateOf("") }
@@ -78,7 +78,7 @@ fun SignUpScreen(
                 val googleIdToken = credential.googleIdToken
                 googleIdToken?.let { token: String ->
                     val firebaseCredential = GoogleAuthProvider.getCredential(token, null)
-                    /*auth.signInWithCredential(firebaseCredential)
+                    auth.signInWithCredential(firebaseCredential)
                         .addOnCompleteListener { task ->
                             isLoading = false
                             if (task.isSuccessful) {
@@ -88,7 +88,7 @@ fun SignUpScreen(
                                 errorMessage = "Error al iniciar sesión con Google. Inténtalo de nuevo."
                                 Log.e("GoogleSignIn", "Error en autenticación con Google", task.exception)
                             }
-                        }*/
+                        }
                 }
             } catch (e: Exception) {
                 isLoading = false
@@ -159,6 +159,7 @@ fun SignUpScreen(
                 }
             }
 
+
             Button(
                 onClick = {
                     if (email.isBlank() || password.isBlank()) {
@@ -169,7 +170,7 @@ fun SignUpScreen(
                     isLoading = true
                     errorMessage = null
 
-                    /*auth.createUserWithEmailAndPassword(email, password)
+                    auth.createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener { task ->
                             isLoading = false
                             if (task.isSuccessful) {
@@ -184,7 +185,7 @@ fun SignUpScreen(
                                 }
                                 Log.i("wikifut", "Error al crear usuario")
                             }
-                        }*/
+                        }
                 },
                 modifier = Modifier.fillMaxWidth(0.8f),
                 shape = RoundedCornerShape(20.dp),
@@ -236,7 +237,7 @@ fun SignUpScreen(
             Spacer(modifier = Modifier.height(10.dp))
 
             TextButton(onClick = {
-                //navigateToLogin()
+                navigateToLogin()
             }) {
                 Text(
                     "¿Ya tienes cuenta? Iniciar Sesión",
@@ -276,15 +277,5 @@ fun PasswordTextField(
                 )
             }
         }
-    )
-}
-@Preview
-@Composable
-fun SignUpScreenPreview() {
-    SignUpScreen(
-        /*auth = Firebase.auth,
-        navigateToInitial = {},
-        navigateToLogin = {},
-        navigateToHome = {}*/
     )
 }
