@@ -17,6 +17,7 @@ import com.wikifut.app.model.StandingTeam
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.wikifut.app.presentation.Ligas.LigaDetalleViewModel
+import com.wikifut.app.presentation.Ligas.StandingsWidget
 
 @Composable
 fun LigaDetalleScreen(
@@ -86,7 +87,10 @@ fun LigaDetalleScreen(
 
         // 📋 Contenido según tab
         when (selectedTab) {
-            0 -> TablaPosiciones(tabla)
+            0 -> StandingsWidget(
+                leagueId = leagueId,
+                season = temporada
+            )
             1 -> Text("Estadísticas (en desarrollo)", modifier = Modifier.padding(16.dp))
             2 -> Text("Temporada actual: $season", modifier = Modifier.padding(16.dp))
         }
