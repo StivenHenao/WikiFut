@@ -81,7 +81,29 @@ fun LigaDetalleScreen(
                 Text("Estadísticas", modifier = Modifier.padding(12.dp))
             }
             Tab(selected = selectedTab == 2, onClick = { selectedTab = 2 }) {
-                Text("Temporada actual: $temporada", modifier = Modifier.padding(16.dp))
+                var expanded by remember { mutableStateOf(false) }
+                val temporadas = viewModel.temporadasDisponibles.value
+
+                Box(modifier = Modifier
+                    .padding(16.dp)
+                    .clickable { expanded = true }
+                ) {
+                    Text("Temporada: $temporada")
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        temporadas.forEach { year ->
+                            DropdownMenuItem(
+                                text = { Text("Temporada $year") },
+                                onClick = {
+                                    expanded = false
+                                    viewModel.cargarTabla(leagueId, year)
+                                }
+                            )
+                        }
+                    }
+                }
             }
         }
 

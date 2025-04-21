@@ -29,13 +29,16 @@ class LigaDetalleViewModel @Inject constructor(
     private val _temporada = mutableStateOf(0)
     val temporada: State<Int> = _temporada
 
+    private val _temporadasDisponibles = mutableStateOf<List<Int>>(emptyList())
+    val temporadasDisponibles: State<List<Int>> = _temporadasDisponibles
+
     fun cargarTabla(leagueId: Int, season: Int) {
         viewModelScope.launch {
             val result = repository.getStandings(leagueId, season)
             result?.response?.firstOrNull()?.league?.standings?.firstOrNull()?.let { posiciones ->
                 _tabla.value = posiciones
                 _nombreLiga.value = result.response.first().league.name
-                _temporada.value = result.response.first().league.season
+                _temporada.value = season
             }
         }
     }
@@ -45,7 +48,8 @@ class LigaDetalleViewModel @Inject constructor(
             val result = ligaDetalleApi.getLigaDetalle(leagueId)
             if (result.isSuccessful) {
                 val seasons = result.body()?.response?.firstOrNull()?.seasons ?: emptyList()
-                val temporadaActual = seasons.find { it.current }?.year ?: 0
+                _temporadasDisponibles.value = seasons.map { it.year }.sortedDescending()  // <-- todas ordenadas
+                val temporadaActual = seasons.find { it.current }?.year ?: seasons.maxOfOrNull { it.year } ?: 0
                 _temporada.value = temporadaActual
             }
         }
