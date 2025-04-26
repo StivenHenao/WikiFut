@@ -1,5 +1,9 @@
 package com.wikifut.app.model
 
+data class MatchApiResponse(
+    val response: List<MatchResponse>
+)
+
 data class MatchResponse(
     val fixture: MRFixture,
     val league: MRLeague,
