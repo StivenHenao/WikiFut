@@ -1,47 +1,47 @@
 package com.wikifut.app.model
 
 data class MatchResponse(
-    val fixture: Fixture,
-    val league: League,
-    val teams: Teams,
-    val goals: Goals,
-    val score: Score,
-    val events: List<Event>,
-    val lineups: List<Lineup>,
-    val statistics: List<TeamStatistics>,
-    val players: List<TeamPlayers>
+    val fixture: MRFixture,
+    val league: MRLeague,
+    val teams: MRTeams,
+    val goals: MRGoals,
+    val score: MRScore,
+    val events: List<MREvent>,
+    val lineups: List<MRLineup>,
+    val statistics: List<MRTeamStatistics>,
+    val players: List<MRTeamPlayers>
 )
 
-data class Fixture(
+data class MRFixture(
     val id: Long,
     val referee: String,
     val timezone: String,
     val date: String,
     val timestamp: Long,
-    val periods: Periods,
-    val venue: Venue,
-    val status: Status
+    val periods: MRPeriods,
+    val venue: MRVenue,
+    val status: MRStatus
 )
 
-data class Periods(
+data class MRPeriods(
     val first: Long,
     val second: Long
 )
 
-data class Status(
+data class MRStatus(
     val long: String,
     val short: String,
     val elapsed: Long,
     val extra: Any? = null
 )
 
-data class Venue(
+data class MRVenue(
     val id: Any? = null,
     val name: String,
     val city: String
 )
 
-data class League(
+data class MRLeague(
     val id: Long,
     val name: String,
     val country: String,
@@ -52,17 +52,17 @@ data class League(
     val standings: Boolean
 )
 
-data class Teams(
-    val home: Team,
-    val away: Team
+data class MRTeams(
+    val home: MRTeam,
+    val away: MRTeam
 )
 
-data class Goals(
+data class MRGoals(
     val home: Int?,
     val away: Int?
 )
 
-data class Team(
+data class MRTeam(
     val id: Long,
     val name: String,
     val logo: String,
@@ -71,145 +71,145 @@ data class Team(
     val winner: Boolean? = null
 )
 
-data class Event(
-    val time: Time,
-    val team: Team,
-    val player: PlayerReference,
-    val assist: PlayerReference,
-    val type: EventType,
+data class MREvent(
+    val time: MRTime,
+    val team: MRTeam,
+    val player: MRPlayerReference,
+    val assist: MRPlayerReference,
+    val type: MREventType,
     val detail: String,
     val comments: Any? = null
 )
 
-data class Time(
+data class MRTime(
     val elapsed: Long,
     val extra: Long? = null
 )
 
-enum class EventType {
+enum class MREventType {
     Goal, Card, Subst
 }
 
-data class PlayerReference(
+data class MRPlayerReference(
     val id: Long? = null,
     val name: String? = null
 )
 
-data class Lineup(
-    val team: Team,
-    val coach: Coach,
+data class MRLineup(
+    val team: MRTeam,
+    val coach: MRCoach,
     val formation: String,
-    val startXI: List<StartingPlayer>,
-    val substitutes: List<StartingPlayer>
+    val startXI: List<MRStartingPlayer>,
+    val substitutes: List<MRStartingPlayer>
 )
 
-data class Coach(
+data class MRCoach(
     val id: Long,
     val name: String,
     val photo: String
 )
 
-data class StartingPlayer(
-    val player: PlayerLineupInfo
+data class MRStartingPlayer(
+    val player: MRPlayerLineupInfo
 )
 
-data class PlayerLineupInfo(
+data class MRPlayerLineupInfo(
     val id: Long,
     val name: String,
     val number: Long,
-    val pos: Position? = null,
+    val pos: MRPosition? = null,
     val grid: String? = null
 )
 
-enum class Position {
+enum class MRPosition {
     G, D, M, F
 }
 
-data class TeamPlayers(
-    val team: Team,
-    val players: List<PlayerDetail>
+data class MRTeamPlayers(
+    val team: MRTeam,
+    val players: List<MRPlayerDetail>
 )
 
-data class PlayerDetail(
-    val player: PlayerInfo,
-    val statistics: List<PlayerStatistics>
+data class MRPlayerDetail(
+    val player: MRPlayerInfo,
+    val statistics: List<MRPlayerStatistics>
 )
 
-data class PlayerInfo(
+data class MRPlayerInfo(
     val id: Long,
     val name: String,
     val photo: String
 )
 
-data class PlayerStatistics(
-    val games: GameStats,
+data class MRPlayerStatistics(
+    val games: MRGameStats,
     val offsides: Long? = null,
-    val shots: Shots,
-    val goals: GoalStats,
-    val passes: Passes,
-    val tackles: Tackles,
-    val duels: Duels,
-    val dribbles: Dribbles,
-    val fouls: Fouls,
-    val cards: Cards,
-    val penalty: Penalty
+    val shots: MRShots,
+    val goals: MRGoalStats,
+    val passes: MRPasses,
+    val tackles: MRTackles,
+    val duels: MRDuels,
+    val dribbles: MRDribbles,
+    val fouls: MRFouls,
+    val cards: MRCards,
+    val penalty: MRPenalty
 )
 
-data class GameStats(
+data class MRGameStats(
     val minutes: Long,
     val number: Long,
-    val position: Position,
+    val position: MRPosition,
     val rating: String,
     val captain: Boolean,
     val substitute: Boolean
 )
 
-data class Shots(
+data class MRShots(
     val total: Long,
     val on: Long
 )
 
-data class GoalStats(
+data class MRGoalStats(
     val total: Long? = null,
     val conceded: Long,
     val assists: Long? = null,
     val saves: Long? = null
 )
 
-data class Passes(
+data class MRPasses(
     val total: Long,
     val key: Long,
     val accuracy: String
 )
 
-data class Tackles(
+data class MRTackles(
     val total: Long? = null,
     val blocks: Long,
     val interceptions: Long
 )
 
-data class Duels(
+data class MRDuels(
     val total: Long,
     val won: Long
 )
 
-data class Dribbles(
+data class MRDribbles(
     val attempts: Long,
     val success: Long,
     val past: Long? = null
 )
 
-data class Fouls(
+data class MRFouls(
     val drawn: Long,
     val committed: Long
 )
 
-data class Cards(
+data class MRCards(
     val yellow: Long,
     val red: Long
 )
 
-data class Penalty(
+data class MRPenalty(
     val won: Any? = null,
     val commited: Any? = null,
     val scored: Long,
@@ -217,25 +217,25 @@ data class Penalty(
     val saved: Long? = null
 )
 
-data class Score(
-    val halftime: Goals,
-    val fulltime: Goals,
-    val extratime: Goals,
-    val penalty: Goals
+data class MRScore(
+    val halftime: MRGoals,
+    val fulltime: MRGoals,
+    val extratime: MRGoals,
+    val penalty: MRGoals
 )
 
-data class TeamStatistics(
-    val team: Team,
-    val statistics: List<Statistic>
+data class MRTeamStatistics(
+    val team: MRTeam,
+    val statistics: List<MRStatistic>
 )
 
-data class Statistic(
+data class MRStatistic(
     val type: String,
-    val value: StatValue
+    val value: MRStatValue
 )
 
-sealed class StatValue {
-    class IntegerValue(val value: Long) : StatValue()
-    class StringValue(val value: String) : StatValue()
-    class NullValue : StatValue()
+sealed class MRStatValue {
+    class IntegerValue(val value: Long) : MRStatValue()
+    class StringValue(val value: String) : MRStatValue()
+    class NullValue : MRStatValue()
 }
