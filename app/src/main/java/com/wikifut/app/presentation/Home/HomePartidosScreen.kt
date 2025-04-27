@@ -33,7 +33,8 @@ import com.wikifut.app.utils.obtenerFechaActual
 @Composable
 fun HomePartidosScreen(
     viewModel: HomePartidosViewModel = hiltViewModel(),
-    navigateToInitial: () -> Unit = {}
+    navigateToInitial: () -> Unit = {},
+    navigateToMatchDetail: (Long) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
@@ -78,7 +79,7 @@ fun HomePartidosScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             LazyColumn {
-                items(partidosFiltrados) { partido -> PartidoCard(partido) }
+                items(partidosFiltrados) { partido -> PartidoCard(partido, onMatchClick = navigateToMatchDetail) }
             }
 
             if (partidosFiltrados.isEmpty()) {
@@ -224,11 +225,19 @@ fun DatePickerDialog(
 
 
 @Composable
-fun PartidoCard(partido: Partido) {
+fun PartidoCard(
+    partido: Partido,
+    onMatchClick: (Long) -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp)
+            .clickable {
+                // Call the provided lambda with the fixture ID when the card is clicked
+                onMatchClick(partido.fixture.id.toLong())
+            },
+
         colors = CardDefaults.cardColors(containerColor = Color(0xFF4A256F))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {

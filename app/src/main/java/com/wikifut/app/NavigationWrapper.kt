@@ -3,8 +3,10 @@ package com.wikifut.app
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.NavHost
+import androidx.navigation.navArgument
 import com.google.firebase.auth.FirebaseAuth
 import com.wikifut.app.presentation.Home.HomePartidosViewModel
 import com.wikifut.app.presentation.Home.HomePartidosScreen
@@ -58,8 +60,26 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
                 navHostController.navigate("initial") {
                     popUpTo("home") { inclusive = true }
                 }
-            })
-        }
+            },
+                navigateToMatchDetail = { matchId ->
+                    navHostController.navigate("matchDetail/$matchId")
+                }
 
+            )
+        }
+        composable(
+            route = "matchDetail/{matchId}",
+            arguments = listOf(
+                navArgument("matchId") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val matchId = backStackEntry.arguments?.getLong("matchId")
+
+            if (matchId != null) {
+                MatchScreen(matchId = matchId)
+            } else {
+                navHostController.popBackStack("home", false)
+            }
+        }
     }
 }
