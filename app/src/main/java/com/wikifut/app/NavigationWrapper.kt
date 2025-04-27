@@ -10,6 +10,8 @@ import com.wikifut.app.presentation.Home.HomePartidosViewModel
 import com.wikifut.app.presentation.Home.HomePartidosScreen
 import com.wikifut.app.presentation.initial.InitialScreen
 import com.wikifut.app.presentation.login.LoginScreen
+import com.wikifut.app.presentation.match.MatchScreen
+import com.wikifut.app.presentation.match.MatchViewModel
 import com.wikifut.app.presentation.signup.SignUpScreen
 
 
