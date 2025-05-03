@@ -1,6 +1,8 @@
 package com.wikifut.app.presentation.player
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -18,7 +20,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.gson.JsonArray
+import coil.compose.rememberImagePainter
+
 import com.wikifut.app.model.*
 import com.wikifut.app.viewmodel.PlayerViewModel
 
@@ -68,7 +71,7 @@ fun PreviewPlayerScreen() {
                             country = "Spain",
                             logo = "https://example.com/league.png",
                             flag = null,
-                            season = 2019
+                            season = 2021
                         ),
                         games = PlayerGames(
                             appearences = 30,
@@ -160,7 +163,7 @@ fun PlayerScreen(
  * La posición se obtiene del primer estadístico (dentro de games) y se muestra.
  */
 @Composable
-fun PlayerDetails(playerDataResponse: PlayerDataResponse) {
+fun PlayerDetails(playerDataResponse: PlayerDataResponse) =
     if (playerDataResponse.response.isEmpty()) {
         // Mostrar un mensaje informando que no se encontraron datos
         Box(
@@ -173,8 +176,15 @@ fun PlayerDetails(playerDataResponse: PlayerDataResponse) {
         }
     } else {
         val playerData = playerDataResponse.response.first()
+
         val player = playerData.player
-        // Obtenemos la posición del primer estadístico, o "N/A" si no existe.
+        val statistic = playerData.statistics.first()
+        val statisticGame = statistic.games
+
+        val rating = statisticGame?.rating
+        val team_player = statistic.team.name
+
+
         val position = playerData.statistics.firstOrNull()?.games?.position ?: "N/A"
 
         Column(
@@ -182,6 +192,9 @@ fun PlayerDetails(playerDataResponse: PlayerDataResponse) {
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
+
+            headerVistaPlayer(name = player.name, player.photo, team_player ,rating)
+
             // Imagen del jugador, centrada y con forma circular.
             AsyncImage(
                 model = player.photo,
@@ -231,5 +244,37 @@ fun PlayerDetails(playerDataResponse: PlayerDataResponse) {
                 color = Color.White
             )
         }
+    }
+
+@Composable
+fun headerVistaPlayer(name: String, photo: String, team: String ,rating: String?){
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .background(Color(0xFF121212))
+        .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically)
+    {
+        Image(
+            painter = rememberImagePainter(photo),
+            contentDescription = "Foto del Jugador",
+            modifier = Modifier
+                .size(64.dp)
+                .clip(CircleShape)
+                .border(2.dp, Color.White, CircleShape)
+        )
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        Column(
+            modifier = Modifier.weight(1f)
+        ){
+            Text(text = name)
+            Text(text = team?: "No team")
+        }
+
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(text = rating?: "N/A")
+
+
     }
 }
