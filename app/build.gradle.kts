@@ -63,7 +63,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashtlytics)
@@ -77,6 +76,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.constraintlayout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -92,6 +92,7 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.2.2")
 
     implementation("androidx.compose.material:material-icons-extended-android:1.3.1")
+
 
     val hilt_navigation_compose_version = "1.1.0"
     val hilt_version = "2.50"
