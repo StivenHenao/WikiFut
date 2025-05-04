@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
+import androidx.compose.material3.Surface
+
 
 import com.wikifut.app.model.*
 import com.wikifut.app.viewmodel.PlayerViewModel
@@ -179,13 +181,17 @@ fun PlayerDetails(playerDataResponse: PlayerDataResponse) =
 
         val player = playerData.player
         val statistic = playerData.statistics.first()
+
         val statisticGame = statistic.games
+        val statisticTeamPlayer = statistic.team
+        val statisticPlayerLeague = statistic.league
 
         val rating = statisticGame?.rating
-        val team_player = statistic.team.name
+        val team_player = statisticTeamPlayer.name
 
 
         val position = playerData.statistics.firstOrNull()?.games?.position ?: "N/A"
+        val numberPlayer =statisticGame?.number?: 0
 
         Column(
             modifier = Modifier
@@ -193,56 +199,26 @@ fun PlayerDetails(playerDataResponse: PlayerDataResponse) =
                 .padding(16.dp)
         ) {
 
+            //---------------------------HEADER------------------
             headerVistaPlayer(name = player.name, player.photo, team_player ,rating)
 
-            // Imagen del jugador, centrada y con forma circular.
-            AsyncImage(
-                model = player.photo,
-                contentDescription = "Foto de ${player.name}",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape)
-                    .align(Alignment.CenterHorizontally)
+            Spacer(Modifier.height(8.dp))
+
+            containerBasicInfo(team = team_player,
+                imageTeam = statisticTeamPlayer.logo,
+                nacionalidad = player.nationality,
+                nacimiento = player.birth.date,
+                altura = player.height,
+                posicion = position,
+                camiseta = numberPlayer,
+                peso = player.weight
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            // Nombre del jugador.
-            Text(
-                text = player.name,
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            // Detalles del jugador.
-            Text(
-                text = "Posición: $position",
-                fontSize = 18.sp,
-                color = Color.White
-            )
-            Text(
-                text = "Edad: ${player.age}",
-                fontSize = 18.sp,
-                color = Color.White
-            )
-            Text(
-                text = "Nacionalidad: ${player.nationality}",
-                fontSize = 18.sp,
-                color = Color.White
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            // Datos de nacimiento.
-            Text(
-                text = "Fecha de nacimiento: ${player.birth.date}",
-                fontSize = 16.sp,
-                color = Color.White
-            )
-            Text(
-                text = "Lugar de nacimiento: ${player.birth.place}, ${player.birth.country}",
-                fontSize = 16.sp,
-                color = Color.White
-            )
+
+            Spacer(Modifier.height(8.dp))
+
+            Text("TEMPORADAS", color=Color.White)
+
+
         }
     }
 
@@ -273,8 +249,121 @@ fun headerVistaPlayer(name: String, photo: String, team: String ,rating: String?
         }
 
         Spacer(modifier = Modifier.width(16.dp))
-        Text(text = rating?: "N/A")
+        Text(text = rating?: "N/A", color = Color.White)
 
 
     }
+}
+
+@Composable
+fun containerBasicInfo(
+    team: String,
+    imageTeam: String,
+    nacionalidad: String,
+    nacimiento: String,
+    altura: String,
+    posicion: String,
+    camiseta: Int,
+    peso: String
+) {
+    Surface(
+        color = Color(0xFF121212),
+        contentColor = Color.White,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            //---------- Equipo ----------
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Image(
+                    painter = rememberImagePainter(imageTeam),
+                    contentDescription = "Escudo del equipo",
+                    modifier = Modifier.size(40.dp) // Tamaño definido
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = team)
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            //---------- Primera fila de datos ----------
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Nacionalidad", fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(4.dp))
+                    Text(nacionalidad)
+                }
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Edad", fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(4.dp))
+                    Text(text = nacimiento) // Corregido: Usar la edad real del jugador
+                }
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Altura", fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(4.dp))
+                    Text(altura)
+                }
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            //---------- Segunda fila de datos ----------
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Posición", fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(4.dp))
+                    Text(posicion)
+                }
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Camiseta", fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(4.dp))
+                    Text(camiseta.toString())
+                }
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Peso", fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(4.dp))
+                    Text(peso)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun containerStatisticInfo(){
+
 }

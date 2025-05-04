@@ -93,6 +93,8 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.2.2")
 
     implementation("androidx.compose.material:material-icons-extended-android:1.3.1")
+    implementation("androidx.compose.material3:material3:1.1.0")
+
 
     val hilt_navigation_compose_version = "1.1.0"
     val hilt_version = "2.50"
