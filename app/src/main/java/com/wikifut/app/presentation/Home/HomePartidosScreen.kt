@@ -1,7 +1,9 @@
 package com.wikifut.app.presentation.Home
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
 import com.wikifut.app.R
 import com.wikifut.app.model.Partido
 import com.wikifut.app.presentation.login.LoginScreen
@@ -49,6 +53,62 @@ fun HomePartidosScreen(
     // Fecha seleccionada, inicia con la fecha actual
     var selectedDate by remember { mutableStateOf(obtenerFechaActual()) }
 
+    var userName by remember { mutableStateOf<String?>(null) }
+    var avatar by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        val auth = FirebaseAuth.getInstance()
+        val email = auth.currentUser?.email
+
+        Log.d("HomeScreen", "LaunchedEffect dentro: Email del usuario actual: $email")
+
+        if (!email.isNullOrEmpty()) {
+            FirebaseFirestore.getInstance().collection("users").document(email)
+                .get()
+                .addOnSuccessListener { document: DocumentSnapshot ->
+                    if (document != null && document.exists()) {
+                        Log.d("HomeScreen", "Documento encontrado para $email")
+                        userName = document.getString("username")
+                        avatar = document.getString("avatar")
+                    } else {
+                        Log.d("HomeScreen", "Documento NO existe para $email")
+                    }
+                }
+                .addOnFailureListener { e: Exception ->
+                    Log.e("HomeScreen", "Error al obtener datos del usuario", e)
+                }
+        } else {
+            Log.e("HomeScreen", "Email nulo o vacío en LaunchedEffect: $email")
+        }
+    }
+
+//    var userAvatar by remember { mutableStateOf<String?>(null) }
+//
+//    val auth = FirebaseAuth.getInstance()
+//    val email = auth.currentUser?.email
+//
+//    LaunchedEffect(email) {
+//        if (!email.isNullOrEmpty()) {
+//            FirebaseFirestore.getInstance().collection("users").document(email)
+//                .get()
+//                .addOnSuccessListener { document: DocumentSnapshot ->
+//                    if (document != null && document.exists()) {
+//                        userName = document.getString("username")
+//                        userAvatar = document.getString("avatar")
+//                    }
+//                }
+//                .addOnFailureListener { e: Exception ->
+//                    Log.e("HomeScreen", "Error al obtener datos del usuario", e)
+//                }
+//        } else {
+//            Log.e("HomeScreen", "Email nulo o vacío: $email")
+//        }
+//    }
+
+
+
+
+
     // Al cambiar la fecha seleccionada, se cargan los partidos de esa fecha
     LaunchedEffect(selectedDate) {
         viewModel.cargarPartidosPorFecha(selectedDate)
@@ -60,11 +120,7 @@ fun HomePartidosScreen(
                 partido.teams.home.name.contains(searchQuery, ignoreCase = true) ||
                 partido.teams.away.name.contains(searchQuery, ignoreCase = true)
     }
-
-    /*
-       --- Código comentado que no está en uso actualmente ---
-    */
-    /*if (showDatePicker) {
+    if (showDatePicker) {
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             onDateSelected = { date ->
@@ -72,7 +128,7 @@ fun HomePartidosScreen(
                 showDatePicker = false
             }
         )
-    }*/
+    }
 
     Column(modifier = Modifier.fillMaxSize().background(Color(0xFF2D1B45))) {
         Header(
@@ -90,6 +146,71 @@ fun HomePartidosScreen(
             Text(selectedDate, fontSize = 16.sp, color = Color.Gray)
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            // Mostrar nombre de usuario y avatar
+
+            if (userName != null && avatar != null) {
+                Text(
+                    text = "¡Hola, $userName!",
+                    fontSize = 18.sp,
+                    color = Color.White,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                val avatarImage = when (avatar) {
+                    "messi" -> R.drawable.messi
+                    "cristiano" -> R.drawable.cristiano
+                    "bruyne" -> R.drawable.bruyne
+                    "mbape" -> R.drawable.mbape
+
+                    else -> R.drawable.bruyne
+                }
+                Image(
+                    painter = painterResource(id = avatarImage),
+                    contentDescription = "Avatar",
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clip(CircleShape)
+                        .border(2.dp, Color(0xFF8E44AD), CircleShape) // borde morado, por ejemplo
+                )
+            }
+
+//            if (userName != null && userAvatar != null) {
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically,
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(horizontal = 16.dp)
+//                ) {
+//                    // Nombre del usuario
+//                    Text(
+//                        text = "¡Hola, $userName!",
+//                        fontSize = 18.sp,
+//                        color = Color.White,
+//                        modifier = Modifier.weight(1f)
+//                    )
+//
+//                    // Avatar del usuario
+//                    val avatarImage = when (userAvatar) {
+//                        "messi" -> R.drawable.messi
+//                        "cristiano" -> R.drawable.cristiano
+//                        "bruyne" -> R.drawable.bruyne
+//                        "mbape" -> R.drawable.mbape
+//
+//                        else -> R.drawable.bruyne
+//                    }
+//
+//                    Image(
+//                        painter = painterResource(id = avatarImage),
+//                        contentDescription = "Avatar",
+//                        modifier = Modifier
+//                            .size(50.dp)
+//                            .clip(CircleShape)
+//                            .border(2.dp, Color(0xFF8E44AD), CircleShape) // borde morado, por ejemplo
+//                    )
+//                }
+//
+//                Spacer(modifier = Modifier.height(16.dp))
+//            }
 
             LazyColumn {
                 items(partidosFiltrados) { partido -> PartidoCard(partido) }
@@ -190,7 +311,7 @@ fun Header(
     }
 }
 
-/*
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerDialog(
@@ -227,7 +348,7 @@ fun DatePickerDialog(
         }
     )
 }
-*/
+
 
 @Composable
 fun PartidoCard(partido: Partido) {

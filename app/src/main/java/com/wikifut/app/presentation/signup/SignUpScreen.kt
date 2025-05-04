@@ -65,6 +65,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.BeginSignInResult
+import com.google.firebase.firestore.FirebaseFirestore
 import com.wikifut.app.R
 import com.wikifut.app.utils.Constans.CLIENT_ID_FIREBASE
 
@@ -83,6 +84,7 @@ fun SignUpScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    val db = FirebaseFirestore.getInstance()
 
     // Avatar selection
     val profileImages = remember {
@@ -272,8 +274,21 @@ fun SignUpScreen(
                         .addOnCompleteListener { task ->
                             isLoading = false
                             if (task.isSuccessful) {
+                                val avatarName = context.resources.getResourceEntryName(selectedImage!!)
+                                db.collection("users").document(email).set(
+                                    hashMapOf(
+                                        "username" to username,
+                                        "email" to email,
+                                        "avatar" to avatarName
+                                    )
+                                ).addOnSuccessListener {
+                                    Log.d("SignUp", "Usuario registrado correctamente")
+                                }.addOnFailureListener { e ->
+                                    Log.e("SignUp", "Error al registrar usuario", e)
+                                }
                                 navigateToHome()
-                            } else {
+                            }
+                            else {
                                 errorMessage = when {
                                     task.exception?.message?.contains("email address") == true -> "Correo inválido o en uso"
                                     password.length < 6 -> "La contraseña debe tener al menos 6 caracteres"
