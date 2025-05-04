@@ -178,59 +178,44 @@ fun SignUpScreen(
 
             // Avatar Selection Row with Animations
             Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 profileImages.forEach { imageRes ->
-                    val isSelected = imageRes == selectedImage
-
-                    // Animations
-                    val borderWidth by animateDpAsState(
-                        targetValue = if (isSelected) 4.dp else 0.dp,
-                        animationSpec = tween(durationMillis = 300)
-                    )
+                    val isSelected = selectedImage == imageRes
 
                     val borderColor by animateColorAsState(
-                        targetValue = if (isSelected) Color(0xFF4CAF50) else Color.Transparent,
+                        targetValue = if (isSelected) Color(0xFF4CAF50) else Color.Transparent, // Verde si está seleccionado
                         animationSpec = tween(durationMillis = 300)
                     )
-
-                    val elevation by animateDpAsState(
-                        targetValue = if (isSelected) 8.dp else 0.dp,
-                        animationSpec = spring(
-                            dampingRatio = 0.4f,
-                            stiffness = Spring.StiffnessLow
-                        )
+                    val imageSize by animateDpAsState(
+                        targetValue = if (isSelected) 80.dp else 70.dp, // Animación de tamaño también (opcional)
+                        animationSpec = spring(stiffness = Spring.StiffnessLow)
                     )
 
-                    Surface(
-                        shape = CircleShape,
-                        tonalElevation = elevation,
+                    Box(
                         modifier = Modifier
-                            .padding(8.dp)
-                            .clickable { selectedImage = imageRes }
+                            .size(imageSize)
+                            .clip(CircleShape)
+                            .background(Color(0xFF6650a4))
+                            .border(width = 3.dp, color = borderColor, shape = CircleShape)
+                            .clickable {
+                                selectedImage = imageRes
+                            },
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(
+                        Image(
+                            painter = painterResource(id = imageRes),
+                            contentDescription = "Avatar",
                             modifier = Modifier
-                                .size(72.dp)
-                                .border(
-                                    width = borderWidth,
-                                    color = borderColor,
-                                    shape = CircleShape
-                                )
-                        ) {
-                            Image(
-                                painter = painterResource(id = imageRes),
-                                contentDescription = "Avatar",
-                                modifier = Modifier
-                                    .size(72.dp)
-                                    .clip(CircleShape),
-                                contentScale = ContentScale.Crop
-                            )
-                        }
+                                .size(60.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
                     }
                 }
             }
+
 
             Spacer(modifier = Modifier.height(16.dp))
 

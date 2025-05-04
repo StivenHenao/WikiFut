@@ -93,6 +93,8 @@ dependencies {
 
     implementation("androidx.compose.material:material-icons-extended-android:1.3.1")
 
+    implementation("com.google.firebase:firebase-firestore:24.7.1")
+
 
     val hilt_navigation_compose_version = "1.1.0"
     val hilt_version = "2.50"
