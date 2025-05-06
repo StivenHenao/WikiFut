@@ -1,3 +1,5 @@
+package com.wikifut.app.repository
+
 import com.wikifut.app.api.PlayerApi
 import com.wikifut.app.model.PlayerDataResponse
 import javax.inject.Inject

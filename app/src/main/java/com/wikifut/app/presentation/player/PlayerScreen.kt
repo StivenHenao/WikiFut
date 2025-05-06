@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -26,6 +27,7 @@ import androidx.compose.material3.Surface
 
 import com.wikifut.app.model.*
 import com.wikifut.app.viewmodel.PlayerViewModel
+import com.wikifut.app.presentation.player.components.StatisticBar
 
 /**
  * Vista de Preview que utiliza un mock, para evitar inyección de dependencias en el preview.
@@ -85,15 +87,15 @@ fun PreviewPlayerScreen() {
                             captain = false
                         ),
                         substitutes = null,
-                        shots = null,
-                        goals = null,
-                        passes = null,
-                        tackles = null,
-                        duels = null,
-                        dribbles = null,
-                        fouls = null,
-                        cards = null,
-                        penalty = null
+                        shots = Shots(100, 20),
+                        goals = PlayerGoals(50, 1, 10, 0),
+                        passes = Passes(200, 10, 20),
+                        tackles = Tackles(10, 5, 20),
+                        duels = Duels(30, 20),
+                        dribbles = Dribbles(100, 80, 12),
+                        fouls = Fouls(100,200),
+                        cards = Cards(20, 50, 30),
+                        penalty = Penalty(100, 200, 30, 70, 0)
                     )
                 )
             )
@@ -193,6 +195,7 @@ fun PlayerDetails(playerDataResponse: PlayerDataResponse) =
         val position = playerData.statistics.firstOrNull()?.games?.position ?: "N/A"
         val numberPlayer =statisticGame?.number?: 0
 
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -216,7 +219,21 @@ fun PlayerDetails(playerDataResponse: PlayerDataResponse) =
 
             Spacer(Modifier.height(8.dp))
 
-            Text("TEMPORADAS", color=Color.White)
+            Text("TEMPORADA", color=Color.White)
+
+            Spacer(Modifier.height(8.dp))
+
+            containerStatisticInfo(
+                statistic.shots,
+                statistic.goals,
+                statistic.passes,
+                statistic.tackles,
+                statistic.duels,
+                statistic.dribbles,
+                statistic.fouls,
+                statistic.cards,
+                statistic.penalty
+            )
 
 
         }
@@ -226,10 +243,11 @@ fun PlayerDetails(playerDataResponse: PlayerDataResponse) =
 fun headerVistaPlayer(name: String, photo: String, team: String ,rating: String?){
     Row(modifier = Modifier
         .fillMaxWidth()
-        .background(Color(0xFF121212))
+        .background(Color(0xFF1E1E1E))
         .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically)
     {
+
         Image(
             painter = rememberImagePainter(photo),
             contentDescription = "Foto del Jugador",
@@ -244,8 +262,8 @@ fun headerVistaPlayer(name: String, photo: String, team: String ,rating: String?
         Column(
             modifier = Modifier.weight(1f)
         ){
-            Text(text = name)
-            Text(text = team?: "No team")
+            Text(text = name,  color = Color.White)
+            Text(text = team?: "No team",  color = Color.White)
         }
 
         Spacer(modifier = Modifier.width(16.dp))
@@ -267,8 +285,10 @@ fun containerBasicInfo(
     peso: String
 ) {
     Surface(
-        color = Color(0xFF121212),
+        color = Color(0xFF1E1E1E),
         contentColor = Color.White,
+        shape = RoundedCornerShape(8.dp),
+        shadowElevation = 4.dp,
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
@@ -364,6 +384,122 @@ fun containerBasicInfo(
 }
 
 @Composable
-fun containerStatisticInfo(){
+fun containerStatisticInfo(
+    shoots: Shots?,
+    goals: PlayerGoals?,
+    passes: Passes?,
+    tackles: Tackles?,
+    duels: Duels?,
+    dribbles: Dribbles?,
+    fouls: Fouls?,
+    cards: Cards?,
+    penalty: Penalty?
+){
+    Surface(
+        color = Color(0xFF1E1E1E),
+        contentColor = Color.White,
+        shape = RoundedCornerShape(8.dp),
+        shadowElevation = 4.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp)
+            ) {
+                Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                    StatisticBar(label = "Goles:",
+                        value = (goals?.total ?: 0).toInt(),
+                        maxValue = (shoots?.on ?: 0))
+                }
+
+                Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                    StatisticBar(label = "Porcentaje de pase:",
+                        value = (passes?.accuracy ?: 0).toInt(),
+                        maxValue = 100)
+
+                }
+
+                Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                    StatisticBar(label = "Dribles:",
+                        value = (dribbles?.success ?: 0),
+                        maxValue = 100)
+                }
+
+
+                Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Asistencias: ")
+                    Text(text = goals?.assists.toString())
+                }
+
+                Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Faltas: ")
+                    Text(text = fouls?.drawn.toString())
+                }
+
+                Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Pases Clave: ")
+                    Text(text = passes?.key.toString())
+                }
+
+
+            }
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp)
+            ) {
+
+                Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                    StatisticBar(label = "Duelos:",
+                        value = (duels?.won ?: 0),
+                        maxValue = (duels?.total ?: 0))
+                }
+
+                Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                    StatisticBar(label = "Disparos:",
+                        value = shoots?.on ?: 0,
+                        maxValue = shoots?.total ?: 0)
+                }
+
+                Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                   StatisticBar(label = "Tackles:",
+                       value = (tackles?.interceptions ?: 0),
+                       maxValue = tackles?.total ?: 0)
+                }
+
+
+                Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Penaltis: ")
+                    Text(text = penalty?.won.toString())
+
+                }
+
+                Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Tarjetas Amarillas: ")
+                    Text(text = cards?.yellow.toString())
+
+                }
+
+                Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Tarjetas Rojas: ")
+                    Text(text = cards?.red.toString())
+
+                }
+
+
+
+            }
+
+        }
+    }
 
 }

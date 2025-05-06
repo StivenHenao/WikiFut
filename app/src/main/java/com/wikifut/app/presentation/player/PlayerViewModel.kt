@@ -6,13 +6,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.wikifut.app.api.PlayerApi
 import com.wikifut.app.model.PlayerDataResponse
+import com.wikifut.app.repository.PlayerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
-    private val playerApi: PlayerApi
+    private val playerRepository: PlayerRepository
 ) : ViewModel() {
 
     private val _playerData = MutableLiveData<PlayerDataResponse?>() // Guarda los datos de la API
@@ -30,7 +31,7 @@ class PlayerViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                val response = playerApi.getPlayer(playerId, season) // Llamada a la API
+                val response = playerRepository.getPlayer(playerId, season)
                 _playerData.value = response
                 _error.value = null
             } catch (e: Exception) {
