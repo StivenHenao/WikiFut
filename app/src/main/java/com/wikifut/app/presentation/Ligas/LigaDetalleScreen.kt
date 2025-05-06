@@ -30,15 +30,22 @@ fun LigaDetalleScreen(
     var selectedTab by remember { mutableStateOf(0) }
 
     val nombreLiga = viewModel.nombreLiga.value
-    // Estado global de tabla
-    val tabla = viewModel.tabla.value
 
     val temporada = viewModel.temporada.value
+    val temporadas = viewModel.temporadasDisponibles.value
+
+    var temporadaSeleccionada by remember { mutableStateOf(season) }
+    var expanded by remember { mutableStateOf(false) }
 
     // Llamar solo una vez
+    // Llamar al cargar tabla cuando cambia la temporada seleccionada
+    LaunchedEffect(temporadaSeleccionada) {
+        viewModel.cargarTabla(leagueId, temporadaSeleccionada)
+    }
+    // Solo una vez
     LaunchedEffect(Unit) {
         viewModel.obtenerTemporadaActual(leagueId)
-        viewModel.cargarTabla(leagueId, season)
+        viewModel.cargarTabla(leagueId, temporadaSeleccionada)
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -72,38 +79,38 @@ fun LigaDetalleScreen(
             )
         }
 
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .clickable { expanded = true }
+        ) {
+            Text("Temporada: $temporadaSeleccionada")
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                temporadas.forEach { year ->
+                    DropdownMenuItem(
+                        text = { Text("Temporada $year") },
+                        onClick = {
+                            expanded = false
+                            temporadaSeleccionada = year
+                        }
+                    )
+                }
+            }
+        }
+
         // 🧭 Tabs: Tabla | Estadísticas | Temporada
         TabRow(selectedTabIndex = selectedTab) {
             Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }) {
                 Text("Tabla", modifier = Modifier.padding(12.dp))
             }
             Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }) {
-                Text("Estadísticas", modifier = Modifier.padding(12.dp))
+                Text("Equipos", modifier = Modifier.padding(12.dp))
             }
             Tab(selected = selectedTab == 2, onClick = { selectedTab = 2 }) {
-                var expanded by remember { mutableStateOf(false) }
-                val temporadas = viewModel.temporadasDisponibles.value
-
-                Box(modifier = Modifier
-                    .padding(16.dp)
-                    .clickable { expanded = true }
-                ) {
-                    Text("Temporada: $temporada")
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        temporadas.forEach { year ->
-                            DropdownMenuItem(
-                                text = { Text("Temporada $year") },
-                                onClick = {
-                                    expanded = false
-                                    viewModel.cargarTabla(leagueId, year)
-                                }
-                            )
-                        }
-                    }
-                }
+                Text("Temporada actual: $season", modifier = Modifier.padding(12.dp))
             }
         }
 
@@ -119,63 +126,3 @@ fun LigaDetalleScreen(
     }
 }
 
-@Composable
-fun TablaPosiciones(tabla: List<StandingTeam>) {
-
-    Column(modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp)) {
-        // 🧾 Encabezados
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("Pos", modifier = Modifier.weight(0.5f), fontWeight = FontWeight.Bold)
-            Text("Equipo", modifier = Modifier.weight(2f), fontWeight = FontWeight.Bold)
-            Text("PJ", modifier = Modifier.weight(0.7f), fontWeight = FontWeight.Bold)
-            Text("G", modifier = Modifier.weight(0.7f), fontWeight = FontWeight.Bold)
-            Text("E", modifier = Modifier.weight(0.7f), fontWeight = FontWeight.Bold)
-            Text("P", modifier = Modifier.weight(0.7f), fontWeight = FontWeight.Bold)
-            Text("Pts", modifier = Modifier.weight(0.8f), fontWeight = FontWeight.Bold)
-        }
-
-        Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
-
-        // 📋 Lista de equipos
-        LazyColumn {
-            items(tabla) { team ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // 🥇 Posición
-                    Text("${team.rank}", modifier = Modifier.weight(0.5f))
-
-                    // 🛡️ Logo + nombre
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.weight(2f)
-                    ) {
-                        AsyncImage(
-                            model = team.team.logo,
-                            contentDescription = team.team.name,
-                            modifier = Modifier
-                                .size(24.dp)
-                                .padding(end = 8.dp)
-                        )
-                        Text(team.team.name, maxLines = 1)
-                    }
-
-                    // 📊 Estadísticas
-                    Text("${team.all.played}", modifier = Modifier.weight(0.7f))
-                    Text("${team.all.win}", modifier = Modifier.weight(0.7f))
-                    Text("${team.all.draw}", modifier = Modifier.weight(0.7f))
-                    Text("${team.all.lose}", modifier = Modifier.weight(0.7f))
-                    Text("${team.points}", modifier = Modifier.weight(0.8f), fontWeight = FontWeight.SemiBold)
-                }
-            }
-        }
-    }
-}
