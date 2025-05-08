@@ -17,6 +17,7 @@ import com.google.firebase.auth.auth
 import com.wikifut.app.ui.theme.WikifutTheme
 import dagger.hilt.android.AndroidEntryPoint
 
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
@@ -34,8 +35,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ){
-                    //NavigationWrapper(navHostController, auth)
-                    NavigationWrapper(navHostController = navHostController, auth = auth)
+                    NavigationWrapper(navHostController, auth)
+                    //NavigationWrapper(navHostController = navHostController, auth = auth)
                 }
             }
         }

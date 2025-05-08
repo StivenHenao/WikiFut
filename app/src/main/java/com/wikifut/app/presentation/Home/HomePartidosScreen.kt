@@ -19,12 +19,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
 import com.wikifut.app.R
 import com.wikifut.app.model.Partido
+import com.wikifut.app.presentation.login.LoginScreen
 import java.util.*
 import com.wikifut.app.utils.convertirHoraAColombia
 import com.wikifut.app.utils.formatFechaParaApi
@@ -35,22 +37,34 @@ fun HomePartidosScreen(
     viewModel: HomePartidosViewModel = hiltViewModel(),
     navigateToInitial: () -> Unit = {}
 ) {
+    // Estado de la lista de partidos observada desde el ViewModel
     val state by viewModel.state.collectAsState()
+
+    // Estado para la búsqueda de texto
     var searchQuery by remember { mutableStateOf("") }
+
+    // Estado para mostrar el selector de fecha
     var showDatePicker by remember { mutableStateOf(false) }
+
+    // Fecha seleccionada, inicia con la fecha actual
     var selectedDate by remember { mutableStateOf(obtenerFechaActual()) }
 
+    // Al cambiar la fecha seleccionada, se cargan los partidos de esa fecha
     LaunchedEffect(selectedDate) {
         viewModel.cargarPartidosPorFecha(selectedDate)
     }
 
+    // Filtro de partidos según la búsqueda
     val partidosFiltrados = state.filter { partido ->
         partido.league.name.contains(searchQuery, ignoreCase = true) ||
                 partido.teams.home.name.contains(searchQuery, ignoreCase = true) ||
                 partido.teams.away.name.contains(searchQuery, ignoreCase = true)
     }
 
-    if (showDatePicker) {
+    /*
+       --- Código comentado que no está en uso actualmente ---
+    */
+    /*if (showDatePicker) {
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             onDateSelected = { date ->
@@ -58,7 +72,7 @@ fun HomePartidosScreen(
                 showDatePicker = false
             }
         )
-    }
+    }*/
 
     Column(modifier = Modifier.fillMaxSize().background(Color(0xFF2D1B45))) {
         Header(
@@ -87,7 +101,6 @@ fun HomePartidosScreen(
         }
     }
 }
-
 
 @Composable
 fun Header(
@@ -120,7 +133,6 @@ fun Header(
             )
         }
 
-
         Spacer(modifier = Modifier.width(8.dp))
 
         TextField(
@@ -139,7 +151,6 @@ fun Header(
         )
 
         Spacer(modifier = Modifier.width(8.dp))
-
 
         IconButton(
             onClick = onDateSelected,
@@ -179,23 +190,18 @@ fun Header(
     }
 }
 
+/*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerDialog(
     onDismissRequest: () -> Unit,
     onDateSelected: (Date) -> Unit
 ) {
-
     val calendar = Calendar.getInstance()
-
-
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = calendar.timeInMillis
     )
-
-
     val selectedDateMillis = datePickerState.selectedDateMillis
-
     AlertDialog(
         onDismissRequest = onDismissRequest,
         confirmButton = {
@@ -221,7 +227,7 @@ fun DatePickerDialog(
         }
     )
 }
-
+*/
 
 @Composable
 fun PartidoCard(partido: Partido) {
@@ -232,8 +238,6 @@ fun PartidoCard(partido: Partido) {
         colors = CardDefaults.cardColors(containerColor = Color(0xFF4A256F))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -255,16 +259,12 @@ fun PartidoCard(partido: Partido) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-
-            Box(
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            Box(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-
                     Column(
                         modifier = Modifier.weight(1f),
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -284,7 +284,6 @@ fun PartidoCard(partido: Partido) {
                         )
                     }
 
-
                     Text(
                         text = " ${partido.goals?.home ?: "-"} | ${partido.goals?.away ?: "-"} ",
                         fontSize = 20.sp,
@@ -293,7 +292,6 @@ fun PartidoCard(partido: Partido) {
                         modifier = Modifier.weight(1f),
                         textAlign = TextAlign.Center
                     )
-
 
                     Column(
                         modifier = Modifier.weight(1f),
@@ -316,16 +314,13 @@ fun PartidoCard(partido: Partido) {
                 }
             }
 
-
             Spacer(modifier = Modifier.height(8.dp))
-
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-
                 Text(
                     text = getEstadoPartido(partido),
                     fontSize = 14.sp,
@@ -334,7 +329,6 @@ fun PartidoCard(partido: Partido) {
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Start
                 )
-
 
                 Text(
                     text = convertirHoraAColombia(partido.fixture.timestamp),
@@ -358,13 +352,11 @@ fun PartidoCard(partido: Partido) {
                     alignment = Alignment.CenterEnd
                 )
             }
-
-
         }
     }
 }
 
-
+// Función lógica que traduce el estado del partido a texto legible
 fun getEstadoPartido(partido: Partido): String {
     return when (partido.fixture.status.short) {
         "FT" -> "Finalizado"
@@ -373,3 +365,4 @@ fun getEstadoPartido(partido: Partido): String {
         else -> partido.fixture.status.long
     }
 }
+
