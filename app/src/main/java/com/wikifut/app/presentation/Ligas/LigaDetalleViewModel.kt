@@ -1,5 +1,6 @@
 package com.wikifut.app.presentation.Ligas
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wikifut.app.model.StandingTeam
@@ -11,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
 import com.wikifut.app.api.LigaDetalleApi
 import com.wikifut.app.api.SeasonApi
+import com.wikifut.app.model.TeamBasicInfo
 
 @HiltViewModel
 class LigaDetalleViewModel @Inject constructor(
@@ -31,6 +33,10 @@ class LigaDetalleViewModel @Inject constructor(
 
     private val _temporadasDisponibles = mutableStateOf<List<Int>>(emptyList())
     val temporadasDisponibles: State<List<Int>> = _temporadasDisponibles
+
+    private val _equipos = mutableStateOf<List<TeamBasicInfo>>(emptyList())
+    val equipos: State<List<TeamBasicInfo>> = _equipos
+
 
     fun cargarTabla(leagueId: Int, season: Int) {
         viewModelScope.launch {
@@ -54,5 +60,17 @@ class LigaDetalleViewModel @Inject constructor(
             }
         }
     }
+
+    fun cargarEquipos(leagueId: Int, season: Int) {
+        viewModelScope.launch {
+            val result = ligaDetalleApi.getTeamsByLeagueAndSeason(leagueId, season)
+            if (result.isSuccessful) {
+                _equipos.value = result.body()?.response?.map { it.team } ?: emptyList()
+            } else {
+                Log.e("Equipos", "Error: ${result.errorBody()?.string()}")
+            }
+        }
+    }
+
 
 }

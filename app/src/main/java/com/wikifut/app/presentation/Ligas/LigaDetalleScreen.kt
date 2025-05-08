@@ -42,10 +42,15 @@ fun LigaDetalleScreen(
     LaunchedEffect(temporadaSeleccionada) {
         viewModel.cargarTabla(leagueId, temporadaSeleccionada)
     }
+    LaunchedEffect(temporadaSeleccionada) {
+        viewModel.cargarEquipos(leagueId, temporadaSeleccionada)
+    }
+
     // Solo una vez
     LaunchedEffect(Unit) {
         viewModel.obtenerTemporadaActual(leagueId)
         viewModel.cargarTabla(leagueId, temporadaSeleccionada)
+        viewModel.cargarEquipos(leagueId, temporadaSeleccionada)
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -101,7 +106,7 @@ fun LigaDetalleScreen(
             }
         }
 
-        // 🧭 Tabs: Tabla | Estadísticas | Temporada
+        // 🧭 Tabs: Tabla | Equipos | Temporada
         TabRow(selectedTabIndex = selectedTab) {
             Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }) {
                 Text("Tabla", modifier = Modifier.padding(12.dp))
@@ -120,9 +125,58 @@ fun LigaDetalleScreen(
                 leagueId = leagueId,
                 season = temporada
             )
-            1 -> Text("Estadísticas (en desarrollo)", modifier = Modifier.padding(16.dp))
+            1 -> {
+                val equipos = viewModel.equipos.value
+                if (equipos.isEmpty()) {
+                    Text("No hay equipos disponibles", modifier = Modifier.padding(16.dp))
+                } else {
+                    EquiposPorLiga(equipos)
+                }
+
+            }
             2 -> Text("Temporada actual: $season", modifier = Modifier.padding(16.dp))
         }
     }
+
 }
+
+@Composable
+fun EquiposPorLiga(equipos: List<com.wikifut.app.model.TeamBasicInfo>) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(equipos) { equipo ->
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    AsyncImage(
+                        model = equipo.logo,
+                        contentDescription = equipo.name,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .padding(end = 12.dp)
+                    )
+                    Text(
+                        text = equipo.name,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        }
+    }
+}
+
+
 

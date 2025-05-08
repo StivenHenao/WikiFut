@@ -1,5 +1,6 @@
 package com.wikifut.app.api
 
+import com.wikifut.app.model.TeamsResponse
 import com.wikifut.app.model.LigaDetalleResponse
 import com.wikifut.app.model.StandingsResponse
 import retrofit2.Response
@@ -18,4 +19,11 @@ interface LigaDetalleApi {
         @Query("league") leagueId: Int,
         @Query("season") season: Int
     ): Response<StandingsResponse>
+
+    @GET("teams")
+    suspend fun getTeamsByLeagueAndSeason(
+        @Query("league") leagueId: Int,
+        @Query("season") season: Int
+    ): Response<TeamsResponse>
+
 }
