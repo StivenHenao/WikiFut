@@ -245,7 +245,7 @@ fun SignUpScreen(
                 shape = RoundedCornerShape(20.dp),
                 singleLine = true,
                 maxLines = 1,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 colors = TextFieldDefaults.textFieldColors(
                     containerColor = Color.White,
                     focusedIndicatorColor = Color.Transparent,

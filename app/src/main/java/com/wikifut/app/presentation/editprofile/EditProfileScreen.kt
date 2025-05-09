@@ -1,8 +1,10 @@
 package com.wikifut.app.presentation.editprofile
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -36,6 +38,8 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -111,16 +115,22 @@ fun EditProfileScreen(
 
                     TextField(
                         value = username,
-                        onValueChange = { newValue -> 
+                        onValueChange = { newValue ->
                             username = newValue
                         },
                         modifier = Modifier
                             .fillMaxWidth()
+                            .heightIn(min = 56.dp)
                             .padding(bottom = 24.dp),
                         shape = RoundedCornerShape(20.dp),
                         textStyle = LocalTextStyle.current.copy(color = Color.Black),
+                        singleLine = true,
+                        maxLines = 1,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                         colors = TextFieldDefaults.textFieldColors(
-                            containerColor = Color.White
+                            containerColor = Color.White,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
                         )
                     )
 
@@ -141,8 +151,15 @@ fun EditProfileScreen(
                     ) {
                         items(profileImages) { (avatarName, imageRes) ->
                             val isSelected = selectedAvatar == avatarName
-                            val borderWidth by animateDpAsState(
-                                targetValue = if (isSelected) 3.dp else 0.dp,
+
+                            // Animaciones
+                            val borderColor by animateColorAsState(
+                                targetValue = if (isSelected) Color(0xFF4CAF50) else Color.Transparent,
+                                animationSpec = tween(durationMillis = 300)
+                            )
+
+                            val imageSize by animateDpAsState(
+                                targetValue = if (isSelected) 104.dp else 100.dp,
                                 animationSpec = spring(stiffness = Spring.StiffnessLow)
                             )
 
@@ -150,18 +167,24 @@ fun EditProfileScreen(
                                 modifier = Modifier
                                     .size(110.dp)
                                     .clip(CircleShape)
-                                    .border(borderWidth, Color(0xFF8E44AD), CircleShape)
                                     .clickable { selectedAvatar = avatarName },
                                 contentAlignment = Alignment.Center
                             ) {
-                                Image(
-                                    painter = painterResource(id = imageRes),
-                                    contentDescription = "Avatar $avatarName",
+                                Box(
                                     modifier = Modifier
-                                        .size(104.dp)
-                                        .clip(CircleShape),
-                                    contentScale = ContentScale.Crop
-                                )
+                                        .size(imageSize)
+                                        .clip(CircleShape)
+                                        .border(3.dp, borderColor, CircleShape)
+                                ) {
+                                    Image(
+                                        painter = painterResource(id = imageRes),
+                                        contentDescription = "Avatar $avatarName",
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .clip(CircleShape),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                }
                             }
                         }
                     }
