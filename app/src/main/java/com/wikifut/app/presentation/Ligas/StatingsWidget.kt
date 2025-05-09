@@ -27,6 +27,7 @@ fun StandingsWidget(
                 data-key="${Constans.X_RAPIDAPI_KEY}"
                 data-league="$leagueId"
                 data-season="$season"
+                data-theme="dark"
                 data-show-errors="false"
                 data-show-logos="true"
                 class="wg_loader">

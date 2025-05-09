@@ -18,6 +18,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.wikifut.app.presentation.Ligas.LigaDetalleViewModel
 import com.wikifut.app.presentation.Ligas.StandingsWidget
+import com.wikifut.app.model.PlayerItem
+
 
 @Composable
 fun LigaDetalleScreen(
@@ -45,12 +47,17 @@ fun LigaDetalleScreen(
     LaunchedEffect(temporadaSeleccionada) {
         viewModel.cargarEquipos(leagueId, temporadaSeleccionada)
     }
+    LaunchedEffect(temporadaSeleccionada) {
+        viewModel.cargarJugadores(leagueId, temporadaSeleccionada)
+    }
 
     // Solo una vez
     LaunchedEffect(Unit) {
         viewModel.obtenerTemporadaActual(leagueId)
         viewModel.cargarTabla(leagueId, temporadaSeleccionada)
         viewModel.cargarEquipos(leagueId, temporadaSeleccionada)
+        viewModel.cargarJugadores(leagueId, temporadaSeleccionada)
+
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -115,7 +122,7 @@ fun LigaDetalleScreen(
                 Text("Equipos", modifier = Modifier.padding(12.dp))
             }
             Tab(selected = selectedTab == 2, onClick = { selectedTab = 2 }) {
-                Text("Temporada actual: $season", modifier = Modifier.padding(12.dp))
+                Text("Jugadores", modifier = Modifier.padding(12.dp))
             }
         }
 
@@ -128,17 +135,56 @@ fun LigaDetalleScreen(
             1 -> {
                 val equipos = viewModel.equipos.value
                 if (equipos.isEmpty()) {
-                    Text("No hay equipos disponibles", modifier = Modifier.padding(16.dp))
+                    Text("No hay equipos disponibles de la temporada $temporadaSeleccionada", modifier = Modifier.padding(16.dp))
                 } else {
                     EquiposPorLiga(equipos)
                 }
 
             }
-            2 -> Text("Temporada actual: $season", modifier = Modifier.padding(16.dp))
+            2 -> JugadoresPorLiga(viewModel.jugadores.value)
         }
     }
 
 }
+
+@Composable
+fun JugadoresPorLiga(jugadores: List<PlayerItem>) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(jugadores) { jugador ->
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    AsyncImage(
+                        model = jugador.player.photo,
+                        contentDescription = jugador.player.name,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .padding(end = 12.dp)
+                    )
+                    Column {
+                        Text(jugador.player.name, fontWeight = FontWeight.Bold)
+                        Text("Equipo: ${jugador.statistics.firstOrNull()?.team?.name.orEmpty()}")
+                        Text("Posición: ${jugador.statistics.firstOrNull()?.games?.position.orEmpty()}")
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 fun EquiposPorLiga(equipos: List<com.wikifut.app.model.TeamBasicInfo>) {
@@ -177,6 +223,3 @@ fun EquiposPorLiga(equipos: List<com.wikifut.app.model.TeamBasicInfo>) {
         }
     }
 }
-
-
-

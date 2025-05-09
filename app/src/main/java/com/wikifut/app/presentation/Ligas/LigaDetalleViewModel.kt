@@ -13,6 +13,10 @@ import androidx.compose.runtime.State
 import com.wikifut.app.api.LigaDetalleApi
 import com.wikifut.app.api.SeasonApi
 import com.wikifut.app.model.TeamBasicInfo
+import com.wikifut.app.model.PlayersByLeagueResponse
+import com.wikifut.app.model.PlayerItem
+
+
 
 @HiltViewModel
 class LigaDetalleViewModel @Inject constructor(
@@ -36,6 +40,10 @@ class LigaDetalleViewModel @Inject constructor(
 
     private val _equipos = mutableStateOf<List<TeamBasicInfo>>(emptyList())
     val equipos: State<List<TeamBasicInfo>> = _equipos
+
+    private val _jugadores = mutableStateOf<List<PlayerItem>>(emptyList())
+    val jugadores: State<List<PlayerItem>> = _jugadores
+
 
 
     fun cargarTabla(leagueId: Int, season: Int) {
@@ -72,5 +80,43 @@ class LigaDetalleViewModel @Inject constructor(
         }
     }
 
+    fun cargarJugadores(leagueId: Int, season: Int) {
+        viewModelScope.launch {
+            val response = ligaDetalleApi.getPlayersByLeagueAndSeason(leagueId, season, page = 1)
+            if (response.isSuccessful) {
+                _jugadores.value = response.body()?.response ?: emptyList()
+            }
+        }
+    }
+    /*
+    fun cargarJugadores(leagueId: Int, season: Int) {
+        _jugadores.value = emptyList() // Reiniciar antes de cargar
 
+        fun fetchPage(page: Int, acumulador: MutableList<PlayerByLeague>) {
+            viewModelScope.launch {
+                val response = ligaDetalleApi.getPlayersByLeagueAndSeason(leagueId, season, page)
+                if (response.isSuccessful) {
+                    val body = response.body()
+                    val nuevos = body?.response ?: emptyList()
+                    acumulador.addAll(nuevos)
+
+                    val current = body?.paging?.current ?: 1
+                    val total = body?.paging?.total ?: 1
+
+                    if (current < total) {
+                        // Respeta el rate limit
+                        kotlinx.coroutines.delay(1000)
+                        fetchPage(current + 1, acumulador)
+                    } else {
+                        _jugadores.value = acumulador
+                    }
+                } else {
+                    _jugadores.value = acumulador // en caso de error, muestra lo que haya
+                }
+            }
+        }
+
+        fetchPage(1, mutableListOf())
+    }
+*/
 }
