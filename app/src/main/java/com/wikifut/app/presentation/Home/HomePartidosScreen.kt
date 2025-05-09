@@ -15,13 +15,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -30,16 +30,221 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.wikifut.app.R
 import com.wikifut.app.model.Partido
-import com.wikifut.app.presentation.login.LoginScreen
 import java.util.*
 import com.wikifut.app.utils.convertirHoraAColombia
 import com.wikifut.app.utils.formatFechaParaApi
 import com.wikifut.app.utils.obtenerFechaActual
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
+import kotlinx.coroutines.launch
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.foundation.Canvas
+
+
+
+@Composable
+fun HomeScreenWithDrawer(
+    navigateToEditProfile: () -> Unit,
+    navigateToInitial: () -> Unit,
+    viewModel: HomePartidosViewModel = hiltViewModel()
+) {
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    var userName by remember { mutableStateOf<String?>(null) }
+    var avatar by remember { mutableStateOf<String?>(null) }
+
+    // Obtener datos de usuario solo una vez
+    LaunchedEffect(Unit) {
+        val auth = FirebaseAuth.getInstance()
+        val email = auth.currentUser?.email
+        if (!email.isNullOrEmpty()) {
+            FirebaseFirestore.getInstance().collection("users").document(email)
+                .get()
+                .addOnSuccessListener { document: DocumentSnapshot ->
+                    if (document.exists()) {
+                        userName = document.getString("username")
+                        avatar = document.getString("avatar")
+                    }
+                }
+        }
+    }
+
+    ModalNavigationDrawer(
+        drawerContent = {
+            DrawerContent(
+                closeDrawer = { scope.launch { drawerState.close() } },
+                navigateToEditProfile = navigateToEditProfile,
+                navigateToInitial = navigateToInitial,
+                userName = userName,
+                avatar = avatar
+            )
+        },
+        drawerState = drawerState
+    ) {
+        HomePartidosScreen(
+            viewModel = viewModel,
+            navigateToEditProfile = navigateToEditProfile,
+            navigateToInitial = navigateToInitial,
+            openDrawer = { scope.launch { drawerState.open() } }
+        )
+    }
+}
+
+@Composable
+fun DrawerContent(
+    closeDrawer: () -> Unit,
+    navigateToEditProfile: () -> Unit,
+    navigateToInitial: () -> Unit,
+    userName: String?,
+    avatar: String?
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxHeight()
+            .fillMaxWidth(0.85f)
+            .clip(RoundedCornerShape(topEnd = 0.dp, bottomEnd = 0.dp, topStart = 32.dp, bottomStart = 32.dp))
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF2D1B45).copy(alpha = 0.97f), // Morado oscuro con 97% opacidad
+                        Color(0xFF4A256F).copy(alpha = 0.97f)  // Morado claro con 97% opacidad
+                    )
+                )
+            )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 60.dp, start = 12.dp, end = 12.dp, bottom = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (userName != null && avatar != null) {
+                Spacer(modifier = Modifier.height(32.dp))
+                Text(
+                    text = "¡Hola, $userName!",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                Spacer(modifier = Modifier.height(28.dp))
+                val avatarImage = when (avatar) {
+                    "messi" -> R.drawable.messi
+                    "cristiano" -> R.drawable.cristiano
+                    "bruyne" -> R.drawable.bruyne
+                    "mbape" -> R.drawable.mbape
+                    else -> R.drawable.bruyne
+                }
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(CircleShape)
+                        .background(Color.White)
+                        .border(3.dp, Color(0xFF8E44AD), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = avatarImage),
+                        contentDescription = "Avatar",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+                Spacer(modifier = Modifier.height(70.dp))
+                // Opción Editar perfil
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .clickable {
+                            navigateToEditProfile()
+                            closeDrawer()
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "✏️ Editar perfil",
+                        fontSize = 22.sp,
+                        color = Color.White,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                Spacer(modifier = Modifier.height(25.dp))
+                HorizontalDivider(color = Color.White.copy(alpha = 0.25f), thickness = 1.dp)
+                Spacer(modifier = Modifier.height(25.dp))
+                // Opción Favoritos
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .clickable { closeDrawer() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "⭐ Favoritos",
+                        fontSize = 22.sp,
+                        color = Color.White,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                Spacer(modifier = Modifier.height(25.dp))
+                HorizontalDivider(color = Color.White.copy(alpha = 0.25f), thickness = 1.dp)
+                Spacer(modifier = Modifier.height(25.dp))
+                // Opción Inicio
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .clickable { closeDrawer() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "🏠 Inicio",
+                        fontSize = 22.sp,
+                        color = Color.White,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                Spacer(modifier = Modifier.height(25.dp))
+                HorizontalDivider(color = Color.White.copy(alpha = 0.25f), thickness = 1.dp)
+                Spacer(modifier = Modifier.height(25.dp))
+                // Opción Cerrar sesión
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .clickable {
+                            FirebaseAuth.getInstance().signOut()
+                            navigateToInitial()
+                            closeDrawer()
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "🔒 Cerrar sesión",
+                        fontSize = 22.sp,
+                        color = Color.White,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun HomePartidosScreen(
     viewModel: HomePartidosViewModel = hiltViewModel(),
-    navigateToInitial: () -> Unit = {}
+    navigateToEditProfile: () -> Unit = {},
+    navigateToInitial: () -> Unit = {},
+    openDrawer: () -> Unit = {}
 ) {
     // Estado de la lista de partidos observada desde el ViewModel
     val state by viewModel.state.collectAsState()
@@ -66,7 +271,7 @@ fun HomePartidosScreen(
             FirebaseFirestore.getInstance().collection("users").document(email)
                 .get()
                 .addOnSuccessListener { document: DocumentSnapshot ->
-                    if (document != null && document.exists()) {
+                    if (document.exists()) {
                         Log.d("HomeScreen", "Documento encontrado para $email")
                         userName = document.getString("username")
                         avatar = document.getString("avatar")
@@ -81,33 +286,6 @@ fun HomePartidosScreen(
             Log.e("HomeScreen", "Email nulo o vacío en LaunchedEffect: $email")
         }
     }
-
-//    var userAvatar by remember { mutableStateOf<String?>(null) }
-//
-//    val auth = FirebaseAuth.getInstance()
-//    val email = auth.currentUser?.email
-//
-//    LaunchedEffect(email) {
-//        if (!email.isNullOrEmpty()) {
-//            FirebaseFirestore.getInstance().collection("users").document(email)
-//                .get()
-//                .addOnSuccessListener { document: DocumentSnapshot ->
-//                    if (document != null && document.exists()) {
-//                        userName = document.getString("username")
-//                        userAvatar = document.getString("avatar")
-//                    }
-//                }
-//                .addOnFailureListener { e: Exception ->
-//                    Log.e("HomeScreen", "Error al obtener datos del usuario", e)
-//                }
-//        } else {
-//            Log.e("HomeScreen", "Email nulo o vacío: $email")
-//        }
-//    }
-
-
-
-
 
     // Al cambiar la fecha seleccionada, se cargan los partidos de esa fecha
     LaunchedEffect(selectedDate) {
@@ -130,94 +308,58 @@ fun HomePartidosScreen(
         )
     }
 
-    Column(modifier = Modifier.fillMaxSize().background(Color(0xFF2D1B45))) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0x992D1B45))
+            .windowInsetsPadding(WindowInsets.statusBars)
+    ) {
         Header(
+            navigateToEditProfile = navigateToEditProfile,
+            userName = userName,
+            avatar = avatar,
             navigateToInitial = navigateToInitial,
             searchQuery = searchQuery,
             onSearchChange = { searchQuery = it },
-            onDateSelected = { showDatePicker = true }
+            onDateSelected = { showDatePicker = true },
+            openDrawer = openDrawer
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Column(modifier = Modifier.padding(horizontal = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Partidos del día", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        Column(modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                "Partidos del día",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
 
-            Text(selectedDate, fontSize = 16.sp, color = Color.Gray)
+            Text(
+                selectedDate,
+                fontSize = 16.sp,
+                color = Color.Gray,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
-
-            // Mostrar nombre de usuario y avatar
-
-            if (userName != null && avatar != null) {
-                Text(
-                    text = "¡Hola, $userName!",
-                    fontSize = 18.sp,
-                    color = Color.White,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-                val avatarImage = when (avatar) {
-                    "messi" -> R.drawable.messi
-                    "cristiano" -> R.drawable.cristiano
-                    "bruyne" -> R.drawable.bruyne
-                    "mbape" -> R.drawable.mbape
-
-                    else -> R.drawable.bruyne
-                }
-                Image(
-                    painter = painterResource(id = avatarImage),
-                    contentDescription = "Avatar",
-                    modifier = Modifier
-                        .size(50.dp)
-                        .clip(CircleShape)
-                        .border(2.dp, Color(0xFF8E44AD), CircleShape) // borde morado, por ejemplo
-                )
-            }
-
-//            if (userName != null && userAvatar != null) {
-//                Row(
-//                    verticalAlignment = Alignment.CenterVertically,
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(horizontal = 16.dp)
-//                ) {
-//                    // Nombre del usuario
-//                    Text(
-//                        text = "¡Hola, $userName!",
-//                        fontSize = 18.sp,
-//                        color = Color.White,
-//                        modifier = Modifier.weight(1f)
-//                    )
-//
-//                    // Avatar del usuario
-//                    val avatarImage = when (userAvatar) {
-//                        "messi" -> R.drawable.messi
-//                        "cristiano" -> R.drawable.cristiano
-//                        "bruyne" -> R.drawable.bruyne
-//                        "mbape" -> R.drawable.mbape
-//
-//                        else -> R.drawable.bruyne
-//                    }
-//
-//                    Image(
-//                        painter = painterResource(id = avatarImage),
-//                        contentDescription = "Avatar",
-//                        modifier = Modifier
-//                            .size(50.dp)
-//                            .clip(CircleShape)
-//                            .border(2.dp, Color(0xFF8E44AD), CircleShape) // borde morado, por ejemplo
-//                    )
-//                }
-//
-//                Spacer(modifier = Modifier.height(16.dp))
-//            }
 
             LazyColumn {
                 items(partidosFiltrados) { partido -> PartidoCard(partido) }
             }
 
             if (partidosFiltrados.isEmpty()) {
-                Text("No se encontraron partidos.", color = Color.White, modifier = Modifier.padding(16.dp))
+                Text(
+                    "No se encontraron partidos.",
+                    color = Color.White,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
@@ -225,17 +367,21 @@ fun HomePartidosScreen(
 
 @Composable
 fun Header(
+    userName: String?,
+    avatar: String?,
     navigateToInitial: () -> Unit,
     searchQuery: String,
     onSearchChange: (String) -> Unit,
-    onDateSelected: () -> Unit
+    onDateSelected: () -> Unit,
+    navigateToEditProfile: () -> Unit,
+    openDrawer: () -> Unit = {}
 ) {
     var expanded by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFF1F1235))
+            .background(Color(0x991F1235))
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -285,32 +431,187 @@ fun Header(
         }
 
         Box {
-            Image(
-                painter = painterResource(id = R.drawable.ic_menu),
-                contentDescription = "Menú",
-                modifier = Modifier
-                    .size(36.dp)
-                    .clickable { expanded = true }
-            )
+            IconButton(onClick = { openDrawer() }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_menu),
+                    contentDescription = "Menú",
+                    tint = Color.White,
+                    modifier = Modifier.size(36.dp)
+                )
+            }
+
 
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-                modifier = Modifier.background(Color.White)
+                offset = DpOffset(x = 0.dp, y = 10.dp),
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .heightIn(max = 1100.dp)
+                    .background(
+                        color = Color(0xFF2D1B45),
+                        shape = RoundedCornerShape(24.dp)
+                    )
+                    .border(
+                        width = 2.dp,
+                        color = Color(0xFF8E44AD),
+                        shape = RoundedCornerShape(24.dp)
+                    )
             ) {
-                DropdownMenuItem(
-                    text = { Text("Cerrar sesión") },
-                    onClick = {
-                        FirebaseAuth.getInstance().signOut()
-                        navigateToInitial()
-                        expanded = false
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        // Avatar y nombre de usuario
+                        if (userName != null && avatar != null) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(48.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Spacer(modifier = Modifier.height(45.dp))
+                                Text(
+                                    text = "¡Hola, $userName!",
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            val avatarImage = when (avatar) {
+                                "messi" -> R.drawable.messi
+                                "cristiano" -> R.drawable.cristiano
+                                "bruyne" -> R.drawable.bruyne
+                                "mbape" -> R.drawable.mbape
+                                else -> R.drawable.bruyne
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(130.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(120.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.White)
+                                        .border(3.dp, Color(0xFF8E44AD), CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Image(
+                                        painter = painterResource(id = avatarImage),
+                                        contentDescription = "Avatar",
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .clip(CircleShape),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(32.dp))
+
+                        // Opciones del menú
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(0.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            // Opción Editar perfil
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp)
+                                    .clickable {
+                                        navigateToEditProfile()
+                                        expanded = false
+                                    },
+                                    contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "✏️ Editar perfil",
+                                    fontSize = 22.sp,
+                                    color = Color.White,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(24.dp))
+                            // Opción Favoritos
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp)
+                                    .clickable {
+                                        expanded = false
+                                    },
+                                    contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "⭐ Favoritos",
+                                    fontSize = 22.sp,
+                                    color = Color.White,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(24.dp))
+                            // Opción Inicio
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp)
+                                    .clickable {
+                                        expanded = false
+                                    },
+                                    contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "🏠 Inicio",
+                                    fontSize = 22.sp,
+                                    color = Color.White,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(24.dp))
+                            // Opción Cerrar sesión
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp)
+                                    .clickable {
+                                        FirebaseAuth.getInstance().signOut()
+                                        navigateToInitial()
+                                        expanded = false
+                                    },
+                                    contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "🔒 Cerrar sesión",
+                                    fontSize = 22.sp,
+                                    color = Color.White,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
                     }
-                )
+                }
             }
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -349,14 +650,13 @@ fun DatePickerDialog(
     )
 }
 
-
 @Composable
 fun PartidoCard(partido: Partido) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF4A256F))
+        colors = CardDefaults.cardColors(containerColor = Color(0x994A256F))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(

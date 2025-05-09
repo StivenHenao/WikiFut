@@ -163,8 +163,11 @@ fun SignUpScreen(
                 placeholder = { Text("Nombre de usuario") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.White
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White,
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black
                 )
             )
 
@@ -199,7 +202,7 @@ fun SignUpScreen(
                         modifier = Modifier
                             .size(imageSize)
                             .clip(CircleShape)
-                            .background(Color(0xFF6650a4))
+                            .background(Color.White)
                             .border(width = 3.dp, color = borderColor, shape = CircleShape)
                             .clickable {
                                 selectedImage = imageRes
@@ -210,7 +213,7 @@ fun SignUpScreen(
                             painter = painterResource(id = imageRes),
                             contentDescription = "Avatar",
                             modifier = Modifier
-                                .size(60.dp)
+                                .fillMaxSize()
                                 .clip(CircleShape),
                             contentScale = ContentScale.Crop
                         )
@@ -375,8 +378,11 @@ fun PasswordTextField(
                 )
             }
         },
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color.White
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.White,
+            unfocusedContainerColor = Color.White,
+            focusedTextColor = Color.Black,
+            unfocusedTextColor = Color.Black
         )
     )
 }
