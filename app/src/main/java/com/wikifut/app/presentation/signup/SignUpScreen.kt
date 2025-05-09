@@ -39,6 +39,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -337,7 +338,7 @@ fun SignUpScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
-                    .border(1.5.dp, White, RoundedCornerShape(20.dp)),
+                    .border(1.dp, White, RoundedCornerShape(10.dp)),
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = White,
                     containerColor = Color.Transparent
@@ -350,6 +351,14 @@ fun SignUpScreen(
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text("Continuar con Google")
+            }
+            TextButton(onClick = { navigateToLogin() }) {
+                Text(
+                    "¿Ya tienes cuenta? Inicia sesión",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = White
+                )
             }
         }
     }

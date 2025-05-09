@@ -1,6 +1,5 @@
 package com.wikifut.app.presentation.Home
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -35,16 +34,19 @@ import com.wikifut.app.utils.convertirHoraAColombia
 import com.wikifut.app.utils.formatFechaParaApi
 import com.wikifut.app.utils.obtenerFechaActual
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Star
 import kotlinx.coroutines.launch
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
-import androidx.compose.foundation.Canvas
-
+import androidx.compose.ui.graphics.vector.ImageVector
 
 
 @Composable
@@ -58,7 +60,6 @@ fun HomeScreenWithDrawer(
     var userName by remember { mutableStateOf<String?>(null) }
     var avatar by remember { mutableStateOf<String?>(null) }
 
-    // Obtener datos de usuario solo una vez
     LaunchedEffect(Unit) {
         val auth = FirebaseAuth.getInstance()
         val email = auth.currentUser?.email
@@ -87,6 +88,8 @@ fun HomeScreenWithDrawer(
         drawerState = drawerState
     ) {
         HomePartidosScreen(
+            userName = userName,
+            avatar = avatar,
             viewModel = viewModel,
             navigateToEditProfile = navigateToEditProfile,
             navigateToInitial = navigateToInitial,
@@ -94,6 +97,38 @@ fun HomeScreenWithDrawer(
         )
     }
 }
+
+@Composable
+fun DrawerOption(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = Color.White,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = label,
+                fontSize = 18.sp,
+                color = Color.White
+            )
+        }
+    }
+}
+
 
 @Composable
 fun DrawerContent(
@@ -126,11 +161,19 @@ fun DrawerContent(
             if (userName != null && avatar != null) {
                 Spacer(modifier = Modifier.height(32.dp))
                 Text(
-                    text = "¡Hola, $userName!",
+                    text = "¡Hola,",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 16.dp).align(Alignment.CenterHorizontally),
+                )
+                Text(
+                    text = "$userName!",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
                 )
                 Spacer(modifier = Modifier.height(28.dp))
                 val avatarImage = when (avatar) {
@@ -158,82 +201,41 @@ fun DrawerContent(
                     )
                 }
                 Spacer(modifier = Modifier.height(70.dp))
-                // Opción Editar perfil
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .clickable {
-                            navigateToEditProfile()
-                            closeDrawer()
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "✏️ Editar perfil",
-                        fontSize = 22.sp,
-                        color = Color.White,
-                        textAlign = TextAlign.Center
-                    )
-                }
-                Spacer(modifier = Modifier.height(25.dp))
-                HorizontalDivider(color = Color.White.copy(alpha = 0.25f), thickness = 1.dp)
-                Spacer(modifier = Modifier.height(25.dp))
-                // Opción Favoritos
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .clickable { closeDrawer() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "⭐ Favoritos",
-                        fontSize = 22.sp,
-                        color = Color.White,
-                        textAlign = TextAlign.Center
-                    )
-                }
-                Spacer(modifier = Modifier.height(25.dp))
-                HorizontalDivider(color = Color.White.copy(alpha = 0.25f), thickness = 1.dp)
-                Spacer(modifier = Modifier.height(25.dp))
-                // Opción Inicio
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .clickable { closeDrawer() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "🏠 Inicio",
-                        fontSize = 22.sp,
-                        color = Color.White,
-                        textAlign = TextAlign.Center
-                    )
-                }
-                Spacer(modifier = Modifier.height(25.dp))
-                HorizontalDivider(color = Color.White.copy(alpha = 0.25f), thickness = 1.dp)
-                Spacer(modifier = Modifier.height(25.dp))
-                // Opción Cerrar sesión
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .clickable {
-                            FirebaseAuth.getInstance().signOut()
-                            navigateToInitial()
-                            closeDrawer()
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "🔒 Cerrar sesión",
-                        fontSize = 22.sp,
-                        color = Color.White,
-                        textAlign = TextAlign.Center
-                    )
-                }
+
+                DrawerOption(
+                    icon = Icons.Default.Edit,
+                    label = "Editar perfil",
+                    onClick = {
+                        navigateToEditProfile()
+                        closeDrawer()
+                    }
+                )
+
+                DrawerOption(
+                    icon = Icons.Default.Star,
+                    label = "Favoritos",
+                    onClick = { closeDrawer() }
+                )
+
+                DrawerOption(
+                    icon = Icons.Default.Home,
+                    label = "Inicio",
+                    onClick = { closeDrawer() }
+                )
+
+                Spacer(modifier = Modifier.height(200.dp))
+
+                DrawerOption(
+                    icon = Icons.Default.Logout,
+                    label = "Cerrar sesión",
+
+                    onClick = {
+                        FirebaseAuth.getInstance().signOut()
+                        navigateToInitial()
+                        closeDrawer()
+                    }
+                )
+
             }
         }
     }
@@ -241,6 +243,8 @@ fun DrawerContent(
 
 @Composable
 fun HomePartidosScreen(
+    userName: String?,
+    avatar: String?,
     viewModel: HomePartidosViewModel = hiltViewModel(),
     navigateToEditProfile: () -> Unit = {},
     navigateToInitial: () -> Unit = {},
@@ -258,34 +262,7 @@ fun HomePartidosScreen(
     // Fecha seleccionada, inicia con la fecha actual
     var selectedDate by remember { mutableStateOf(obtenerFechaActual()) }
 
-    var userName by remember { mutableStateOf<String?>(null) }
-    var avatar by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(Unit) {
-        val auth = FirebaseAuth.getInstance()
-        val email = auth.currentUser?.email
-
-        Log.d("HomeScreen", "LaunchedEffect dentro: Email del usuario actual: $email")
-
-        if (!email.isNullOrEmpty()) {
-            FirebaseFirestore.getInstance().collection("users").document(email)
-                .get()
-                .addOnSuccessListener { document: DocumentSnapshot ->
-                    if (document.exists()) {
-                        Log.d("HomeScreen", "Documento encontrado para $email")
-                        userName = document.getString("username")
-                        avatar = document.getString("avatar")
-                    } else {
-                        Log.d("HomeScreen", "Documento NO existe para $email")
-                    }
-                }
-                .addOnFailureListener { e: Exception ->
-                    Log.e("HomeScreen", "Error al obtener datos del usuario", e)
-                }
-        } else {
-            Log.e("HomeScreen", "Email nulo o vacío en LaunchedEffect: $email")
-        }
-    }
 
     // Al cambiar la fecha seleccionada, se cargan los partidos de esa fecha
     LaunchedEffect(selectedDate) {
@@ -311,7 +288,7 @@ fun HomePartidosScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0x992D1B45))
+            .background(Color(0xFF2D1B45))
             .windowInsetsPadding(WindowInsets.statusBars)
     ) {
         Header(
@@ -377,6 +354,7 @@ fun Header(
     openDrawer: () -> Unit = {}
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val menuWidth = 250.dp
 
     Row(
         modifier = Modifier
@@ -439,176 +417,6 @@ fun Header(
                     modifier = Modifier.size(36.dp)
                 )
             }
-
-
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                offset = DpOffset(x = 0.dp, y = 10.dp),
-                modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .heightIn(max = 1100.dp)
-                    .background(
-                        color = Color(0xFF2D1B45),
-                        shape = RoundedCornerShape(24.dp)
-                    )
-                    .border(
-                        width = 2.dp,
-                        color = Color(0xFF8E44AD),
-                        shape = RoundedCornerShape(24.dp)
-                    )
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp, vertical = 32.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        // Avatar y nombre de usuario
-                        if (userName != null && avatar != null) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(48.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Spacer(modifier = Modifier.height(45.dp))
-                                Text(
-                                    text = "¡Hola, $userName!",
-                                    fontSize = 24.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            val avatarImage = when (avatar) {
-                                "messi" -> R.drawable.messi
-                                "cristiano" -> R.drawable.cristiano
-                                "bruyne" -> R.drawable.bruyne
-                                "mbape" -> R.drawable.mbape
-                                else -> R.drawable.bruyne
-                            }
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(130.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(120.dp)
-                                        .clip(CircleShape)
-                                        .background(Color.White)
-                                        .border(3.dp, Color(0xFF8E44AD), CircleShape),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Image(
-                                        painter = painterResource(id = avatarImage),
-                                        contentDescription = "Avatar",
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .clip(CircleShape),
-                                        contentScale = ContentScale.Crop
-                                    )
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(32.dp))
-
-                        // Opciones del menú
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(0.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            // Opción Editar perfil
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(56.dp)
-                                    .clickable {
-                                        navigateToEditProfile()
-                                        expanded = false
-                                    },
-                                    contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "✏️ Editar perfil",
-                                    fontSize = 22.sp,
-                                    color = Color.White,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(24.dp))
-                            // Opción Favoritos
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(56.dp)
-                                    .clickable {
-                                        expanded = false
-                                    },
-                                    contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "⭐ Favoritos",
-                                    fontSize = 22.sp,
-                                    color = Color.White,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(24.dp))
-                            // Opción Inicio
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(56.dp)
-                                    .clickable {
-                                        expanded = false
-                                    },
-                                    contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "🏠 Inicio",
-                                    fontSize = 22.sp,
-                                    color = Color.White,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(24.dp))
-                            // Opción Cerrar sesión
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(56.dp)
-                                    .clickable {
-                                        FirebaseAuth.getInstance().signOut()
-                                        navigateToInitial()
-                                        expanded = false
-                                    },
-                                    contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "🔒 Cerrar sesión",
-                                    fontSize = 22.sp,
-                                    color = Color.White,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 }
@@ -656,7 +464,7 @@ fun PartidoCard(partido: Partido) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0x994A256F))
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF4A256F))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
