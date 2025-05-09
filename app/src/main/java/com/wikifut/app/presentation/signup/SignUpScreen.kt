@@ -22,11 +22,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -56,6 +58,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -162,14 +166,20 @@ fun SignUpScreen(
                 value = username,
                 onValueChange = { username = it },
                 placeholder = { Text("Nombre de usuario") },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 56.dp),
                 shape = RoundedCornerShape(20.dp),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White,
                     focusedTextColor = Color.Black,
                     unfocusedTextColor = Color.Black
-                )
+                ),
+                singleLine = true,
+                maxLines = 1,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -228,13 +238,21 @@ fun SignUpScreen(
             TextField(
                 value = email,
                 onValueChange = { email = it },
-                placeholder = { Text("Correo Electrónico") },
-                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Correo electrónico", color = Color.Black) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 56.dp),
                 shape = RoundedCornerShape(20.dp),
+                singleLine = true,
+                maxLines = 1,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.White
+                    containerColor = Color.White,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
                 )
             )
+
 
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -338,7 +356,7 @@ fun SignUpScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
-                    .border(1.dp, White, RoundedCornerShape(10.dp)),
+                    .border(1.5.dp, White, RoundedCornerShape(20.dp)),
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = White,
                     containerColor = Color.Transparent
@@ -376,14 +394,22 @@ fun PasswordTextField(
         value = value,
         onValueChange = onValueChange,
         placeholder = { Text("Contraseña") },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp),
         shape = RoundedCornerShape(20.dp),
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+        singleLine = true,
+        maxLines = 1,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Password,
+            imeAction = ImeAction.Done
+        ),
         trailingIcon = {
             IconButton(onClick = onPasswordVisibilityToggle) {
                 Icon(
                     imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                    contentDescription = null
+                    contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
                 )
             }
         },
@@ -391,7 +417,9 @@ fun PasswordTextField(
             focusedContainerColor = Color.White,
             unfocusedContainerColor = Color.White,
             focusedTextColor = Color.Black,
-            unfocusedTextColor = Color.Black
+            unfocusedTextColor = Color.Black,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
         )
     )
 }
