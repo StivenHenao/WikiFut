@@ -249,13 +249,13 @@ fun PasswordTextField(
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         modifier = Modifier
             .fillMaxWidth(0.8f)
-            .heightIn(min = 56.dp),  // Altura mínima (ajusta según diseño)
+            .heightIn(min = 56.dp),
         shape = RoundedCornerShape(20.dp),
-        singleLine = true,  // Evita saltos de línea
-        maxLines = 1,        // Fuerza una sola línea
+        singleLine = true,
+        maxLines = 1,
         keyboardOptions = KeyboardOptions(
-            imeAction = ImeAction.Done,  // Teclado con acción "Listo"
-            keyboardType = KeyboardType.Password  // Tipo de teclado (opcional)
+            imeAction = ImeAction.Done,
+            keyboardType = KeyboardType.Password
         ),
         trailingIcon = {
             val image = if (passwordVisible)
