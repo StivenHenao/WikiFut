@@ -1,5 +1,6 @@
 package com.wikifut.app.api
 
+import com.wikifut.app.model.TopScorersResponse
 import com.wikifut.app.model.PlayersByLeagueResponse
 import com.wikifut.app.model.TeamsResponse
 import com.wikifut.app.model.LigaDetalleResponse
@@ -33,4 +34,11 @@ interface LigaDetalleApi {
         @Query("season") season: Int,
         @Query("page") page: Int = 1
     ): Response<PlayersByLeagueResponse>
+
+    @GET("players/topscorers")
+    suspend fun getTopScorers(
+        @Query("league") leagueId: Int,
+        @Query("season") season: Int
+    ): Response<TopScorersResponse>
+
 }

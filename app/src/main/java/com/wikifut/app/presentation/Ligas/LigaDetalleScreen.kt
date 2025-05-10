@@ -20,6 +20,7 @@ import com.wikifut.app.presentation.Ligas.LigaDetalleViewModel
 import com.wikifut.app.presentation.Ligas.StandingsWidget
 import com.wikifut.app.model.PlayerItem
 import com.wikifut.app.model.Partido
+import com.wikifut.app.model.TopScorerItem
 
 
 @Composable
@@ -52,7 +53,7 @@ fun LigaDetalleScreen(
         viewModel.cargarJugadores(leagueId, temporadaSeleccionada)
     }
     LaunchedEffect(temporadaSeleccionada) {
-        //viewModel.cargarPartidosPorLiga(leagueId, temporadaSeleccionada)
+        viewModel.cargarTopScorers(leagueId, temporadaSeleccionada)
         viewModel.cargarPartidosPorLigaYTemporada(leagueId, temporadaSeleccionada)
 
     }
@@ -133,6 +134,9 @@ fun LigaDetalleScreen(
             Tab(selected = selectedTab == 3, onClick = { selectedTab = 3 }) {
                 Text("Jugadores", modifier = Modifier.padding(12.dp))
             }
+            Tab(selected = selectedTab == 4, onClick = { selectedTab = 4 }) {
+                Text("Goleadores", modifier = Modifier.padding(12.dp))
+            }
         }
 
         // 📋 Contenido según tab
@@ -159,10 +163,53 @@ fun LigaDetalleScreen(
 
             }
             3 -> JugadoresPorLiga(viewModel.jugadores.value)
+            4 -> TablaGoleadores(viewModel.topScorers.value)
         }
     }
 
 }
+
+@Composable
+fun TablaGoleadores(goleadores: List<TopScorerItem>) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(goleadores) { item ->
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(2.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        AsyncImage(
+                            model = item.player.photo,
+                            contentDescription = item.player.name,
+                            modifier = Modifier.size(40.dp).padding(end = 8.dp)
+                        )
+                        Column {
+                            Text(text = item.player.name, fontWeight = FontWeight.Bold)
+                            Text(text = item.statistics.firstOrNull()?.team?.name.orEmpty())
+                        }
+                    }
+                    Text(
+                        text = "${item.statistics.firstOrNull()?.goals?.total ?: 0} goles",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 fun ListaDePartidos(partidos: List<Partido>) {

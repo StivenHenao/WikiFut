@@ -16,7 +16,7 @@ import com.wikifut.app.model.TeamBasicInfo
 import com.wikifut.app.model.PlayerItem
 import com.wikifut.app.repository.PartidosRepository
 import com.wikifut.app.model.Partido
-
+import com.wikifut.app.model.TopScorerItem
 
 @HiltViewModel
 class LigaDetalleViewModel @Inject constructor(
@@ -48,6 +48,9 @@ class LigaDetalleViewModel @Inject constructor(
 
     private val _partidos = mutableStateOf<List<Partido>>(emptyList())
     val partidos: State<List<Partido>> = _partidos
+
+    private val _topScorers = mutableStateOf<List<TopScorerItem>>(emptyList())
+    val topScorers: State<List<TopScorerItem>> = _topScorers
 
 
     fun cargarTabla(leagueId: Int, season: Int) {
@@ -110,6 +113,22 @@ class LigaDetalleViewModel @Inject constructor(
                 Log.d("LigaDetalle", "✅ Partidos encontrados: ${resultado.response.size}")
             } catch (e: Exception) {
                 Log.e("LigaDetalle", "❌ Error cargando partidos: ${e.message}")
+            }
+        }
+    }
+
+    fun cargarTopScorers(leagueId: Int, season: Int) {
+        viewModelScope.launch {
+            try {
+                val result = ligaDetalleApi.getTopScorers(leagueId, season)
+                if (result.isSuccessful) {
+                    _topScorers.value = result.body()?.response ?: emptyList()
+                    Log.d("LigaDetalle", "✅ Goleadores cargados: ${_topScorers.value.size}")
+                } else {
+                    Log.e("LigaDetalle", "❌ Error en top scorers: ${result.errorBody()?.string()}")
+                }
+            } catch (e: Exception) {
+                Log.e("LigaDetalle", "⚠️ Excepción en top scorers: ${e.message}")
             }
         }
     }
