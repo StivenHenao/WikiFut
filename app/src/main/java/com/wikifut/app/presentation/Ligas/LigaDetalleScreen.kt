@@ -54,6 +54,7 @@ fun LigaDetalleScreen(
     LaunchedEffect(temporadaSeleccionada) {
         //viewModel.cargarPartidosPorLiga(leagueId, temporadaSeleccionada)
         viewModel.cargarPartidosPorLigaYTemporada(leagueId, temporadaSeleccionada)
+
     }
 
     // Solo una vez

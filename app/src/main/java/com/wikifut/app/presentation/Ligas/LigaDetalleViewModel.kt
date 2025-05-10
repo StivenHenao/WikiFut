@@ -101,26 +101,16 @@ class LigaDetalleViewModel @Inject constructor(
         }
     }
 
-    fun cargarPartidosPorLiga(leagueId: Int, fecha: String) {
-        viewModelScope.launch {
-            try {
-                val resultado = partidosRepository.getPartidos(fecha)
-                _partidos.value = resultado.response.filter { it.league.id == leagueId }
-            } catch (e: Exception) {
-                Log.e("LigaDetalle", "Error cargando partidos: ${e.message}")
-            }
-        }
-    }
     fun cargarPartidosPorLigaYTemporada(leagueId: Int, season: Int) {
         viewModelScope.launch {
             try {
-                val fechaReferencia = "2023-10-01" // Puedes usar una fecha fija dentro de la temporada como referencia
-                val resultado = partidosRepository.getPartidos(fechaReferencia)
-                _partidos.value = resultado.response.filter { it.league.id == leagueId && it.league.season == season }
+                Log.d("LigaDetalle", "📆 Buscando partidos para liga=$leagueId, temporada=$season")
+                val resultado = partidosRepository.getPartidosPorLigaYTemporada(leagueId, season)
+                _partidos.value = resultado.response
+                Log.d("LigaDetalle", "✅ Partidos encontrados: ${resultado.response.size}")
             } catch (e: Exception) {
-                Log.e("LigaDetalle", "Error cargando partidos: ${e.message}")
+                Log.e("LigaDetalle", "❌ Error cargando partidos: ${e.message}")
             }
         }
     }
-
 }

@@ -11,4 +11,8 @@ class PartidosRepository @Inject constructor(
     suspend fun getPartidos(fecha: String) : ListaPartidos {
         return partidosApi.getPartidos(fecha)
     }
+    suspend fun getPartidosPorLigaYTemporada(leagueId: Int, season: Int): ListaPartidos {
+        return partidosApi.getPartidosPorLigaYTemporada(leagueId, season)
+    }
+
 }

@@ -7,4 +7,11 @@ import retrofit2.http.Query
 interface PartidosApi {
     @GET("fixtures")
     suspend fun getPartidos(@Query("date") fecha: String): ListaPartidos
+
+    @GET("fixtures")
+    suspend fun getPartidosPorLigaYTemporada(
+        @Query("league") leagueId: Int,
+        @Query("season") season: Int
+    ): ListaPartidos
+
 }
