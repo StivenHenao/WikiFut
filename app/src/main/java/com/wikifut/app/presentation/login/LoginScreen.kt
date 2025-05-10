@@ -8,9 +8,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -18,12 +18,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -116,9 +117,14 @@ fun LoginScreen(
             TextField(
                 value = email,
                 onValueChange = { email = it },
-                placeholder = { Text("Correo Electrónico") },
-                modifier = Modifier.fillMaxWidth(0.8f),
-                shape = RoundedCornerShape(20.dp)
+                placeholder = { Text("Correo electrónico") },
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .heightIn(min = 56.dp),
+                shape = RoundedCornerShape(20.dp),
+                singleLine = true,
+                maxLines = 1,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
             )
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -192,9 +198,12 @@ fun LoginScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
-                    .border(2.dp, White, RoundedCornerShape(20.dp)),
-                shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.outlinedButtonColors(containerColor = Color(0xFF0E0414))
+                    .height(50.dp)
+                    .border(1.5.dp, White, RoundedCornerShape(20.dp)),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = White,
+                    containerColor = Color.Transparent
+                )
             ) {
                 Image(
                     painter = painterResource(id = R.mipmap.google_ic),
@@ -204,7 +213,7 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     "Iniciar sesión con Google",
-                    fontSize = 18.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
@@ -215,23 +224,6 @@ fun LoginScreen(
             TextButton(onClick = { navigateToSignUp() }) {
                 Text(
                     "¿No tienes cuenta? Crea una",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = White
-                )
-            }
-
-            Divider(
-                color = Color.White,
-                thickness = 1.dp,
-                modifier = Modifier
-                    .width(200.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
-
-            TextButton(onClick = { navigateToSignUp() }) {
-                Text(
-                    "Recuperar contraseña",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = White
@@ -253,12 +245,23 @@ fun PasswordTextField(
         onValueChange = onValueChange,
         placeholder = { Text("Contraseña") },
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-        modifier = Modifier.fillMaxWidth(0.8f),
+        modifier = Modifier
+            .fillMaxWidth(0.8f)
+            .heightIn(min = 56.dp),
         shape = RoundedCornerShape(20.dp),
+        singleLine = true,
+        maxLines = 1,
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Done,
+            keyboardType = KeyboardType.Password
+        ),
         trailingIcon = {
-            val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+            val image = if (passwordVisible)
+                Icons.Filled.Visibility
+            else
+                Icons.Filled.VisibilityOff
             IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                Icon(imageVector = image, contentDescription = null)
+                Icon(imageVector = image, contentDescription = "Toggle password visibility")
             }
         }
     )

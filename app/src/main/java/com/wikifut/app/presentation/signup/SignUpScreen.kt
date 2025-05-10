@@ -22,11 +22,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -39,6 +41,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -55,6 +58,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -65,6 +70,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.BeginSignInResult
+import com.google.firebase.firestore.FirebaseFirestore
 import com.wikifut.app.R
 import com.wikifut.app.utils.Constans.CLIENT_ID_FIREBASE
 
@@ -83,6 +89,7 @@ fun SignUpScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    val db = FirebaseFirestore.getInstance()
 
     // Avatar selection
     val profileImages = remember {
@@ -159,11 +166,20 @@ fun SignUpScreen(
                 value = username,
                 onValueChange = { username = it },
                 placeholder = { Text("Nombre de usuario") },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 56.dp),
                 shape = RoundedCornerShape(20.dp),
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.White
-                )
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White,
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black
+                ),
+                singleLine = true,
+                maxLines = 1,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -197,7 +213,7 @@ fun SignUpScreen(
                         modifier = Modifier
                             .size(imageSize)
                             .clip(CircleShape)
-                            .background(Color(0xFF6650a4))
+                            .background(Color.White)
                             .border(width = 3.dp, color = borderColor, shape = CircleShape)
                             .clickable {
                                 selectedImage = imageRes
@@ -208,7 +224,7 @@ fun SignUpScreen(
                             painter = painterResource(id = imageRes),
                             contentDescription = "Avatar",
                             modifier = Modifier
-                                .size(60.dp)
+                                .fillMaxSize()
                                 .clip(CircleShape),
                             contentScale = ContentScale.Crop
                         )
@@ -222,13 +238,21 @@ fun SignUpScreen(
             TextField(
                 value = email,
                 onValueChange = { email = it },
-                placeholder = { Text("Correo Electrónico") },
-                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Correo electrónico", color = Color.Black) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 56.dp),
                 shape = RoundedCornerShape(20.dp),
+                singleLine = true,
+                maxLines = 1,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.White
+                    containerColor = Color.White,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
                 )
             )
+
 
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -272,8 +296,21 @@ fun SignUpScreen(
                         .addOnCompleteListener { task ->
                             isLoading = false
                             if (task.isSuccessful) {
+                                val avatarName = context.resources.getResourceEntryName(selectedImage!!)
+                                db.collection("users").document(email).set(
+                                    hashMapOf(
+                                        "username" to username,
+                                        "email" to email,
+                                        "avatar" to avatarName
+                                    )
+                                ).addOnSuccessListener {
+                                    Log.d("SignUp", "Usuario registrado correctamente")
+                                }.addOnFailureListener { e ->
+                                    Log.e("SignUp", "Error al registrar usuario", e)
+                                }
                                 navigateToHome()
-                            } else {
+                            }
+                            else {
                                 errorMessage = when {
                                     task.exception?.message?.contains("email address") == true -> "Correo inválido o en uso"
                                     password.length < 6 -> "La contraseña debe tener al menos 6 caracteres"
@@ -333,6 +370,14 @@ fun SignUpScreen(
                 Spacer(modifier = Modifier.width(10.dp))
                 Text("Continuar con Google")
             }
+            TextButton(onClick = { navigateToLogin() }) {
+                Text(
+                    "¿Ya tienes cuenta? Inicia sesión",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = White
+                )
+            }
         }
     }
 }
@@ -349,19 +394,32 @@ fun PasswordTextField(
         value = value,
         onValueChange = onValueChange,
         placeholder = { Text("Contraseña") },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp),
         shape = RoundedCornerShape(20.dp),
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+        singleLine = true,
+        maxLines = 1,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Password,
+            imeAction = ImeAction.Done
+        ),
         trailingIcon = {
             IconButton(onClick = onPasswordVisibilityToggle) {
                 Icon(
                     imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                    contentDescription = null
+                    contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
                 )
             }
         },
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color.White
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.White,
+            unfocusedContainerColor = Color.White,
+            focusedTextColor = Color.Black,
+            unfocusedTextColor = Color.Black,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
         )
     )
 }

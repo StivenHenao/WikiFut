@@ -2,6 +2,7 @@ package com.wikifut.app.presentation.Home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,29 +14,241 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
 import com.wikifut.app.R
 import com.wikifut.app.model.Partido
-import com.wikifut.app.presentation.login.LoginScreen
 import java.util.*
 import com.wikifut.app.utils.convertirHoraAColombia
 import com.wikifut.app.utils.formatFechaParaApi
 import com.wikifut.app.utils.obtenerFechaActual
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Star
+import kotlinx.coroutines.launch
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.ui.graphics.vector.ImageVector
+
+
+@Composable
+fun HomeScreenWithDrawer(
+    navigateToEditProfile: () -> Unit,
+    navigateToInitial: () -> Unit,
+    viewModel: HomePartidosViewModel = hiltViewModel()
+) {
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    var userName by remember { mutableStateOf<String?>(null) }
+    var avatar by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        val auth = FirebaseAuth.getInstance()
+        val email = auth.currentUser?.email
+        if (!email.isNullOrEmpty()) {
+            FirebaseFirestore.getInstance().collection("users").document(email)
+                .get()
+                .addOnSuccessListener { document: DocumentSnapshot ->
+                    if (document.exists()) {
+                        userName = document.getString("username")
+                        avatar = document.getString("avatar")
+                    }
+                }
+        }
+    }
+
+    ModalNavigationDrawer(
+        drawerContent = {
+            DrawerContent(
+                closeDrawer = { scope.launch { drawerState.close() } },
+                navigateToEditProfile = navigateToEditProfile,
+                navigateToInitial = navigateToInitial,
+                userName = userName,
+                avatar = avatar
+            )
+        },
+        drawerState = drawerState
+    ) {
+        HomePartidosScreen(
+            userName = userName,
+            avatar = avatar,
+            viewModel = viewModel,
+            navigateToEditProfile = navigateToEditProfile,
+            navigateToInitial = navigateToInitial,
+            openDrawer = { scope.launch { drawerState.open() } }
+        )
+    }
+}
+
+@Composable
+fun DrawerOption(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = Color.White,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = label,
+                fontSize = 18.sp,
+                color = Color.White
+            )
+        }
+    }
+}
+
+
+@Composable
+fun DrawerContent(
+    closeDrawer: () -> Unit,
+    navigateToEditProfile: () -> Unit,
+    navigateToInitial: () -> Unit,
+    userName: String?,
+    avatar: String?
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxHeight()
+            .fillMaxWidth(0.85f)
+            .clip(RoundedCornerShape(topEnd = 0.dp, bottomEnd = 0.dp, topStart = 32.dp, bottomStart = 32.dp))
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF2D1B45).copy(alpha = 0.97f), // Morado oscuro con 97% opacidad
+                        Color(0xFF4A256F).copy(alpha = 0.97f)  // Morado claro con 97% opacidad
+                    )
+                )
+            )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 60.dp, start = 12.dp, end = 12.dp, bottom = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (userName != null && avatar != null) {
+                Spacer(modifier = Modifier.height(32.dp))
+                Text(
+                    text = "¡Hola,",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    modifier = Modifier.padding(bottom = 16.dp).align(Alignment.CenterHorizontally),
+                )
+                Text(
+                    text = "$userName!",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                )
+                Spacer(modifier = Modifier.height(28.dp))
+                val avatarImage = when (avatar) {
+                    "messi" -> R.drawable.messi
+                    "cristiano" -> R.drawable.cristiano
+                    "bruyne" -> R.drawable.bruyne
+                    "mbape" -> R.drawable.mbape
+                    else -> R.drawable.bruyne
+                }
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(CircleShape)
+                        .background(Color.White)
+                        .border(3.dp, Color(0xFF8E44AD), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = avatarImage),
+                        contentDescription = "Avatar",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+                Spacer(modifier = Modifier.height(70.dp))
+
+                DrawerOption(
+                    icon = Icons.Default.Edit,
+                    label = "Editar perfil",
+                    onClick = {
+                        navigateToEditProfile()
+                        closeDrawer()
+                    }
+                )
+
+                DrawerOption(
+                    icon = Icons.Default.Star,
+                    label = "Favoritos",
+                    onClick = { closeDrawer() }
+                )
+
+                DrawerOption(
+                    icon = Icons.Default.Home,
+                    label = "Inicio",
+                    onClick = { closeDrawer() }
+                )
+
+                Spacer(modifier = Modifier.height(200.dp))
+
+                DrawerOption(
+                    icon = Icons.Default.Logout,
+                    label = "Cerrar sesión",
+
+                    onClick = {
+                        FirebaseAuth.getInstance().signOut()
+                        navigateToInitial()
+                        closeDrawer()
+                    }
+                )
+
+            }
+        }
+    }
+}
 
 @Composable
 fun HomePartidosScreen(
+    userName: String?,
+    avatar: String?,
     viewModel: HomePartidosViewModel = hiltViewModel(),
-    navigateToInitial: () -> Unit = {}
+    navigateToEditProfile: () -> Unit = {},
+    navigateToInitial: () -> Unit = {},
+    openDrawer: () -> Unit = {}
 ) {
     // Estado de la lista de partidos observada desde el ViewModel
     val state by viewModel.state.collectAsState()
@@ -49,6 +262,8 @@ fun HomePartidosScreen(
     // Fecha seleccionada, inicia con la fecha actual
     var selectedDate by remember { mutableStateOf(obtenerFechaActual()) }
 
+
+
     // Al cambiar la fecha seleccionada, se cargan los partidos de esa fecha
     LaunchedEffect(selectedDate) {
         viewModel.cargarPartidosPorFecha(selectedDate)
@@ -60,11 +275,7 @@ fun HomePartidosScreen(
                 partido.teams.home.name.contains(searchQuery, ignoreCase = true) ||
                 partido.teams.away.name.contains(searchQuery, ignoreCase = true)
     }
-
-    /*
-       --- Código comentado que no está en uso actualmente ---
-    */
-    /*if (showDatePicker) {
+    if (showDatePicker) {
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             onDateSelected = { date ->
@@ -72,22 +283,44 @@ fun HomePartidosScreen(
                 showDatePicker = false
             }
         )
-    }*/
+    }
 
-    Column(modifier = Modifier.fillMaxSize().background(Color(0xFF2D1B45))) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF2D1B45))
+            .windowInsetsPadding(WindowInsets.statusBars)
+    ) {
         Header(
+            navigateToEditProfile = navigateToEditProfile,
+            userName = userName,
+            avatar = avatar,
             navigateToInitial = navigateToInitial,
             searchQuery = searchQuery,
             onSearchChange = { searchQuery = it },
-            onDateSelected = { showDatePicker = true }
+            onDateSelected = { showDatePicker = true },
+            openDrawer = openDrawer
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Column(modifier = Modifier.padding(horizontal = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Partidos del día", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        Column(modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                "Partidos del día",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
 
-            Text(selectedDate, fontSize = 16.sp, color = Color.Gray)
+            Text(
+                selectedDate,
+                fontSize = 16.sp,
+                color = Color.Gray,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -96,7 +329,14 @@ fun HomePartidosScreen(
             }
 
             if (partidosFiltrados.isEmpty()) {
-                Text("No se encontraron partidos.", color = Color.White, modifier = Modifier.padding(16.dp))
+                Text(
+                    "No se encontraron partidos.",
+                    color = Color.White,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
@@ -104,17 +344,22 @@ fun HomePartidosScreen(
 
 @Composable
 fun Header(
+    userName: String?,
+    avatar: String?,
     navigateToInitial: () -> Unit,
     searchQuery: String,
     onSearchChange: (String) -> Unit,
-    onDateSelected: () -> Unit
+    onDateSelected: () -> Unit,
+    navigateToEditProfile: () -> Unit,
+    openDrawer: () -> Unit = {}
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val menuWidth = 250.dp
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFF1F1235))
+            .background(Color(0x991F1235))
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -164,33 +409,18 @@ fun Header(
         }
 
         Box {
-            Image(
-                painter = painterResource(id = R.drawable.ic_menu),
-                contentDescription = "Menú",
-                modifier = Modifier
-                    .size(36.dp)
-                    .clickable { expanded = true }
-            )
-
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier.background(Color.White)
-            ) {
-                DropdownMenuItem(
-                    text = { Text("Cerrar sesión") },
-                    onClick = {
-                        FirebaseAuth.getInstance().signOut()
-                        navigateToInitial()
-                        expanded = false
-                    }
+            IconButton(onClick = { openDrawer() }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_menu),
+                    contentDescription = "Menú",
+                    tint = Color.White,
+                    modifier = Modifier.size(36.dp)
                 )
             }
         }
     }
 }
 
-/*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerDialog(
@@ -227,7 +457,6 @@ fun DatePickerDialog(
         }
     )
 }
-*/
 
 @Composable
 fun PartidoCard(partido: Partido) {
