@@ -19,6 +19,7 @@ import coil.compose.AsyncImage
 import com.wikifut.app.presentation.Ligas.LigaDetalleViewModel
 import com.wikifut.app.presentation.Ligas.StandingsWidget
 import com.wikifut.app.model.PlayerItem
+import com.wikifut.app.model.Partido
 
 
 @Composable
@@ -49,6 +50,10 @@ fun LigaDetalleScreen(
     }
     LaunchedEffect(temporadaSeleccionada) {
         viewModel.cargarJugadores(leagueId, temporadaSeleccionada)
+    }
+    LaunchedEffect(temporadaSeleccionada) {
+        //viewModel.cargarPartidosPorLiga(leagueId, temporadaSeleccionada)
+        viewModel.cargarPartidosPorLigaYTemporada(leagueId, temporadaSeleccionada)
     }
 
     // Solo una vez
@@ -116,23 +121,34 @@ fun LigaDetalleScreen(
         // 🧭 Tabs: Tabla | Equipos | Temporada
         TabRow(selectedTabIndex = selectedTab) {
             Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }) {
-                Text("Tabla", modifier = Modifier.padding(12.dp))
+                Text("Partidos", modifier = Modifier.padding(12.dp))
             }
             Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }) {
-                Text("Equipos", modifier = Modifier.padding(12.dp))
+                Text("Tabla", modifier = Modifier.padding(12.dp))
             }
             Tab(selected = selectedTab == 2, onClick = { selectedTab = 2 }) {
+                Text("Equipos", modifier = Modifier.padding(12.dp))
+            }
+            Tab(selected = selectedTab == 3, onClick = { selectedTab = 3 }) {
                 Text("Jugadores", modifier = Modifier.padding(12.dp))
             }
         }
 
         // 📋 Contenido según tab
         when (selectedTab) {
-            0 -> StandingsWidget(
+            0 -> {
+                val partidos = viewModel.partidos.value
+                if (partidos.isEmpty()) {
+                    Text("No hay partidos disponibles", modifier = Modifier.padding(16.dp))
+                } else {
+                    ListaDePartidos(partidos)
+                }
+            }
+            1 -> StandingsWidget(
                 leagueId = leagueId,
                 season = temporada
             )
-            1 -> {
+            2 -> {
                 val equipos = viewModel.equipos.value
                 if (equipos.isEmpty()) {
                     Text("No hay equipos disponibles de la temporada $temporadaSeleccionada", modifier = Modifier.padding(16.dp))
@@ -141,11 +157,42 @@ fun LigaDetalleScreen(
                 }
 
             }
-            2 -> JugadoresPorLiga(viewModel.jugadores.value)
+            3 -> JugadoresPorLiga(viewModel.jugadores.value)
         }
     }
 
 }
+
+@Composable
+fun ListaDePartidos(partidos: List<Partido>) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(partidos) { partido ->
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(2.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(partido.teams.home.name)
+                    Text("${partido.goals?.home ?: "-"} - ${partido.goals?.away ?: "-"}")
+                    Text(partido.teams.away.name)
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 fun JugadoresPorLiga(jugadores: List<PlayerItem>) {

@@ -43,6 +43,7 @@ class MainActivity : ComponentActivity() {
                     LaunchedEffect(Unit) {
                         kotlinx.coroutines.delay(100)
                         navHostController.navigate("ligas")
+                        //navHostController.navigate("ligaDetalle/39/2022")
                     }
                 }
             }

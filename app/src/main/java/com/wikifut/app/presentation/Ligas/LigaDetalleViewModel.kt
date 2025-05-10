@@ -13,9 +13,9 @@ import androidx.compose.runtime.State
 import com.wikifut.app.api.LigaDetalleApi
 import com.wikifut.app.api.SeasonApi
 import com.wikifut.app.model.TeamBasicInfo
-import com.wikifut.app.model.PlayersByLeagueResponse
 import com.wikifut.app.model.PlayerItem
-
+import com.wikifut.app.repository.PartidosRepository
+import com.wikifut.app.model.Partido
 
 
 @HiltViewModel
@@ -25,6 +25,8 @@ class LigaDetalleViewModel @Inject constructor(
 
     @Inject lateinit var seasonApi: SeasonApi
     @Inject lateinit var ligaDetalleApi: LigaDetalleApi
+    @Inject lateinit var partidosRepository: PartidosRepository
+
 
     private val _nombreLiga = mutableStateOf("")
     val nombreLiga: State<String> = _nombreLiga
@@ -44,6 +46,8 @@ class LigaDetalleViewModel @Inject constructor(
     private val _jugadores = mutableStateOf<List<PlayerItem>>(emptyList())
     val jugadores: State<List<PlayerItem>> = _jugadores
 
+    private val _partidos = mutableStateOf<List<Partido>>(emptyList())
+    val partidos: State<List<Partido>> = _partidos
 
 
     fun cargarTabla(leagueId: Int, season: Int) {
@@ -72,8 +76,10 @@ class LigaDetalleViewModel @Inject constructor(
     fun cargarEquipos(leagueId: Int, season: Int) {
         viewModelScope.launch {
             val result = ligaDetalleApi.getTeamsByLeagueAndSeason(leagueId, season)
+            Log.d("LigaDetalle", "Llamando a cargarEquipos con leagueId=$leagueId, season=$season")
             if (result.isSuccessful) {
                 _equipos.value = result.body()?.response?.map { it.team } ?: emptyList()
+                Log.d("LigaDetalle", "Respuesta exitosa: ${result.body()}")
             } else {
                 Log.e("Equipos", "Error: ${result.errorBody()?.string()}")
             }
@@ -82,41 +88,39 @@ class LigaDetalleViewModel @Inject constructor(
 
     fun cargarJugadores(leagueId: Int, season: Int) {
         viewModelScope.launch {
+            Log.d("LigaDetalle", "🚀 Ejecutando función cargarJugadores()")
+            Log.d("LigaDetalle", "Llamando a cargarJugadoresPaginados con leagueId=$leagueId, season=$season")
             val response = ligaDetalleApi.getPlayersByLeagueAndSeason(leagueId, season, page = 1)
             if (response.isSuccessful) {
                 _jugadores.value = response.body()?.response ?: emptyList()
+                Log.d("LigaDetalle", "✅ Respuesta exitosa: ${response.body()?.response?.size} jugadores")
+            }else{
+                Log.e("LigaDetalle", "❌ Error al obtener jugadores: ${response.errorBody()?.string()}")
+
             }
         }
     }
-    /*
-    fun cargarJugadores(leagueId: Int, season: Int) {
-        _jugadores.value = emptyList() // Reiniciar antes de cargar
 
-        fun fetchPage(page: Int, acumulador: MutableList<PlayerByLeague>) {
-            viewModelScope.launch {
-                val response = ligaDetalleApi.getPlayersByLeagueAndSeason(leagueId, season, page)
-                if (response.isSuccessful) {
-                    val body = response.body()
-                    val nuevos = body?.response ?: emptyList()
-                    acumulador.addAll(nuevos)
-
-                    val current = body?.paging?.current ?: 1
-                    val total = body?.paging?.total ?: 1
-
-                    if (current < total) {
-                        // Respeta el rate limit
-                        kotlinx.coroutines.delay(1000)
-                        fetchPage(current + 1, acumulador)
-                    } else {
-                        _jugadores.value = acumulador
-                    }
-                } else {
-                    _jugadores.value = acumulador // en caso de error, muestra lo que haya
-                }
+    fun cargarPartidosPorLiga(leagueId: Int, fecha: String) {
+        viewModelScope.launch {
+            try {
+                val resultado = partidosRepository.getPartidos(fecha)
+                _partidos.value = resultado.response.filter { it.league.id == leagueId }
+            } catch (e: Exception) {
+                Log.e("LigaDetalle", "Error cargando partidos: ${e.message}")
             }
         }
-
-        fetchPage(1, mutableListOf())
     }
-*/
+    fun cargarPartidosPorLigaYTemporada(leagueId: Int, season: Int) {
+        viewModelScope.launch {
+            try {
+                val fechaReferencia = "2023-10-01" // Puedes usar una fecha fija dentro de la temporada como referencia
+                val resultado = partidosRepository.getPartidos(fechaReferencia)
+                _partidos.value = resultado.response.filter { it.league.id == leagueId && it.league.season == season }
+            } catch (e: Exception) {
+                Log.e("LigaDetalle", "Error cargando partidos: ${e.message}")
+            }
+        }
+    }
+
 }

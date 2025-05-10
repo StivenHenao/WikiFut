@@ -1,4 +1,5 @@
 package com.wikifut.app.presentation.Ligas
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -53,16 +54,28 @@ class LigasViewModel @Inject constructor(
 
     private fun obtenerLigas() {
         viewModelScope.launch {
+            Log.d("LigasViewModel", "🌐 Llamando a API para obtener ligas")
             val resultado = repository.obtenerLigas()
+
+            if (resultado != null) {
+                Log.d("LigasViewModel", "✅ Se recibieron ${resultado.size} ligas")
+                resultado.forEach { liga ->
+                    Log.d("LigasViewModel", "📌 Liga: ${liga.league.name} (${liga.country.name})")
+                }
+            } else {
+                Log.e("LigasViewModel", "❌ Error al obtener ligas, resultado nulo")
+            }
+
             resultado?.let {
                 todasLasLigas.value = it
-                _ligas.value = it.filter { liga -> // por si quieres seguir mostrando solo destacadas al inicio
+                _ligas.value = it.filter { liga ->
                     liga.league.id in listOf(39, 140, 135, 61, 78, 128, 71, 239)
                 }
                 filtrarLigas()
             }
         }
     }
+
 
 
 }
