@@ -13,7 +13,6 @@ import androidx.compose.runtime.State
 import com.wikifut.app.api.LigaDetalleApi
 import com.wikifut.app.api.SeasonApi
 import com.wikifut.app.model.TeamBasicInfo
-import com.wikifut.app.model.PlayerItem
 import com.wikifut.app.repository.PartidosRepository
 import com.wikifut.app.model.Partido
 import com.wikifut.app.model.TopScorerItem
@@ -42,9 +41,6 @@ class LigaDetalleViewModel @Inject constructor(
 
     private val _equipos = mutableStateOf<List<TeamBasicInfo>>(emptyList())
     val equipos: State<List<TeamBasicInfo>> = _equipos
-
-    private val _jugadores = mutableStateOf<List<PlayerItem>>(emptyList())
-    val jugadores: State<List<PlayerItem>> = _jugadores
 
     private val _partidos = mutableStateOf<List<Partido>>(emptyList())
     val partidos: State<List<Partido>> = _partidos
@@ -85,21 +81,6 @@ class LigaDetalleViewModel @Inject constructor(
                 Log.d("LigaDetalle", "Respuesta exitosa: ${result.body()}")
             } else {
                 Log.e("Equipos", "Error: ${result.errorBody()?.string()}")
-            }
-        }
-    }
-
-    fun cargarJugadores(leagueId: Int, season: Int) {
-        viewModelScope.launch {
-            Log.d("LigaDetalle", "🚀 Ejecutando función cargarJugadores()")
-            Log.d("LigaDetalle", "Llamando a cargarJugadoresPaginados con leagueId=$leagueId, season=$season")
-            val response = ligaDetalleApi.getPlayersByLeagueAndSeason(leagueId, season, page = 1)
-            if (response.isSuccessful) {
-                _jugadores.value = response.body()?.response ?: emptyList()
-                Log.d("LigaDetalle", "✅ Respuesta exitosa: ${response.body()?.response?.size} jugadores")
-            }else{
-                Log.e("LigaDetalle", "❌ Error al obtener jugadores: ${response.errorBody()?.string()}")
-
             }
         }
     }

@@ -15,6 +15,22 @@ data class TopScorerPlayer(
     val photo: String
 )
 
+data class PlayerTeamInfo(
+    val id: Int,
+    val name: String,
+    val logo: String
+)
+
+data class PlayerGames(
+    val appearences: Int?,
+    val minutes: Int?,
+    val position: String?
+)
+
+data class PlayerGoals(
+    val total: Int?,
+    val assists: Int?
+)
 data class TopScorerStatistics(
     val team: PlayerTeamInfo,
     val games: PlayerGames,

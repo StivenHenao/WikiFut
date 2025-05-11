@@ -18,7 +18,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.wikifut.app.presentation.Ligas.LigaDetalleViewModel
 import com.wikifut.app.presentation.Ligas.StandingsWidget
-import com.wikifut.app.model.PlayerItem
 import com.wikifut.app.model.Partido
 import com.wikifut.app.model.TopScorerItem
 
@@ -49,9 +48,7 @@ fun LigaDetalleScreen(
     LaunchedEffect(temporadaSeleccionada) {
         viewModel.cargarEquipos(leagueId, temporadaSeleccionada)
     }
-    LaunchedEffect(temporadaSeleccionada) {
-        viewModel.cargarJugadores(leagueId, temporadaSeleccionada)
-    }
+
     LaunchedEffect(temporadaSeleccionada) {
         viewModel.cargarTopScorers(leagueId, temporadaSeleccionada)
         viewModel.cargarPartidosPorLigaYTemporada(leagueId, temporadaSeleccionada)
@@ -63,7 +60,6 @@ fun LigaDetalleScreen(
         viewModel.obtenerTemporadaActual(leagueId)
         viewModel.cargarTabla(leagueId, temporadaSeleccionada)
         viewModel.cargarEquipos(leagueId, temporadaSeleccionada)
-        viewModel.cargarJugadores(leagueId, temporadaSeleccionada)
 
     }
 
@@ -132,9 +128,6 @@ fun LigaDetalleScreen(
                 Text("Equipos", modifier = Modifier.padding(12.dp))
             }
             Tab(selected = selectedTab == 3, onClick = { selectedTab = 3 }) {
-                Text("Jugadores", modifier = Modifier.padding(12.dp))
-            }
-            Tab(selected = selectedTab == 4, onClick = { selectedTab = 4 }) {
                 Text("Goleadores", modifier = Modifier.padding(12.dp))
             }
         }
@@ -162,8 +155,14 @@ fun LigaDetalleScreen(
                 }
 
             }
-            3 -> JugadoresPorLiga(viewModel.jugadores.value)
-            4 -> TablaGoleadores(viewModel.topScorers.value)
+            3 -> {
+                val goleadores = viewModel.topScorers.value
+                if (goleadores.isEmpty()) {
+                    Text("No hay goleadores disponibles de la temporada $temporadaSeleccionada", modifier = Modifier.padding(16.dp))
+                } else {
+                    TablaGoleadores(goleadores)
+                }
+            }
         }
     }
 
@@ -235,45 +234,6 @@ fun ListaDePartidos(partidos: List<Partido>) {
                     Text(partido.teams.home.name)
                     Text("${partido.goals?.home ?: "-"} - ${partido.goals?.away ?: "-"}")
                     Text(partido.teams.away.name)
-                }
-            }
-        }
-    }
-}
-
-
-@Composable
-fun JugadoresPorLiga(jugadores: List<PlayerItem>) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(jugadores) { jugador ->
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    AsyncImage(
-                        model = jugador.player.photo,
-                        contentDescription = jugador.player.name,
-                        modifier = Modifier
-                            .size(40.dp)
-                            .padding(end = 12.dp)
-                    )
-                    Column {
-                        Text(jugador.player.name, fontWeight = FontWeight.Bold)
-                        Text("Equipo: ${jugador.statistics.firstOrNull()?.team?.name.orEmpty()}")
-                        Text("Posición: ${jugador.statistics.firstOrNull()?.games?.position.orEmpty()}")
-                    }
                 }
             }
         }
