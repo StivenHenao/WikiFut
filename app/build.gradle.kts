@@ -63,7 +63,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashtlytics)
@@ -104,7 +103,7 @@ dependencies {
     kapt("com.google.dagger:hilt-android-compiler:$hilt_version")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.google.android.gms:play-services-auth:20.7.0")
-    implementation("io.coil-kt:coil-compose:2.4.0")
-    implementation("io.coil-kt:coil-svg:2.4.0")
 
+    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("io.coil-kt:coil-svg:2.4.0")//Para imagenes svg
 }

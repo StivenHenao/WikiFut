@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -37,6 +38,12 @@ class MainActivity : ComponentActivity() {
                 ){
                     NavigationWrapper(navHostController, auth)
                     //NavigationWrapper(navHostController = navHostController, auth = auth)
+                    //  Esperar un frame y navegar
+                    /*LaunchedEffect(Unit) {
+                        kotlinx.coroutines.delay(100)
+                        //navHostController.navigate("ligas")
+                        navHostController.navigate("ligaDetalle/39/2023")
+                    }*/
                 }
             }
         }

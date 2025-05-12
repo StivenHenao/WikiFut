@@ -10,6 +10,7 @@ import com.wikifut.app.presentation.login.LoginScreen
 import com.wikifut.app.presentation.signup.SignUpScreen
 import com.wikifut.app.presentation.editprofile.EditProfileScreen
 import com.wikifut.app.presentation.Home.HomeScreenWithDrawer
+import com.wikifut.app.presentation.LigaDetalle.LigaDetalleScreen
 
 @Composable
 fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) {
@@ -64,6 +65,16 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
         composable("edit_profile") {
             EditProfileScreen(
                 onBack = { navHostController.popBackStack() }
+            )
+        }
+
+        composable("ligaDetalle/{leagueId}/{season}") { backStackEntry ->
+            val leagueId = backStackEntry.arguments?.getString("leagueId")?.toIntOrNull() ?: return@composable
+            val season = backStackEntry.arguments?.getString("season")?.toIntOrNull() ?: return@composable
+            LigaDetalleScreen(
+                leagueId = leagueId,
+                season = season,
+                navController = navHostController // para el botón "Atrás"
             )
         }
     }
