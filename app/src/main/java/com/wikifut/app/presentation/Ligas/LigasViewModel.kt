@@ -54,7 +54,7 @@ class LigasViewModel @Inject constructor(
 
     private fun obtenerLigas() {
         viewModelScope.launch {
-            Log.d("LigasViewModel", "🌐 Llamando a API para obtener ligas")
+            Log.d("LigasViewModel", " Llamando a API para obtener ligas")
             val resultado = repository.obtenerLigas()
 
             if (resultado != null) {

@@ -66,7 +66,6 @@ object AppModule {
     fun provideLigaDetalleApi(retrofit: Retrofit): LigaDetalleApi =
         retrofit.create(LigaDetalleApi::class.java)
 
-    // ✅ NUEVO: LigaApi para LigasRepository
     @Provides
     fun provideLigaApi(retrofit: Retrofit): LigaApi =
         retrofit.create(LigaApi::class.java)

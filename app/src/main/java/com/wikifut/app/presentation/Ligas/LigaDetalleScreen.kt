@@ -21,9 +21,6 @@ import com.wikifut.app.model.StandingTeam
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.ImageLoader
 import coil.decode.SvgDecoder
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-
 import coil.compose.AsyncImage
 import com.wikifut.app.presentation.Ligas.LigaDetalleViewModel
 import com.wikifut.app.presentation.Ligas.StandingsWidget
@@ -52,8 +49,7 @@ fun LigaDetalleScreen(
     var temporadaSeleccionada by remember { mutableStateOf(season) }
     var expanded by remember { mutableStateOf(false) }
 
-    // Llamar solo una vez
-    // Llamar al cargar tabla cuando cambia la temporada seleccionada
+    // Actualizar valores cuando cambia la temporada seleccionada
 
     LaunchedEffect(temporadaSeleccionada) {
         viewModel.cargarTabla(leagueId, temporadaSeleccionada)
@@ -62,20 +58,19 @@ fun LigaDetalleScreen(
         viewModel.cargarPartidosPorLigaYTemporada(leagueId, temporadaSeleccionada)
         //viewModel.cargarStandings(leagueId, temporadaSeleccionada)
         viewModel.cargarAsistidores(leagueId, temporadaSeleccionada)
-
     }
-
     // Solo una vez
     LaunchedEffect(Unit) {
-        viewModel.obtenerTemporadaActual(leagueId)
         viewModel.cargarTabla(leagueId, temporadaSeleccionada)
         viewModel.cargarEquipos(leagueId, temporadaSeleccionada)
+        viewModel.cargarTopScorers(leagueId, temporadaSeleccionada)
+        viewModel.cargarPartidosPorLigaYTemporada(leagueId, temporadaSeleccionada)
         //viewModel.cargarStandings(leagueId, temporadaSeleccionada)
-        viewModel.cargarInfoLiga(leagueId)
+        viewModel.cargarAsistidores(leagueId, temporadaSeleccionada)
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        // 🔙 Botón de regreso
+        // Botón de regreso
         Text(
             text = "Atrás",
             modifier = Modifier
@@ -85,7 +80,7 @@ fun LigaDetalleScreen(
             color = MaterialTheme.colorScheme.primary
         )
 
-        // 🏆 Nombre de liga y logo
+        // Nombre de liga y logo
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -105,6 +100,7 @@ fun LigaDetalleScreen(
             )
         }
 
+        // Menu desplegable con temporadas
         Box(
             modifier = Modifier
                 .padding(horizontal = 12.dp, vertical = 8.dp)
@@ -127,7 +123,7 @@ fun LigaDetalleScreen(
             }
         }
 
-        // 🧭 Tabs: Tabla | Equipos | Temporada
+        // Tabs: Informacion General | Partidos | Tabla | Goleadores | Asistidores
         TabRow(selectedTabIndex = selectedTab) {
             Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }) {
                 Text("Informacion general", modifier = Modifier.padding(12.dp))
@@ -148,7 +144,7 @@ fun LigaDetalleScreen(
 
         }
 
-        // 📋 Contenido según tab
+        // Contenido según tab
         when (selectedTab) {
             0 -> {
                 val info = viewModel.infoLiga.value
@@ -360,7 +356,7 @@ fun LigaInfoConEquiposTab(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // 👉 Información de la liga
+        // Info de la liga
         item {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 AsyncImage(
@@ -394,7 +390,7 @@ fun LigaInfoConEquiposTab(
             }
         }
 
-        // 👉 Título de equipos
+        // Título de equipos
         item {
             Text(
                 text = "Equipos participantes",
@@ -403,16 +399,16 @@ fun LigaInfoConEquiposTab(
             )
         }
 
-        // 👉 Equipos en formato grid
+        // Equipos en formato de grillas
         item {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(3),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 1000.dp), // ajusta según tu contenido
+                    .heightIn(max = 1000.dp), // ajusta según el contenido
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
-                userScrollEnabled = false // muy importante para evitar doble scroll
+                userScrollEnabled = false //  para evitar doble scroll
             ) {
                 items(equipos) { equipo ->
                     Card(
