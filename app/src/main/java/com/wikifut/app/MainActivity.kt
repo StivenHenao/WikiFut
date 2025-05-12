@@ -8,17 +8,15 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
-import com.wikifut.app.presentation.player.PlayerScreen
 import com.wikifut.app.ui.theme.WikifutTheme
 import dagger.hilt.android.AndroidEntryPoint
-import com.wikifut.app.presentation.Ligas.LigasScreen
+
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -38,13 +36,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ){
                     NavigationWrapper(navHostController, auth)
-
-                    // 👇 Esperar un frame y navegar
-                    LaunchedEffect(Unit) {
-                        kotlinx.coroutines.delay(100)
-                        //navHostController.navigate("ligas")
-                        navHostController.navigate("ligaDetalle/39/2022")
-                    }
+                    //NavigationWrapper(navHostController = navHostController, auth = auth)
                 }
             }
         }

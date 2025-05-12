@@ -5,56 +5,105 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.wikifut.app.R
-import com.wikifut.app.utils.Constans.CLIENT_ID_FIREBASE
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
-import androidx.compose.ui.platform.LocalContext
 import com.google.android.gms.auth.api.identity.BeginSignInResult
+import com.google.firebase.firestore.FirebaseFirestore
+import com.wikifut.app.R
+import com.wikifut.app.utils.Constans.CLIENT_ID_FIREBASE
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(
-    auth: FirebaseAuth,
+    auth: FirebaseAuth? = null,
     navigateToInitial: () -> Unit = {},
     navigateToLogin: () -> Unit = {},
     navigateToHome: () -> Unit = {}
 ) {
     val context = LocalContext.current
     var email by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    val db = FirebaseFirestore.getInstance()
 
+    // Avatar selection
+    val profileImages = remember {
+        listOf(
+            R.drawable.bruyne,
+            R.drawable.cristiano,
+            R.drawable.messi,
+            R.drawable.mbape
+        )
+    }
+    var selectedImage by remember { mutableStateOf<Int?>(null) }
 
-    val oneTapClient = remember { Identity.getSignInClient(context) }
-    val signInRequest = remember {
+    val oneTapClient = if (auth != null) remember { Identity.getSignInClient(context) } else null
+    val signInRequest = if (auth != null) remember {
         BeginSignInRequest.builder()
             .setGoogleIdTokenRequestOptions(
                 BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
@@ -64,33 +113,30 @@ fun SignUpScreen(
                     .build()
             )
             .build()
-    }
+    } else null
 
     val signInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
+        if (result.resultCode == Activity.RESULT_OK && auth != null && oneTapClient != null) {
             try {
                 val credential = oneTapClient.getSignInCredentialFromIntent(result.data)
                 val googleIdToken = credential.googleIdToken
-                googleIdToken?.let { token: String ->
+                googleIdToken?.let { token ->
                     val firebaseCredential = GoogleAuthProvider.getCredential(token, null)
                     auth.signInWithCredential(firebaseCredential)
                         .addOnCompleteListener { task ->
                             isLoading = false
                             if (task.isSuccessful) {
-                                Log.i("GoogleSignIn", "Autenticación con Google exitosa")
-                                navigateToHome() // Navega a la pantalla principal
+                                navigateToHome()
                             } else {
-                                errorMessage = "Error al iniciar sesión con Google. Inténtalo de nuevo."
-                                Log.e("GoogleSignIn", "Error en autenticación con Google", task.exception)
+                                errorMessage = "Error al iniciar sesión con Google"
                             }
                         }
                 }
             } catch (e: Exception) {
                 isLoading = false
-                errorMessage = "Error al obtener credenciales de Google. Inténtalo de nuevo."
-                Log.e("GoogleSignIn", "Error al obtener credenciales", e)
+                errorMessage = "Error al obtener credenciales"
             }
         }
     }
@@ -98,58 +144,115 @@ fun SignUpScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(Color(0xFF3A1E4D), Color(0xFF1D0B27)),
-                    startY = 0f,
-                    endY = 600f
-                )
-            )
-            .statusBarsPadding()
+            .background(Color(0xFF6650a4))
     ) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_back_24),
-            contentDescription = "Back",
-            tint = Color.White,
-            modifier = Modifier
-                .padding(24.dp)
-                .size(24.dp)
-                .align(Alignment.TopStart)
-                .clickable(onClick = navigateToInitial)
+        Image(
+            painter = painterResource(id = R.drawable.fondo_login_register),
+            contentDescription = "Fondo",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
         )
 
         Column(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Box(
+            Spacer(modifier = Modifier.height(60.dp))
+
+            TextField(
+                value = username,
+                onValueChange = { username = it },
+                placeholder = { Text("Nombre de usuario") },
                 modifier = Modifier
-                    .size(310.dp, 180.dp)
-                    .background(Color.White, shape = RoundedCornerShape(110.dp))
-                    .clip(RoundedCornerShape(110.dp)),
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth()
+                    .heightIn(min = 56.dp),
+                shape = RoundedCornerShape(20.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White,
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black
+                ),
+                singleLine = true,
+                maxLines = 1,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Elige tu foto de perfil",
+                fontSize = 18.sp,
+                color = Color.White
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Avatar Selection Row with Animations
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.wikifutlogo),
-                    contentDescription = "Logo Wikifut",
-                    modifier = Modifier
-                        .size(110.dp)
-                        .scale(1.5f)
-                        .clip(RoundedCornerShape(110.dp))
-                )
+                profileImages.forEach { imageRes ->
+                    val isSelected = selectedImage == imageRes
+
+                    val borderColor by animateColorAsState(
+                        targetValue = if (isSelected) Color(0xFF4CAF50) else Color.Transparent, // Verde si está seleccionado
+                        animationSpec = tween(durationMillis = 300)
+                    )
+                    val imageSize by animateDpAsState(
+                        targetValue = if (isSelected) 80.dp else 70.dp, // Animación de tamaño también (opcional)
+                        animationSpec = spring(stiffness = Spring.StiffnessLow)
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .size(imageSize)
+                            .clip(CircleShape)
+                            .background(Color.White)
+                            .border(width = 3.dp, color = borderColor, shape = CircleShape)
+                            .clickable {
+                                selectedImage = imageRes
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = imageRes),
+                            contentDescription = "Avatar",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
             }
 
-            Spacer(modifier = Modifier.height(70.dp))
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             TextField(
                 value = email,
                 onValueChange = { email = it },
-                placeholder = { Text("Correo Electrónico") },
-                modifier = Modifier.fillMaxWidth(0.8f),
-                shape = RoundedCornerShape(20.dp)
+                placeholder = { Text("Correo electrónico", color = Color.Black) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 56.dp),
+                shape = RoundedCornerShape(20.dp),
+                singleLine = true,
+                maxLines = 1,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = Color.White,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                )
             )
+
 
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -163,55 +266,69 @@ fun SignUpScreen(
             Spacer(modifier = Modifier.height(10.dp))
 
             if (errorMessage != null) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = errorMessage!!,
-                        color = Color.Red,
-                        fontSize = 14.sp
-                    )
-                }
+                Text(
+                    text = errorMessage!!,
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(8.dp)
+                )
             }
 
             Button(
                 onClick = {
-                    if (email.isBlank() || password.isBlank()) {
-                        errorMessage = "Por favor, completa todos los campos."
+                    if (email.isBlank() || password.isBlank() || username.isBlank()) {
+                        errorMessage = "Completa todos los campos"
+                        return@Button
+                    }
+
+                    if (selectedImage == null) {
+                        errorMessage = "Selecciona un avatar"
+                        return@Button
+                    }
+
+                    if (auth == null) {
+                        navigateToHome()
                         return@Button
                     }
 
                     isLoading = true
-                    errorMessage = null
-
                     auth.createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener { task ->
                             isLoading = false
                             if (task.isSuccessful) {
-                                Log.i("wikifut", "Usuario creado")
-                                navigateToHome()
-                            } else {
-                                errorMessage = when (task.exception?.message) {
-                                    "The email address is already in use by another account." -> "El correo electrónico ya está en uso."
-                                    "The email address is badly formatted." -> "El formato del correo electrónico no es válido."
-                                    "The given password is invalid. [ Password should be at least 6 characters ]" -> "La contraseña debe tener al menos 6 caracteres."
-                                    else -> "Error al crear el usuario. Inténtalo de nuevo."
+                                val avatarName = context.resources.getResourceEntryName(selectedImage!!)
+                                db.collection("users").document(email).set(
+                                    hashMapOf(
+                                        "username" to username,
+                                        "email" to email,
+                                        "avatar" to avatarName
+                                    )
+                                ).addOnSuccessListener {
+                                    Log.d("SignUp", "Usuario registrado correctamente")
+                                }.addOnFailureListener { e ->
+                                    Log.e("SignUp", "Error al registrar usuario", e)
                                 }
-                                Log.i("wikifut", "Error al crear usuario")
+                                navigateToHome()
+                            }
+                            else {
+                                errorMessage = when {
+                                    task.exception?.message?.contains("email address") == true -> "Correo inválido o en uso"
+                                    password.length < 6 -> "La contraseña debe tener al menos 6 caracteres"
+                                    else -> "Error al registrar"
+                                }
                             }
                         }
                 },
-                modifier = Modifier.fillMaxWidth(0.8f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
                 shape = RoundedCornerShape(20.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0E0414))
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(color = White)
+                    CircularProgressIndicator(color = White, modifier = Modifier.size(20.dp))
                 } else {
-                    Text("Registrarse", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text("Registrarse", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -219,43 +336,43 @@ fun SignUpScreen(
 
             OutlinedButton(
                 onClick = {
+                    if (auth == null || oneTapClient == null || signInRequest == null) {
+                        navigateToHome()
+                        return@OutlinedButton
+                    }
+
                     isLoading = true
-                    errorMessage = null
                     oneTapClient.beginSignIn(signInRequest)
-                        .addOnSuccessListener { result: BeginSignInResult ->
-                            signInLauncher.launch(IntentSenderRequest.Builder(result.pendingIntent).build())
+                        .addOnSuccessListener { result ->
+                            signInLauncher.launch(
+                                IntentSenderRequest.Builder(result.pendingIntent).build()
+                            )
                         }
-                        .addOnFailureListener { e: Exception ->
+                        .addOnFailureListener {
                             isLoading = false
-                            errorMessage = "Error al iniciar sesión con Google. Inténtalo de nuevo."
-                            Log.e("GoogleSignIn", "Error en el inicio de sesión con Google", e)
+                            errorMessage = "Error con Google"
                         }
                 },
                 modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .border(2.dp, White, RoundedCornerShape(20.dp)),
-                shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.Transparent)
+                    .fillMaxWidth()
+                    .height(50.dp)
+                    .border(1.5.dp, White, RoundedCornerShape(20.dp)),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = White,
+                    containerColor = Color.Transparent
+                )
             ) {
                 Image(
                     painter = painterResource(id = R.mipmap.google_ic),
-                    contentDescription = "Google Icon",
+                    contentDescription = "Google",
                     modifier = Modifier.size(24.dp)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    "Registrarse con Google",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Text("Continuar con Google")
             }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
             TextButton(onClick = { navigateToLogin() }) {
                 Text(
-                    "¿Ya tienes cuenta? Iniciar Sesión",
+                    "¿Ya tienes cuenta? Inicia sesión",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = White
@@ -265,6 +382,7 @@ fun SignUpScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PasswordTextField(
     value: String,
@@ -276,21 +394,38 @@ fun PasswordTextField(
         value = value,
         onValueChange = onValueChange,
         placeholder = { Text("Contraseña") },
-        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-        modifier = Modifier.fillMaxWidth(0.8f),
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp),
         shape = RoundedCornerShape(20.dp),
+        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+        singleLine = true,
+        maxLines = 1,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Password,
+            imeAction = ImeAction.Done
+        ),
         trailingIcon = {
-            val image = if (passwordVisible) {
-                Icons.Filled.Visibility
-            } else {
-                Icons.Filled.VisibilityOff
-            }
             IconButton(onClick = onPasswordVisibilityToggle) {
                 Icon(
-                    imageVector = image,
+                    imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
                     contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
                 )
             }
-        }
+        },
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.White,
+            unfocusedContainerColor = Color.White,
+            focusedTextColor = Color.Black,
+            unfocusedTextColor = Color.Black,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
+        )
     )
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun SignUpScreenPreview() {
+    SignUpScreen(auth = null)
 }

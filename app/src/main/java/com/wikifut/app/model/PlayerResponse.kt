@@ -1,8 +1,10 @@
 package com.wikifut.app.model
 
+import java.security.Policy
+
 class PlayerDataResponse(
     val get: String,
-    val parameters: Parameters,
+    val parameters: Policy.Parameters,
     val errors: List<Any>,
     val results: Int,
     val paging: Paging,
@@ -10,9 +12,7 @@ class PlayerDataResponse(
 )
 
 data class Parameters(
-    val player: Int?, // ID del jugador (puede ser nulo si se usa búsqueda por apellido)
-    val search: String?, // Apellido del jugador (mínimo 3 caracteres, puede ser nulo)
-    val page: Int = 1 // Paginación, por defecto 1
+    val player: String
 )
 
 data class Paging(
