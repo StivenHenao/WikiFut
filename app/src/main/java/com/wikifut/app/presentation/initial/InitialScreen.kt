@@ -2,9 +2,9 @@ package com.wikifut.app.presentation.initial
 
 import android.app.Activity
 import android.util.Log
-// import androidx.activity.compose.rememberLauncherForActivityResult
-// import androidx.activity.result.IntentSenderRequest
-// import androidx.activity.result.contract.ActivityResultContracts
+ import androidx.activity.compose.rememberLauncherForActivityResult
+ import androidx.activity.result.IntentSenderRequest
+ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -12,8 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-// import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment
+ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
@@ -26,15 +25,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-// import com.google.firebase.auth.FirebaseAuth
-// import com.google.firebase.auth.GoogleAuthProvider
+ import com.google.firebase.auth.FirebaseAuth
+ import com.google.firebase.auth.GoogleAuthProvider
 import com.wikifut.app.R
-// import com.wikifut.app.utils.Constans.CLIENT_ID_FIREBASE
-// import com.google.android.gms.auth.api.identity.Identity
-// import com.google.android.gms.auth.api.identity.BeginSignInRequest
-// import com.google.android.gms.auth.api.identity.BeginSignInResult
-// import com.google.android.gms.common.api.ApiException
-// import com.google.android.gms.common.api.CommonStatusCodes
+ import com.wikifut.app.utils.Constans.CLIENT_ID_FIREBASE
+ import com.google.android.gms.auth.api.identity.Identity
+ import com.google.android.gms.auth.api.identity.BeginSignInRequest
+ import com.google.android.gms.auth.api.identity.BeginSignInResult
+ import com.google.android.gms.common.api.ApiException
+ import com.google.android.gms.common.api.CommonStatusCodes
 
 @Composable
 fun InitialScreen(
@@ -44,48 +43,47 @@ fun InitialScreen(
 ) {
     val context = LocalContext.current
 
-    // Comentado para evitar errores en Preview
-    // val auth = remember { FirebaseAuth.getInstance() }
-    // val oneTapClient = remember { Identity.getSignInClient(context) }
-    // val signInRequest = remember {
-    //     BeginSignInRequest.builder()
-    //         .setGoogleIdTokenRequestOptions(
-    //             BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
-    //                 .setSupported(true)
-    //                 .setServerClientId(CLIENT_ID_FIREBASE)
-    //                 .setFilterByAuthorizedAccounts(false)
-    //                 .build()
-    //         )
-    //         .build()
-    // }
+     val auth = remember { FirebaseAuth.getInstance() }
+     val oneTapClient = remember { Identity.getSignInClient(context) }
+     val signInRequest = remember {
+         BeginSignInRequest.builder()
+             .setGoogleIdTokenRequestOptions(
+                 BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                     .setSupported(true)
+                     .setServerClientId(CLIENT_ID_FIREBASE)
+                     .setFilterByAuthorizedAccounts(false)
+                     .build()
+             )
+             .build()
+     }
 
-    // val signInLauncher = rememberLauncherForActivityResult(
-    //     contract = ActivityResultContracts.StartIntentSenderForResult()
-    // ) { result ->
-    //     if (result.resultCode == Activity.RESULT_OK) {
-    //         try {
-    //             val credential = oneTapClient.getSignInCredentialFromIntent(result.data)
-    //             val googleIdToken = credential.googleIdToken
-    //             googleIdToken?.let { token: String ->
-    //                 val firebaseCredential = GoogleAuthProvider.getCredential(token, null)
-    //                 auth.signInWithCredential(firebaseCredential)
-    //                     .addOnCompleteListener { task ->
-    //                         if (task.isSuccessful) {
-    //                             navigateToHome()
-    //                         } else {
-    //                             Log.e(
-    //                                 "GoogleSignIn",
-    //                                 "Error en autenticación con Google",
-    //                                 task.exception
-    //                             )
-    //                         }
-    //                     }
-    //             }
-    //         } catch (e: Exception) {
-    //             Log.e("GoogleSignIn", "Error al obtener credenciales", e)
-    //         }
-    //     }
-    // }
+     val signInLauncher = rememberLauncherForActivityResult(
+         contract = ActivityResultContracts.StartIntentSenderForResult()
+     ) { result ->
+         if (result.resultCode == Activity.RESULT_OK) {
+             try {
+                 val credential = oneTapClient.getSignInCredentialFromIntent(result.data)
+                 val googleIdToken = credential.googleIdToken
+                 googleIdToken?.let { token: String ->
+                     val firebaseCredential = GoogleAuthProvider.getCredential(token, null)
+                     auth.signInWithCredential(firebaseCredential)
+                         .addOnCompleteListener { task ->
+                             if (task.isSuccessful) {
+                                 navigateToHome()
+                             } else {
+                                 Log.e(
+                                     "GoogleSignIn",
+                                     "Error en autenticación con Google",
+                                     task.exception
+                                 )
+                             }
+                         }
+                 }
+             } catch (e: Exception) {
+                 Log.e("GoogleSignIn", "Error al obtener credenciales", e)
+             }
+         }
+     }
 
     Box(modifier = Modifier.fillMaxSize()
         .background(Color(0xFF6650a4))
@@ -151,7 +149,28 @@ fun InitialScreen(
             // BOTÓN GOOGLE
             OutlinedButton(
                 onClick = {
-                    // TODO: Acción de Google Sign-In
+                    oneTapClient.beginSignIn(signInRequest)
+                        .addOnSuccessListener { result: BeginSignInResult ->
+                            signInLauncher.launch(
+                                IntentSenderRequest.Builder(result.pendingIntent).build()
+                            )
+                        }
+                        .addOnFailureListener { e: Exception ->
+                            Log.e("GoogleSignIn", "Error en el inicio de sesión con Google", e)
+                            when ((e as? ApiException)?.statusCode) {
+                                CommonStatusCodes.INVALID_ACCOUNT -> {
+                                    Log.e("GoogleSignIn", "Cuenta no válida")
+                                }
+
+                                CommonStatusCodes.NETWORK_ERROR -> {
+                                    Log.e("GoogleSignIn", "Error de red")
+                                }
+
+                                else -> {
+                                    Log.e("GoogleSignIn", "Error desconocido: ${e.message}")
+                                }
+                            }
+                        }
                 },
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
