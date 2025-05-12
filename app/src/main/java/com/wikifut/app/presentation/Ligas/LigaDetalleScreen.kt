@@ -4,23 +4,33 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.wikifut.app.model.StandingTeam
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.ImageLoader
+import coil.decode.SvgDecoder
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+
 import coil.compose.AsyncImage
 import com.wikifut.app.presentation.Ligas.LigaDetalleViewModel
 import com.wikifut.app.presentation.Ligas.StandingsWidget
 import com.wikifut.app.model.Partido
 import com.wikifut.app.model.TopScorerItem
 import com.wikifut.app.model.LeagueDetailItem
+import com.wikifut.app.model.TeamBasicInfo
 
 
 @Composable
@@ -43,17 +53,13 @@ fun LigaDetalleScreen(
 
     // Llamar solo una vez
     // Llamar al cargar tabla cuando cambia la temporada seleccionada
-    LaunchedEffect(temporadaSeleccionada) {
-        viewModel.cargarTabla(leagueId, temporadaSeleccionada)
-    }
-    LaunchedEffect(temporadaSeleccionada) {
-        viewModel.cargarEquipos(leagueId, temporadaSeleccionada)
-    }
 
     LaunchedEffect(temporadaSeleccionada) {
+        viewModel.cargarTabla(leagueId, temporadaSeleccionada)
+        viewModel.cargarEquipos(leagueId, temporadaSeleccionada)
         viewModel.cargarTopScorers(leagueId, temporadaSeleccionada)
         viewModel.cargarPartidosPorLigaYTemporada(leagueId, temporadaSeleccionada)
-        viewModel.cargarStandings(leagueId, temporadaSeleccionada)
+        //viewModel.cargarStandings(leagueId, temporadaSeleccionada)
     }
 
     // Solo una vez
@@ -121,51 +127,53 @@ fun LigaDetalleScreen(
         // 🧭 Tabs: Tabla | Equipos | Temporada
         TabRow(selectedTabIndex = selectedTab) {
             Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }) {
-                Text("Partidos", modifier = Modifier.padding(12.dp))
+                Text("Informacion general", modifier = Modifier.padding(12.dp))
             }
             Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }) {
-                Text("Clasificacion", modifier = Modifier.padding(12.dp))
+                Text("Partidos", modifier = Modifier.padding(12.dp))
             }
             Tab(selected = selectedTab == 2, onClick = { selectedTab = 2 }) {
-                Text("Equipos", modifier = Modifier.padding(12.dp))
+                Text("Clasificacion", modifier = Modifier.padding(12.dp))
+
             }
             Tab(selected = selectedTab == 3, onClick = { selectedTab = 3 }) {
                 Text("Goleadores", modifier = Modifier.padding(12.dp))
             }
-            Tab(selected = selectedTab == 5, onClick = { selectedTab = 5 }) {
-                Text("Info", modifier = Modifier.padding(12.dp))
-            }
+
         }
 
         // 📋 Contenido según tab
         when (selectedTab) {
             0 -> {
+                val info = viewModel.infoLiga.value
+                val equipos = viewModel.equipos.value
+
+                if (info != null) {
+                    LigaInfoConEquiposTab(info = info, equipos = equipos)
+                } else {
+                    Text("Cargando información de la liga...", modifier = Modifier.padding(16.dp))
+                }
+            }
+            1 -> {
                 val partidos = viewModel.partidos.value
                 if (partidos.isEmpty()) {
                     Text("No hay equipos disponibles de la temporada $temporadaSeleccionada", modifier = Modifier.padding(16.dp))
                 } else {
                     ListaDePartidos(partidos)
                 }
-            }
-            1 -> /*{
+            }/*{  //Para mostrar la tabla de clasificacion completa
                 val standings = viewModel.standings.value
                 if (standings.isEmpty()) {
                     Text("No hay equipos disponibles de la temporada $temporadaSeleccionada", modifier = Modifier.padding(16.dp))
                 } else {
                     TablaClasificacionCompleta(standings)
                 }
-            }*/StandingsWidget(
-                leagueId = leagueId,
-                season = temporada
-            )
+            }*/
             2 -> {
-                val equipos = viewModel.equipos.value
-                if (equipos.isEmpty()) {
-                    Text("No hay equipos disponibles de la temporada $temporadaSeleccionada", modifier = Modifier.padding(16.dp))
-                } else {
-                    EquiposPorLiga(equipos)
-                }
-
+                StandingsWidget(
+                    leagueId = leagueId,
+                    season = temporada
+                )
             }
             3 -> {
                 val goleadores = viewModel.topScorers.value
@@ -175,62 +183,10 @@ fun LigaDetalleScreen(
                     TablaGoleadores(goleadores)
                 }
             }
-            5 -> {
-                val info = viewModel.infoLiga.value
-                if (info != null) {
-                    InfoLigaTab(info)
-                } else {
-                    Text("Cargando información de la liga...", modifier = Modifier.padding(16.dp))
-                }
-            }
+
         }
     }
 
-}
-
-@Composable
-fun InfoLigaTab(info: LeagueDetailItem) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            AsyncImage(
-                model = info.league.logo,
-                contentDescription = "Logo Liga",
-                modifier = Modifier.size(60.dp)
-            )
-            Column {
-                Text(info.league.name, style = MaterialTheme.typography.titleLarge)
-                Text(info.league.type, style = MaterialTheme.typography.bodyMedium)
-            }
-        }
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            AsyncImage(
-                model = info.country.flag,
-                contentDescription = "Bandera país",
-                modifier = Modifier.size(30.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(info.country.name, style = MaterialTheme.typography.bodyLarge)
-        }
-
-        Divider()
-
-        Text("Temporadas registradas:", fontWeight = FontWeight.Bold)
-        LazyColumn {
-            items(info.seasons.sortedByDescending { it.year }) { temporada ->
-                Text("• ${temporada.year} (${temporada.start} → ${temporada.end})" +
-                        if (temporada.current) " 🟢 Actual" else "")
-            }
-        }
-    }
 }
 
 
@@ -337,39 +293,93 @@ fun ListaDePartidos(partidos: List<Partido>) {
     }
 }
 
-
 @Composable
-fun EquiposPorLiga(equipos: List<com.wikifut.app.model.TeamBasicInfo>) {
+fun LigaInfoConEquiposTab(
+    info: LeagueDetailItem, // tu modelo con los datos de la liga
+    equipos: List<TeamBasicInfo> // lista de equipos
+) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(equipos) { equipo ->
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        // 👉 Información de la liga
+        item {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                AsyncImage(
+                    model = info.league.logo,
+                    contentDescription = "Logo Liga",
+                    modifier = Modifier.size(80.dp)
+                )
+                Text(
+                    text = info.league.name,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    val imageLoader = ImageLoader.Builder(LocalContext.current)
+                        .components {
+                            add(SvgDecoder.Factory())
+                        }
+                        .build()
+
+                    Image(
+                        painter = rememberAsyncImagePainter(
+                            model = info.country.flag,
+                            imageLoader = imageLoader
+                        ),
+                        contentDescription = "Bandera país",
+                        modifier = Modifier.size(30.dp)
+                    )
+                    Text(text = info.country.name)
+                }
+            }
+        }
+
+        // 👉 Título de equipos
+        item {
+            Text(
+                text = "Equipos participantes",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        // 👉 Equipos en formato grid
+        item {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 1000.dp), // ajusta según tu contenido
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                userScrollEnabled = false // muy importante para evitar doble scroll
             ) {
-                Row(
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    AsyncImage(
-                        model = equipo.logo,
-                        contentDescription = equipo.name,
-                        modifier = Modifier
-                            .size(40.dp)
-                            .padding(end = 12.dp)
-                    )
-                    Text(
-                        text = equipo.name,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Medium
-                    )
+                items(equipos) { equipo ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            AsyncImage(
+                                model = equipo.logo,
+                                contentDescription = equipo.name,
+                                modifier = Modifier.size(40.dp)
+                            )
+                            Text(
+                                text = equipo.name,
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 1
+                            )
+                        }
+                    }
                 }
             }
         }

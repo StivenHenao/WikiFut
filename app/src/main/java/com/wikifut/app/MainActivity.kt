@@ -42,8 +42,8 @@ class MainActivity : ComponentActivity() {
                     // 👇 Esperar un frame y navegar
                     LaunchedEffect(Unit) {
                         kotlinx.coroutines.delay(100)
-                        navHostController.navigate("ligas")
-                        //navHostController.navigate("ligaDetalle/39/2022")
+                        //navHostController.navigate("ligas")
+                        navHostController.navigate("ligaDetalle/39/2022")
                     }
                 }
             }
