@@ -1,5 +1,6 @@
 package com.wikifut.app.api
 
+import com.wikifut.app.model.LeagueDetailResponse
 import com.wikifut.app.model.TopScorersResponse
 import com.wikifut.app.model.TeamsResponse
 import com.wikifut.app.model.LigaDetalleResponse
@@ -14,6 +15,11 @@ interface LigaDetalleApi {
     suspend fun getLigaDetalle(
         @Query("id") leagueId: Int
     ): Response<LigaDetalleResponse>
+
+    @GET("leagues")
+    suspend fun getLeagueInfo(
+        @Query("id") leagueId: Int
+    ): Response<LeagueDetailResponse>
 
     @GET("standings")
     suspend fun getTablaPosiciones(

@@ -13,6 +13,7 @@ data class LeagueStandings(
     val name: String,
     val country: String,
     val logo: String,
+    val flag: String?,
     val season: Int,
     val standings: List<List<StandingTeam>>
 )
@@ -22,7 +23,14 @@ data class StandingTeam(
     val team: TeamInfo,
     val points: Int,
     val goalsDiff: Int,
-    val all: TeamStats
+    val group: String?,
+    val form: String?,              // e.g. "WWDLW"
+    val status: String?,           // e.g. "same", "up", "down"
+    val description: String?,      // e.g. "Promotion - Champions League"
+    val all: TeamStatsFull,
+    val home: TeamStatsFull,
+    val away: TeamStatsFull,
+    val update: String             // e.g. "2023-05-28T00:00:00+00:00"
 )
 
 data class TeamInfo(
@@ -31,9 +39,15 @@ data class TeamInfo(
     val logo: String
 )
 
-data class TeamStats(
+data class TeamStatsFull(
     val played: Int,
     val win: Int,
     val draw: Int,
-    val lose: Int
+    val lose: Int,
+    val goals: StatingGoals
+)
+
+data class StatingGoals(
+    val `for`: Int,
+    val against: Int
 )

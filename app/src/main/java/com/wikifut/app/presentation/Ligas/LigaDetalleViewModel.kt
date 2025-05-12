@@ -12,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
 import com.wikifut.app.api.LigaDetalleApi
 import com.wikifut.app.api.SeasonApi
+import com.wikifut.app.model.LeagueDetailItem
 import com.wikifut.app.model.TeamBasicInfo
 import com.wikifut.app.repository.PartidosRepository
 import com.wikifut.app.model.Partido
@@ -26,6 +27,9 @@ class LigaDetalleViewModel @Inject constructor(
     @Inject lateinit var ligaDetalleApi: LigaDetalleApi
     @Inject lateinit var partidosRepository: PartidosRepository
 
+
+    private val _standings = mutableStateOf<List<StandingTeam>>(emptyList())
+    val standings: State<List<StandingTeam>> = _standings
 
     private val _nombreLiga = mutableStateOf("")
     val nombreLiga: State<String> = _nombreLiga
@@ -48,6 +52,9 @@ class LigaDetalleViewModel @Inject constructor(
     private val _topScorers = mutableStateOf<List<TopScorerItem>>(emptyList())
     val topScorers: State<List<TopScorerItem>> = _topScorers
 
+    private val _infoLiga = mutableStateOf<LeagueDetailItem?>(null)
+    val infoLiga: State<LeagueDetailItem?> = _infoLiga
+
 
     fun cargarTabla(leagueId: Int, season: Int) {
         viewModelScope.launch {
@@ -56,6 +63,26 @@ class LigaDetalleViewModel @Inject constructor(
                 _tabla.value = posiciones
                 _nombreLiga.value = result.response.first().league.name
                 _temporada.value = season
+            }
+        }
+    }
+
+    fun cargarStandings(leagueId: Int, season: Int) {
+        viewModelScope.launch {
+            try {
+                val response = ligaDetalleApi.getTablaPosiciones(leagueId, season)
+                if (response.isSuccessful) {
+                    val standingsData = response.body()?.response?.firstOrNull()?.league
+                    standingsData?.let { league ->
+                        _standings.value = league.standings.firstOrNull() ?: emptyList()
+                        _nombreLiga.value = league.name
+                    }
+                    Log.d("Standings", "✅ Datos de standings cargados correctamente")
+                } else {
+                    Log.e("Standings", "❌ Error al obtener standings: ${response.code()} ${response.message()}")
+                }
+            } catch (e: Exception) {
+                Log.e("Standings", "❌ Excepción al obtener standings: ${e.message}")
             }
         }
     }
@@ -110,6 +137,15 @@ class LigaDetalleViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Log.e("LigaDetalle", "⚠️ Excepción en top scorers: ${e.message}")
+            }
+        }
+    }
+
+    fun cargarInfoLiga(leagueId: Int) {
+        viewModelScope.launch {
+            val response = ligaDetalleApi.getLeagueInfo(leagueId)
+            if (response.isSuccessful) {
+                _infoLiga.value = response.body()?.response?.firstOrNull()
             }
         }
     }

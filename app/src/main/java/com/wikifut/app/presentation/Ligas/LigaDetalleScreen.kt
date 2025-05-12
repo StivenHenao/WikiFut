@@ -20,6 +20,7 @@ import com.wikifut.app.presentation.Ligas.LigaDetalleViewModel
 import com.wikifut.app.presentation.Ligas.StandingsWidget
 import com.wikifut.app.model.Partido
 import com.wikifut.app.model.TopScorerItem
+import com.wikifut.app.model.LeagueDetailItem
 
 
 @Composable
@@ -52,7 +53,7 @@ fun LigaDetalleScreen(
     LaunchedEffect(temporadaSeleccionada) {
         viewModel.cargarTopScorers(leagueId, temporadaSeleccionada)
         viewModel.cargarPartidosPorLigaYTemporada(leagueId, temporadaSeleccionada)
-
+        viewModel.cargarStandings(leagueId, temporadaSeleccionada)
     }
 
     // Solo una vez
@@ -60,7 +61,8 @@ fun LigaDetalleScreen(
         viewModel.obtenerTemporadaActual(leagueId)
         viewModel.cargarTabla(leagueId, temporadaSeleccionada)
         viewModel.cargarEquipos(leagueId, temporadaSeleccionada)
-
+        //viewModel.cargarStandings(leagueId, temporadaSeleccionada)
+        viewModel.cargarInfoLiga(leagueId)
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -122,13 +124,16 @@ fun LigaDetalleScreen(
                 Text("Partidos", modifier = Modifier.padding(12.dp))
             }
             Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }) {
-                Text("Tabla", modifier = Modifier.padding(12.dp))
+                Text("Clasificacion", modifier = Modifier.padding(12.dp))
             }
             Tab(selected = selectedTab == 2, onClick = { selectedTab = 2 }) {
                 Text("Equipos", modifier = Modifier.padding(12.dp))
             }
             Tab(selected = selectedTab == 3, onClick = { selectedTab = 3 }) {
                 Text("Goleadores", modifier = Modifier.padding(12.dp))
+            }
+            Tab(selected = selectedTab == 5, onClick = { selectedTab = 5 }) {
+                Text("Info", modifier = Modifier.padding(12.dp))
             }
         }
 
@@ -137,12 +142,19 @@ fun LigaDetalleScreen(
             0 -> {
                 val partidos = viewModel.partidos.value
                 if (partidos.isEmpty()) {
-                    Text("No hay partidos disponibles", modifier = Modifier.padding(16.dp))
+                    Text("No hay equipos disponibles de la temporada $temporadaSeleccionada", modifier = Modifier.padding(16.dp))
                 } else {
                     ListaDePartidos(partidos)
                 }
             }
-            1 -> StandingsWidget(
+            1 -> /*{
+                val standings = viewModel.standings.value
+                if (standings.isEmpty()) {
+                    Text("No hay equipos disponibles de la temporada $temporadaSeleccionada", modifier = Modifier.padding(16.dp))
+                } else {
+                    TablaClasificacionCompleta(standings)
+                }
+            }*/StandingsWidget(
                 leagueId = leagueId,
                 season = temporada
             )
@@ -163,9 +175,94 @@ fun LigaDetalleScreen(
                     TablaGoleadores(goleadores)
                 }
             }
+            5 -> {
+                val info = viewModel.infoLiga.value
+                if (info != null) {
+                    InfoLigaTab(info)
+                } else {
+                    Text("Cargando información de la liga...", modifier = Modifier.padding(16.dp))
+                }
+            }
         }
     }
 
+}
+
+@Composable
+fun InfoLigaTab(info: LeagueDetailItem) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            AsyncImage(
+                model = info.league.logo,
+                contentDescription = "Logo Liga",
+                modifier = Modifier.size(60.dp)
+            )
+            Column {
+                Text(info.league.name, style = MaterialTheme.typography.titleLarge)
+                Text(info.league.type, style = MaterialTheme.typography.bodyMedium)
+            }
+        }
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            AsyncImage(
+                model = info.country.flag,
+                contentDescription = "Bandera país",
+                modifier = Modifier.size(30.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(info.country.name, style = MaterialTheme.typography.bodyLarge)
+        }
+
+        Divider()
+
+        Text("Temporadas registradas:", fontWeight = FontWeight.Bold)
+        LazyColumn {
+            items(info.seasons.sortedByDescending { it.year }) { temporada ->
+                Text("• ${temporada.year} (${temporada.start} → ${temporada.end})" +
+                        if (temporada.current) " 🟢 Actual" else "")
+            }
+        }
+    }
+}
+
+
+@Composable
+fun TablaClasificacionCompleta(standings: List<StandingTeam>) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(standings) { team ->
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(2.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("${team.rank}. ${team.team.name}")
+                    Text("Pts: ${team.points}")
+                    Text("PJ: ${team.all.played}")
+                    Text("G: ${team.all.win} E: ${team.all.draw} P: ${team.all.lose}")
+                }
+            }
+        }
+    }
 }
 
 @Composable
