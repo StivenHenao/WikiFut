@@ -31,6 +31,7 @@ import com.wikifut.app.model.Partido
 import com.wikifut.app.model.TopScorerItem
 import com.wikifut.app.model.LeagueDetailItem
 import com.wikifut.app.model.TeamBasicInfo
+import com.wikifut.app.model.TopAssistItem
 
 
 @Composable
@@ -60,6 +61,8 @@ fun LigaDetalleScreen(
         viewModel.cargarTopScorers(leagueId, temporadaSeleccionada)
         viewModel.cargarPartidosPorLigaYTemporada(leagueId, temporadaSeleccionada)
         //viewModel.cargarStandings(leagueId, temporadaSeleccionada)
+        viewModel.cargarAsistidores(leagueId, temporadaSeleccionada)
+
     }
 
     // Solo una vez
@@ -139,6 +142,9 @@ fun LigaDetalleScreen(
             Tab(selected = selectedTab == 3, onClick = { selectedTab = 3 }) {
                 Text("Goleadores", modifier = Modifier.padding(12.dp))
             }
+            Tab(selected = selectedTab == 4, onClick = { selectedTab = 4 }) {
+                Text("Asistidores", modifier = Modifier.padding(12.dp))
+            }
 
         }
 
@@ -183,12 +189,62 @@ fun LigaDetalleScreen(
                     TablaGoleadores(goleadores)
                 }
             }
+            4 -> {
+                val asistidores = viewModel.asistidores.value
+                if (asistidores.isEmpty()) {
+                    Text("No hay asistidores disponibles de la temporada $temporadaSeleccionada", modifier = Modifier.padding(16.dp))
+                } else {
+                    TopAssistsTab(asistidores)
+                }
+            }
 
         }
     }
 
 }
 
+@Composable
+fun TopAssistsTab(asistidores: List<TopAssistItem>) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(asistidores) { item ->
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(2.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        AsyncImage(
+                            model = item.player.photo,
+                            contentDescription = item.player.name,
+                            modifier = Modifier.size(40.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(item.player.name, fontWeight = FontWeight.Bold)
+                            Text("Equipo: ${item.statistics.firstOrNull()?.team?.name ?: "Desconocido"}")
+                        }
+                    }
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text("Asistencias: ${item.statistics.firstOrNull()?.goals?.assists ?: 0}")
+                        Text("Posición: ${item.statistics.firstOrNull()?.games?.position ?: "?"}")
+                    }
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun TablaClasificacionCompleta(standings: List<StandingTeam>) {

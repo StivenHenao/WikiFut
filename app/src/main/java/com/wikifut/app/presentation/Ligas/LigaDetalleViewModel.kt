@@ -16,6 +16,7 @@ import com.wikifut.app.model.LeagueDetailItem
 import com.wikifut.app.model.TeamBasicInfo
 import com.wikifut.app.repository.PartidosRepository
 import com.wikifut.app.model.Partido
+import com.wikifut.app.model.TopAssistItem
 import com.wikifut.app.model.TopScorerItem
 
 @HiltViewModel
@@ -54,6 +55,9 @@ class LigaDetalleViewModel @Inject constructor(
 
     private val _infoLiga = mutableStateOf<LeagueDetailItem?>(null)
     val infoLiga: State<LeagueDetailItem?> = _infoLiga
+
+    private val _asistidores = mutableStateOf<List<TopAssistItem>>(emptyList())
+    val asistidores: State<List<TopAssistItem>> = _asistidores
 
 
     fun cargarTabla(leagueId: Int, season: Int) {
@@ -149,4 +153,18 @@ class LigaDetalleViewModel @Inject constructor(
             }
         }
     }
+
+    fun cargarAsistidores(leagueId: Int, season: Int) {
+        viewModelScope.launch {
+            try {
+                val result = ligaDetalleApi.getTopAssists(leagueId, season)
+                if (result.isSuccessful) {
+                    _asistidores.value = result.body()?.response ?: emptyList()
+                }
+            } catch (e: Exception) {
+                Log.e("LigaDetalle", "Error al cargar asistidores: ${e.message}")
+            }
+        }
+    }
+
 }

@@ -5,6 +5,7 @@ import com.wikifut.app.model.TopScorersResponse
 import com.wikifut.app.model.TeamsResponse
 import com.wikifut.app.model.LigaDetalleResponse
 import com.wikifut.app.model.StandingsResponse
+import com.wikifut.app.model.TopAssistsResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -38,5 +39,11 @@ interface LigaDetalleApi {
         @Query("league") leagueId: Int,
         @Query("season") season: Int
     ): Response<TopScorersResponse>
+
+    @GET("players/topassists")
+    suspend fun getTopAssists(
+        @Query("league") leagueId: Int,
+        @Query("season") season: Int
+    ): Response<TopAssistsResponse>
 
 }
