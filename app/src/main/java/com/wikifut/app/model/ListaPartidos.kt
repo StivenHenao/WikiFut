@@ -4,6 +4,14 @@ data class ListaPartidos(
     val response: List<Partido>
 )
 
+data class ListaEquipos(
+    val response: List<Team>
+)
+
+data class ListaLigas(
+    val response: List<League>
+)
+
 data class Partido(
     val fixture: Fixture,
     val league: League,

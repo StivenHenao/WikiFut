@@ -47,13 +47,21 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.ui.graphics.vector.ImageVector
-
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.navigation.NavController
+import com.wikifut.app.model.TipoBusqueda
 
 @Composable
 fun HomeScreenWithDrawer(
     navigateToEditProfile: () -> Unit,
     navigateToInitial: () -> Unit,
-    viewModel: HomePartidosViewModel = hiltViewModel()
+    viewModel: HomePartidosViewModel = hiltViewModel(),
+    onSearchNavigate: (TipoBusqueda, String) -> Unit
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -93,7 +101,8 @@ fun HomeScreenWithDrawer(
             viewModel = viewModel,
             navigateToEditProfile = navigateToEditProfile,
             navigateToInitial = navigateToInitial,
-            openDrawer = { scope.launch { drawerState.open() } }
+            openDrawer = { scope.launch { drawerState.open() } },
+            onSearchNavigate = onSearchNavigate
         )
     }
 }
@@ -248,7 +257,8 @@ fun HomePartidosScreen(
     viewModel: HomePartidosViewModel = hiltViewModel(),
     navigateToEditProfile: () -> Unit = {},
     navigateToInitial: () -> Unit = {},
-    openDrawer: () -> Unit = {}
+    openDrawer: () -> Unit = {},
+    onSearchNavigate: (TipoBusqueda, String) -> Unit,
 ) {
     // Estado de la lista de partidos observada desde el ViewModel
     val state by viewModel.state.collectAsState()
@@ -270,11 +280,14 @@ fun HomePartidosScreen(
     }
 
     // Filtro de partidos según la búsqueda
-    val partidosFiltrados = state.filter { partido ->
-        partido.league.name.contains(searchQuery, ignoreCase = true) ||
-                partido.teams.home.name.contains(searchQuery, ignoreCase = true) ||
-                partido.teams.away.name.contains(searchQuery, ignoreCase = true)
-    }
+    //val partidosFiltrados = state.filter { partido ->
+        //partido.league.name.contains(searchQuery, ignoreCase = true) ||
+                //partido.teams.home.name.contains(searchQuery, ignoreCase = true) ||
+                //partido.teams.away.name.contains(searchQuery, ignoreCase = true)
+    //}
+    val partidosFiltrados = state;
+
+
     if (showDatePicker) {
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
@@ -299,7 +312,8 @@ fun HomePartidosScreen(
             searchQuery = searchQuery,
             onSearchChange = { searchQuery = it },
             onDateSelected = { showDatePicker = true },
-            openDrawer = openDrawer
+            openDrawer = openDrawer,
+            onBuscar = onSearchNavigate,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -351,18 +365,23 @@ fun Header(
     onSearchChange: (String) -> Unit,
     onDateSelected: () -> Unit,
     navigateToEditProfile: () -> Unit,
-    openDrawer: () -> Unit = {}
+    openDrawer: () -> Unit = {},
+    onBuscar: (TipoBusqueda, String) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    val menuWidth = 250.dp
+    var dropdownExpanded by remember { mutableStateOf(false) }
+    var selectedOption by remember { mutableStateOf("Equipos") } // por defecto
+
+    val menuOptions = listOf("Equipos", "Ligas", "Partidos")
+    val dropdownBackgroundColor = Color(0xFF4A148C) // morado oscuro
+    val focusManager = LocalFocusManager.current
+
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color(0x991F1235))
             .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
@@ -380,20 +399,73 @@ fun Header(
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        TextField(
-            value = searchQuery,
-            onValueChange = onSearchChange,
-            placeholder = { Text("Buscar partidos...") },
+        // Contenedor para TextField + Dropdown
+        Row(
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 8.dp),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                focusedTextColor = Color.Black,
-                unfocusedTextColor = Color.Black
+                .background(Color.White, shape = RoundedCornerShape(8.dp))
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextField(
+                value = searchQuery,
+                onValueChange = onSearchChange,
+                placeholder = { Text("Buscar $selectedOption...") },
+                modifier = Modifier
+                    .weight(1f)
+                    .onKeyEvent { keyEvent ->
+                        if (keyEvent.key == Key.Enter && keyEvent.type == KeyEventType.KeyUp) {
+                            focusManager.clearFocus()
+                            val tipoBusqueda = when (selectedOption) {
+                                "Ligas" -> TipoBusqueda.Ligas
+                                "Partidos" -> TipoBusqueda.Partidos
+                                else -> TipoBusqueda.Equipos
+                            }
+                            onBuscar(tipoBusqueda, searchQuery)
+                            true  // Consume el evento
+                        } else {
+                            false
+                        }
+                    },
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black
+                ),
+                maxLines = 1,
+                singleLine = true,
             )
-        )
+
+            Box(
+                modifier = Modifier
+                    .background(dropdownBackgroundColor, shape = RoundedCornerShape(6.dp))
+            ) {
+                IconButton(onClick = { dropdownExpanded = true }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.arrow_drop_down),
+                        contentDescription = "Seleccionar tipo",
+                        tint = Color.White
+                    )
+                }
+            }
+            DropdownMenu(
+                expanded = dropdownExpanded,
+                onDismissRequest = { dropdownExpanded = false }
+            ) {
+                menuOptions.forEach { option ->
+                    DropdownMenuItem(
+                        text = { Text(option) },
+                        onClick = {
+                            selectedOption = option
+                            dropdownExpanded = false
+                        }
+                    )
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.width(8.dp))
 
@@ -408,18 +480,17 @@ fun Header(
             )
         }
 
-        Box {
-            IconButton(onClick = { openDrawer() }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_menu),
-                    contentDescription = "Menú",
-                    tint = Color.White,
-                    modifier = Modifier.size(36.dp)
-                )
-            }
+        IconButton(onClick = openDrawer) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_menu),
+                contentDescription = "Menú",
+                tint = Color.White,
+                modifier = Modifier.size(36.dp)
+            )
         }
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

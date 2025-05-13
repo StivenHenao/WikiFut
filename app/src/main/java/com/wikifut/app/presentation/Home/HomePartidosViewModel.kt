@@ -3,7 +3,9 @@ package com.wikifut.app.presentation.Home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import com.wikifut.app.model.Partido
+import com.wikifut.app.model.TipoBusqueda
 import com.wikifut.app.repository.PartidosRepository
 import com.wikifut.app.utils.obtenerFechaActual
 import dagger.hilt.android.lifecycle.HiltViewModel
