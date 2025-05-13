@@ -4,8 +4,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -191,7 +193,6 @@ fun PlayerDetails(playerDataResponse: PlayerDataResponse) =
         val rating = statisticGame?.rating
         val team_player = statisticTeamPlayer.name
 
-
         val position = playerData.statistics.firstOrNull()?.games?.position ?: "N/A"
         val numberPlayer =statisticGame?.number?: 0
 
@@ -200,6 +201,8 @@ fun PlayerDetails(playerDataResponse: PlayerDataResponse) =
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+
         ) {
 
             //---------------------------HEADER------------------
@@ -210,7 +213,7 @@ fun PlayerDetails(playerDataResponse: PlayerDataResponse) =
             containerBasicInfo(team = team_player,
                 imageTeam = statisticTeamPlayer.logo,
                 nacionalidad = player.nationality,
-                nacimiento = player.birth.date,
+                nacimiento = player.age,
                 altura = player.height,
                 posicion = position,
                 camiseta = numberPlayer,
@@ -234,6 +237,10 @@ fun PlayerDetails(playerDataResponse: PlayerDataResponse) =
                 statistic.cards,
                 statistic.penalty
             )
+            Spacer(Modifier.height(8.dp))
+
+            containerResume(statisticPlayerLeague, statisticGame)
+
 
 
         }
@@ -278,7 +285,7 @@ fun containerBasicInfo(
     team: String,
     imageTeam: String,
     nacionalidad: String,
-    nacimiento: String,
+    nacimiento: Int,
     altura: String,
     posicion: String,
     camiseta: Int,
@@ -332,7 +339,7 @@ fun containerBasicInfo(
                 ) {
                     Text("Edad", fontWeight = FontWeight.Bold)
                     Spacer(Modifier.height(4.dp))
-                    Text(text = nacimiento) // Corregido: Usar la edad real del jugador
+                    Text(text = nacimiento.toString()) // Corregido: Usar la edad real del jugador
                 }
 
                 Column(
@@ -497,6 +504,104 @@ fun containerStatisticInfo(
 
 
 
+            }
+
+        }
+    }
+
+}
+
+
+@Composable
+fun containerResume( league: PlayerLeague, games: PlayerGames? ){
+    Surface(
+        color = Color(0xFF1E1E1E),
+        contentColor = Color.White,
+        shape = RoundedCornerShape(8.dp),
+        shadowElevation = 4.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(16.dp)
+    ){
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            //--------LIGA---------
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Image(
+                    painter = rememberImagePainter(league.logo),
+                    contentDescription = "Escudo de la liga",
+                    modifier = Modifier.size(40.dp) // Tamaño definido
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Column(modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp)){
+                    Text(text = league.name)
+                    Text(text = league.season.toString())
+                }
+            }
+
+            //-------Games----------
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Columna izquierda
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "Apariciones",
+                        modifier = Modifier.fillMaxWidth(), // Agrega esto
+                        color = Color.White
+                    )
+                    Text(
+                        games?.appearences?.toString() ?: "-",
+                        modifier = Modifier.fillMaxWidth(), // Agrega esto
+                        color = Color.White
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        "Minutos",
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color.White
+                    )
+                    Text(
+                        games?.minutes?.toString() ?: "-",
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color.White
+                    )
+                }
+                // Columna derecha
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "Titular",
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color.White
+                    )
+
+                    Text(
+                        games?.lineups?.toString() ?: "-",
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color.White
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        "Capitán",
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color.White
+                    )
+
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = games?.captain?.let { if (it) "Sí" else "No" } ?: "-",
+                        color = Color.White
+                    )
+                }
             }
 
         }
