@@ -5,9 +5,13 @@ data class ListaPartidos(
 )
 
 data class ListaEquipos(
-    val response: List<Team>
+    val response: List<EquipoInfo>
 )
 
+data class EquipoInfo(
+    val team: Team,
+    val venue: Venue
+)
 data class ListaLigas(
     val response: List<League>
 )
@@ -32,8 +36,13 @@ data class Fixture(
 data class Venue(
     val id: Int?,
     val name: String?,
-    val city: String?
+    val address: String?,
+    val city: String?,
+    val capacity: Int?,
+    val surface: String?,
+    val image: String?
 )
+
 
 data class Status(
     val long: String,
@@ -60,7 +69,8 @@ data class Team(
     val id: Int,
     val name: String,
     val logo: String,
-    val winner: Boolean?
+    val winner: Boolean? = null,
+    val country: String? = null,
 )
 
 data class Goals(

@@ -7,13 +7,20 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.navArgument
 import com.google.firebase.auth.FirebaseAuth
+import com.google.gson.Gson
+import com.wikifut.app.model.Team
 import com.wikifut.app.presentation.initial.InitialScreen
 import com.wikifut.app.presentation.login.LoginScreen
 import com.wikifut.app.presentation.signup.SignUpScreen
 import com.wikifut.app.presentation.editprofile.EditProfileScreen
 import com.wikifut.app.presentation.Home.HomeScreenWithDrawer
 import com.wikifut.app.model.TipoBusqueda
+import com.wikifut.app.model.Venue
 import com.wikifut.app.presentation.Search.SearchScreen
+import com.wikifut.app.presentation.Team.TeamScreen
+import java.net.URLDecoder
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @Composable
 fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) {
@@ -24,6 +31,12 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
     val onSearchNavigate: (TipoBusqueda, String) -> Unit = { tipo, query ->
         navHostController.navigate("busqueda/${tipo}/$query")
     }
+    val onTeamNavigate: (Team, Venue) -> Unit = { team, venue ->
+        val teamJson = URLEncoder.encode(Gson().toJson(team), StandardCharsets.UTF_8.toString())
+        val venueJson = URLEncoder.encode(Gson().toJson(venue), StandardCharsets.UTF_8.toString())
+        navHostController.navigate("teamScreen/$teamJson/$venueJson")
+    }
+
 
     NavHost(navController = navHostController, startDestination = startDestination) {
         composable("initial") {
@@ -93,7 +106,23 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
                 else -> TipoBusqueda.Equipos
             }
 
-            SearchScreen(tipo = tipo, query = query)
+            SearchScreen(
+                tipo = tipo,
+                query = query,
+                onSearchNavigate = onSearchNavigate,
+                HomeNavigate = {
+                    navHostController.popBackStack("home", inclusive = false)
+                },
+                onTeamNavigate = onTeamNavigate)
+        }
+
+
+        composable("teamScreen/{teamJson}/{venueJson}") { backStackEntry ->
+            val teamjson = URLDecoder.decode(backStackEntry.arguments?.getString("teamJson") ?: "", StandardCharsets.UTF_8.toString())
+            val venuejson = URLDecoder.decode(backStackEntry.arguments?.getString("teamJson") ?: "", StandardCharsets.UTF_8.toString())
+            val team = Gson().fromJson(teamjson, Team::class.java)
+            val venue = Gson().fromJson(venuejson, Venue::class.java)
+            TeamScreen(team = team, venue = venue, onBackClick = { navHostController.popBackStack()})
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.wikifut.app.presentation.Home
 
+import java.util.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,16 +24,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestore
-import com.wikifut.app.R
-import com.wikifut.app.model.Partido
-import java.util.*
-import com.wikifut.app.utils.convertirHoraAColombia
-import com.wikifut.app.utils.formatFechaParaApi
-import com.wikifut.app.utils.obtenerFechaActual
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBars
@@ -42,19 +33,23 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Star
-import kotlinx.coroutines.launch
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.type
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
+import coil.compose.AsyncImage
 import com.wikifut.app.model.TipoBusqueda
+import com.wikifut.app.presentation.Header.Header
+import com.wikifut.app.R
+import com.wikifut.app.model.Partido
+import com.wikifut.app.utils.convertirHoraAColombia
+import com.wikifut.app.utils.formatFechaParaApi
+import com.wikifut.app.utils.obtenerFechaActual
+
 
 @Composable
 fun HomeScreenWithDrawer(
@@ -304,16 +299,41 @@ fun HomePartidosScreen(
             .background(Color(0xFF2D1B45))
             .windowInsetsPadding(WindowInsets.statusBars)
     ) {
+        //Header(
+            //navigateToEditProfile = navigateToEditProfile,
+            //userName = userName,
+            //avatar = avatar,
+            //navigateToInitial = navigateToInitial,
+            //searchQuery = searchQuery,
+            //onSearchChange = { searchQuery = it },
+            //onDateSelected = { showDatePicker = true },
+            //openDrawer = openDrawer,
+            //    onBuscar = onSearchNavigate,
+        //)
         Header(
-            navigateToEditProfile = navigateToEditProfile,
-            userName = userName,
-            avatar = avatar,
-            navigateToInitial = navigateToInitial,
             searchQuery = searchQuery,
             onSearchChange = { searchQuery = it },
-            onDateSelected = { showDatePicker = true },
-            openDrawer = openDrawer,
             onBuscar = onSearchNavigate,
+            actions = {
+                IconButton(
+                    onClick = {showDatePicker = true},
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_calendar),
+                        contentDescription = "Seleccionar fecha",
+                        tint = Color.White
+                    )
+                }
+                IconButton(onClick = openDrawer) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_menu),
+                        contentDescription = "Menú",
+                        tint = Color.White,
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -352,141 +372,6 @@ fun HomePartidosScreen(
                     textAlign = TextAlign.Center
                 )
             }
-        }
-    }
-}
-
-@Composable
-fun Header(
-    userName: String?,
-    avatar: String?,
-    navigateToInitial: () -> Unit,
-    searchQuery: String,
-    onSearchChange: (String) -> Unit,
-    onDateSelected: () -> Unit,
-    navigateToEditProfile: () -> Unit,
-    openDrawer: () -> Unit = {},
-    onBuscar: (TipoBusqueda, String) -> Unit
-) {
-    var dropdownExpanded by remember { mutableStateOf(false) }
-    var selectedOption by remember { mutableStateOf("Equipos") } // por defecto
-
-    val menuOptions = listOf("Equipos", "Ligas", "Partidos")
-    val dropdownBackgroundColor = Color(0xFF4A148C) // morado oscuro
-    val focusManager = LocalFocusManager.current
-
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color(0x991F1235))
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(50.dp)
-                .background(Color.White, shape = CircleShape)
-                .clip(CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.wikifutlogo),
-                contentDescription = "Logo",
-                modifier = Modifier.size(50.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        // Contenedor para TextField + Dropdown
-        Row(
-            modifier = Modifier
-                .weight(1f)
-                .background(Color.White, shape = RoundedCornerShape(8.dp))
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            TextField(
-                value = searchQuery,
-                onValueChange = onSearchChange,
-                placeholder = { Text("Buscar $selectedOption...") },
-                modifier = Modifier
-                    .weight(1f)
-                    .onKeyEvent { keyEvent ->
-                        if (keyEvent.key == Key.Enter && keyEvent.type == KeyEventType.KeyUp) {
-                            focusManager.clearFocus()
-                            val tipoBusqueda = when (selectedOption) {
-                                "Ligas" -> TipoBusqueda.Ligas
-                                "Partidos" -> TipoBusqueda.Partidos
-                                else -> TipoBusqueda.Equipos
-                            }
-                            onBuscar(tipoBusqueda, searchQuery)
-                            true  // Consume el evento
-                        } else {
-                            false
-                        }
-                    },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedTextColor = Color.Black,
-                    unfocusedTextColor = Color.Black
-                ),
-                maxLines = 1,
-                singleLine = true,
-            )
-
-            Box(
-                modifier = Modifier
-                    .background(dropdownBackgroundColor, shape = RoundedCornerShape(6.dp))
-            ) {
-                IconButton(onClick = { dropdownExpanded = true }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.arrow_drop_down),
-                        contentDescription = "Seleccionar tipo",
-                        tint = Color.White
-                    )
-                }
-            }
-            DropdownMenu(
-                expanded = dropdownExpanded,
-                onDismissRequest = { dropdownExpanded = false }
-            ) {
-                menuOptions.forEach { option ->
-                    DropdownMenuItem(
-                        text = { Text(option) },
-                        onClick = {
-                            selectedOption = option
-                            dropdownExpanded = false
-                        }
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        IconButton(
-            onClick = onDateSelected,
-            modifier = Modifier.size(36.dp)
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_calendar),
-                contentDescription = "Seleccionar fecha",
-                tint = Color.White
-            )
-        }
-
-        IconButton(onClick = openDrawer) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_menu),
-                contentDescription = "Menú",
-                tint = Color.White,
-                modifier = Modifier.size(36.dp)
-            )
         }
     }
 }
