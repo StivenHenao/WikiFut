@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.wikifut.app.model.ListaEquipos
 import com.wikifut.app.model.ListaLigas
 import com.wikifut.app.model.ListaPartidos
+import com.wikifut.app.model.ListaPlayers
 import com.wikifut.app.model.TipoBusqueda
 import com.wikifut.app.repository.SearchRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,6 +28,9 @@ class SearchViewModel @Inject constructor(
     private val _resultadoPartidos = MutableStateFlow<ListaPartidos?>(null)
     val resultadoPartidos: StateFlow<ListaPartidos?> = _resultadoPartidos
 
+    private val _resultadoJugadores = MutableStateFlow<ListaPlayers?>(null)
+    val resultadoJugadores: StateFlow<ListaPlayers?> = _resultadoJugadores
+
     fun buscar(tipo: TipoBusqueda, query: String) {
         viewModelScope.launch {
             when(tipo) {
@@ -37,7 +41,7 @@ class SearchViewModel @Inject constructor(
                 }
                 TipoBusqueda.Ligas -> {
                     // en un futuro
-                    //_resultadoLigas.value = searchRepository.buscarLiga(query)
+                    _resultadoLigas.value = searchRepository.buscarLiga(query)
                     _resultadoEquipos.value = null
                     _resultadoPartidos.value = null
                 }
@@ -45,6 +49,12 @@ class SearchViewModel @Inject constructor(
                     //_resultadoPartidos.value = searchRepository.buscarPartido(query)
                     _resultadoEquipos.value = null
                     _resultadoLigas.value = null
+                }
+                TipoBusqueda.Jugadores -> {
+                    _resultadoJugadores.value = searchRepository.buscarPlayer(query)
+                    _resultadoEquipos.value = null
+                    _resultadoLigas.value = null
+                    _resultadoPartidos.value = null
                 }
                 else -> {
                     print("El tipo de búsqueda no es válido")

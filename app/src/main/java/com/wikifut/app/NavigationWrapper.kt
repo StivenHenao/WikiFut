@@ -29,7 +29,12 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
 
     // Función que maneja la navegación a búsqueda
     val onSearchNavigate: (TipoBusqueda, String) -> Unit = { tipo, query ->
-        navHostController.navigate("busqueda/${tipo}/$query")
+        when(tipo){
+            TipoBusqueda.Equipos -> navHostController.navigate("busqueda/Equipos/$query")
+            TipoBusqueda.Ligas -> navHostController.navigate("busqueda/Ligas/$query")
+            TipoBusqueda.Partidos -> navHostController.navigate("busqueda/Partidos/$query")
+            TipoBusqueda.Jugadores -> navHostController.navigate("busqueda/jugadores/$query")
+        }
     }
     val onTeamNavigate: (Team, Venue) -> Unit = { team, venue ->
         val teamJson = URLEncoder.encode(Gson().toJson(team), StandardCharsets.UTF_8.toString())
@@ -103,6 +108,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
             val tipo = when (tipoString) {
                 "Ligas" -> TipoBusqueda.Ligas
                 "Partidos" -> TipoBusqueda.Partidos
+                "jugadores" -> TipoBusqueda.Jugadores
                 else -> TipoBusqueda.Equipos
             }
 
@@ -119,7 +125,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
 
         composable("teamScreen/{teamJson}/{venueJson}") { backStackEntry ->
             val teamjson = URLDecoder.decode(backStackEntry.arguments?.getString("teamJson") ?: "", StandardCharsets.UTF_8.toString())
-            val venuejson = URLDecoder.decode(backStackEntry.arguments?.getString("teamJson") ?: "", StandardCharsets.UTF_8.toString())
+            val venuejson = URLDecoder.decode(backStackEntry.arguments?.getString("venueJson") ?: "", StandardCharsets.UTF_8.toString())
             val team = Gson().fromJson(teamjson, Team::class.java)
             val venue = Gson().fromJson(venuejson, Venue::class.java)
             TeamScreen(team = team, venue = venue, onBackClick = { navHostController.popBackStack()})

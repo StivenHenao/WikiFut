@@ -19,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import com.wikifut.app.presentation.Header.Header
 import com.wikifut.app.R
 import com.wikifut.app.model.Venue
+//import com.wikifut.app.presentation.Search.EquiposResult
 
 val MoradoOscuro = Color(0xFF2E0854)    // Morado oscuro
 val MoradoClaro = Color(0xFF7E57C2)    // Morado más claro para el Card
@@ -62,67 +63,22 @@ fun SearchScreen(
                     }
                 }
             )
-            // Aquí solo mostramos el resultado para equipos como pediste
-            if (tipo == TipoBusqueda.Equipos) {
-                EquiposResult(viewModel,onTeamNavigate)
-            } else {
-                Text(
-                    text = "Seleccione un tipo de búsqueda válido para ver resultados.",
-                    color = Color.White
-                )
-
+            // Aquí solo mostramos el resultado que el usuario busco
+            when (tipo) {
+                TipoBusqueda.Equipos -> {
+                    EquiposResult(viewModel,onTeamNavigate)
+                }
+                TipoBusqueda.Ligas -> {
+                    LigasResult(viewModel)
+                }
+                TipoBusqueda.Jugadores -> {
+                    PlayerResult(viewModel)
+                }
+                TipoBusqueda.Partidos -> TODO()
             }
         }
     }
 }
 
-@Composable
-private fun EquiposResult(viewModel: SearchViewModel, onTeamNavigate: (team: Team, venue: Venue) -> Unit) {
-    val resultadoState by viewModel.resultadoEquipos.collectAsState()
-    val resultado = resultadoState
 
-    if (resultado == null || resultado.response.isEmpty()) {
-        Text(
-            text = "No hay resultados",
-            color = Color.White
-        )
-    } else {
-        LazyColumn {
-            items(resultado.response) { equipo ->
-                //Log.d("SearchScreen", "Equipo: ${equipo.venue.toString()}")
-                TeamItem(team = equipo.team, onClick = {onTeamNavigate(equipo.team, equipo.venue)})
-            }
-        }
-    }
-}
-@Composable
-fun TeamItem(team: Team, onClick: () -> Unit) {
-    val team_country = team.country ?: ""
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .clickable{onClick()}, // Hacer el Card clickeable
-        colors = CardDefaults.cardColors(containerColor = MoradoClaro),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            AsyncImage(
-                model = team.logo,
-                contentDescription = "Logo ${team.name}",
-                modifier = Modifier.size(48.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(text = team.name, style = MaterialTheme.typography.bodyMedium)
-                Text(text = team_country, style = MaterialTheme.typography.bodySmall)
-            }
-        }
-    }
-}
 

@@ -1,5 +1,6 @@
 package com.wikifut.app.presentation.Header
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -38,6 +39,11 @@ import androidx.compose.ui.unit.dp
 import com.wikifut.app.R
 import com.wikifut.app.model.TipoBusqueda
 
+fun noHacerNada(tipoBusqueda: TipoBusqueda  , string: String) {
+    // No hace nada
+}
+
+
 @Composable
 fun Header(
     searchQuery: String,
@@ -48,7 +54,7 @@ fun Header(
     var dropdownExpanded by remember { mutableStateOf(false) }
     var selectedOption by remember { mutableStateOf("Equipos") }
     val focusManager = LocalFocusManager.current
-    val menuOptions = listOf("Equipos", "Ligas", "Partidos")
+    val menuOptions = listOf("Equipos", "Ligas", "Partidos","Jugador")
     val dropdownBackgroundColor = Color(0xFF4A148C)
 
     Row(
@@ -95,9 +101,12 @@ fun Header(
                             val tipoBusqueda = when (selectedOption) {
                                 "Ligas" -> TipoBusqueda.Ligas
                                 "Partidos" -> TipoBusqueda.Partidos
+                                "Jugador" -> TipoBusqueda.Jugadores
                                 else -> TipoBusqueda.Equipos
                             }
+                            Log.d("TipoBusqueda", tipoBusqueda.toString())
                             onBuscar(tipoBusqueda, searchQuery)
+                            //noHacerNada(tipoBusqueda, searchQuery)
                             true
                         } else false
                     },

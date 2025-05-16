@@ -12,8 +12,9 @@ data class EquipoInfo(
     val team: Team,
     val venue: Venue
 )
+
 data class ListaLigas(
-    val response: List<League>
+    val response: List<LigaResponse>
 )
 
 data class Partido(
@@ -48,6 +49,16 @@ data class Status(
     val long: String,
     val short: String,
     val elapsed: Int?
+)
+
+data class LigaResponse(
+    val league: League,
+    val country: CountryInfo
+)
+
+data class CountryInfo(
+    val name: String,
+    val flag: String?
 )
 
 data class League(
