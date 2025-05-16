@@ -15,6 +15,14 @@ data class Parameters(
     val player: String
 )
 
+data class ListaPlayers(
+    val response: List<PlayerInfo>
+)
+
+data class PlayerInfo(
+    val player: Player
+)
+
 data class Paging(
     val current: Int,
     val total: Int

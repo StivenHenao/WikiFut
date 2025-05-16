@@ -1,5 +1,6 @@
 package com.wikifut.app.presentation.Home
 
+import java.util.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,16 +24,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestore
-import com.wikifut.app.R
-import com.wikifut.app.model.Partido
-import java.util.*
-import com.wikifut.app.utils.convertirHoraAColombia
-import com.wikifut.app.utils.formatFechaParaApi
-import com.wikifut.app.utils.obtenerFechaActual
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBars
@@ -42,18 +33,30 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Star
-import kotlinx.coroutines.launch
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
+import coil.compose.AsyncImage
+import com.wikifut.app.model.TipoBusqueda
+import com.wikifut.app.presentation.Header.Header
+import com.wikifut.app.R
+import com.wikifut.app.model.Partido
+import com.wikifut.app.utils.convertirHoraAColombia
+import com.wikifut.app.utils.formatFechaParaApi
+import com.wikifut.app.utils.obtenerFechaActual
 
 
 @Composable
 fun HomeScreenWithDrawer(
     navigateToEditProfile: () -> Unit,
     navigateToInitial: () -> Unit,
-    viewModel: HomePartidosViewModel = hiltViewModel()
+    viewModel: HomePartidosViewModel = hiltViewModel(),
+    onSearchNavigate: (TipoBusqueda, String) -> Unit
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -93,7 +96,8 @@ fun HomeScreenWithDrawer(
             viewModel = viewModel,
             navigateToEditProfile = navigateToEditProfile,
             navigateToInitial = navigateToInitial,
-            openDrawer = { scope.launch { drawerState.open() } }
+            openDrawer = { scope.launch { drawerState.open() } },
+            onSearchNavigate = onSearchNavigate
         )
     }
 }
@@ -248,7 +252,8 @@ fun HomePartidosScreen(
     viewModel: HomePartidosViewModel = hiltViewModel(),
     navigateToEditProfile: () -> Unit = {},
     navigateToInitial: () -> Unit = {},
-    openDrawer: () -> Unit = {}
+    openDrawer: () -> Unit = {},
+    onSearchNavigate: (TipoBusqueda, String) -> Unit,
 ) {
     // Estado de la lista de partidos observada desde el ViewModel
     val state by viewModel.state.collectAsState()
@@ -270,11 +275,14 @@ fun HomePartidosScreen(
     }
 
     // Filtro de partidos según la búsqueda
-    val partidosFiltrados = state.filter { partido ->
-        partido.league.name.contains(searchQuery, ignoreCase = true) ||
-                partido.teams.home.name.contains(searchQuery, ignoreCase = true) ||
-                partido.teams.away.name.contains(searchQuery, ignoreCase = true)
-    }
+    //val partidosFiltrados = state.filter { partido ->
+        //partido.league.name.contains(searchQuery, ignoreCase = true) ||
+                //partido.teams.home.name.contains(searchQuery, ignoreCase = true) ||
+                //partido.teams.away.name.contains(searchQuery, ignoreCase = true)
+    //}
+    val partidosFiltrados = state;
+
+
     if (showDatePicker) {
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
@@ -291,15 +299,41 @@ fun HomePartidosScreen(
             .background(Color(0xFF2D1B45))
             .windowInsetsPadding(WindowInsets.statusBars)
     ) {
+        //Header(
+            //navigateToEditProfile = navigateToEditProfile,
+            //userName = userName,
+            //avatar = avatar,
+            //navigateToInitial = navigateToInitial,
+            //searchQuery = searchQuery,
+            //onSearchChange = { searchQuery = it },
+            //onDateSelected = { showDatePicker = true },
+            //openDrawer = openDrawer,
+            //    onBuscar = onSearchNavigate,
+        //)
         Header(
-            navigateToEditProfile = navigateToEditProfile,
-            userName = userName,
-            avatar = avatar,
-            navigateToInitial = navigateToInitial,
             searchQuery = searchQuery,
             onSearchChange = { searchQuery = it },
-            onDateSelected = { showDatePicker = true },
-            openDrawer = openDrawer
+            onBuscar = onSearchNavigate,
+            actions = {
+                IconButton(
+                    onClick = {showDatePicker = true},
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_calendar),
+                        contentDescription = "Seleccionar fecha",
+                        tint = Color.White
+                    )
+                }
+                IconButton(onClick = openDrawer) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_menu),
+                        contentDescription = "Menú",
+                        tint = Color.White,
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -342,84 +376,6 @@ fun HomePartidosScreen(
     }
 }
 
-@Composable
-fun Header(
-    userName: String?,
-    avatar: String?,
-    navigateToInitial: () -> Unit,
-    searchQuery: String,
-    onSearchChange: (String) -> Unit,
-    onDateSelected: () -> Unit,
-    navigateToEditProfile: () -> Unit,
-    openDrawer: () -> Unit = {}
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val menuWidth = 250.dp
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color(0x991F1235))
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Box(
-            modifier = Modifier
-                .size(50.dp)
-                .background(Color.White, shape = CircleShape)
-                .clip(CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.wikifutlogo),
-                contentDescription = "Logo",
-                modifier = Modifier.size(50.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        TextField(
-            value = searchQuery,
-            onValueChange = onSearchChange,
-            placeholder = { Text("Buscar partidos...") },
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 8.dp),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                focusedTextColor = Color.Black,
-                unfocusedTextColor = Color.Black
-            )
-        )
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        IconButton(
-            onClick = onDateSelected,
-            modifier = Modifier.size(36.dp)
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_calendar),
-                contentDescription = "Seleccionar fecha",
-                tint = Color.White
-            )
-        }
-
-        Box {
-            IconButton(onClick = { openDrawer() }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_menu),
-                    contentDescription = "Menú",
-                    tint = Color.White,
-                    modifier = Modifier.size(36.dp)
-                )
-            }
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
