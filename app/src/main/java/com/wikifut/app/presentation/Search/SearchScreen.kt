@@ -12,8 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.wikifut.app.model.Team // Asegúrate de que la ruta a tu data class Team sea correcta
-import com.wikifut.app.model.TipoBusqueda // Asegúrate de que la ruta a tu enum TipoBusqueda sea correcta
+import com.wikifut.app.model.Team
+import com.wikifut.app.model.TipoBusqueda
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import com.wikifut.app.presentation.Header.Header

@@ -53,7 +53,8 @@ data class Status(
 
 data class LigaResponse(
     val league: League,
-    val country: CountryInfo
+    val country: CountryInfo,
+    val seasons: List<Season>
 )
 
 data class CountryInfo(
@@ -69,6 +70,33 @@ data class League(
     val flag: String?,
     val season: Int,
     val round: String
+)
+
+data class Season(
+    val year: Int,
+    val start: String,
+    val end: String,
+    val current: Boolean,
+    val coverage: Coverage
+)
+
+data class Coverage(
+    val fixtures: FixtureCoverage,
+    val standings: Boolean,
+    val players: Boolean,
+    val top_scorers: Boolean,
+    val top_assists: Boolean,
+    val top_cards: Boolean,
+    val injuries: Boolean,
+    val predictions: Boolean,
+    val odds: Boolean
+)
+
+data class FixtureCoverage(
+    val events: Boolean,
+    val lineups: Boolean,
+    val statistics_fixtures: Boolean,
+    val statistics_players: Boolean
 )
 
 data class Teams(
@@ -100,3 +128,22 @@ data class ScoreDetail(
     val home: Int?,
     val away: Int?
 )
+// estadisticas equipos
+data class TeamStatisticsResponse(
+    val response: TeamStatsResponse
+)
+
+data class TeamStatsResponse(
+    val league: League,
+    val team: Team,
+    val fixtures: Fixtures,
+    val goals: GoalsStats
+)
+
+//data class League(val id: Int, val name: String, val logo: String)
+//data class Team(val id: Int, val name: String, val logo: String)
+data class Fixtures(val played: FixtureTotal, val wins: FixtureTotal, val draws: FixtureTotal, val loses: FixtureTotal)
+data class FixtureTotal(val home: Int, val away: Int, val total: Int)
+data class GoalsStats(val `for`: GoalStats, val against: GoalStats)
+data class GoalStats(val total: FixtureTotal, val average: GoalAverage)
+data class GoalAverage(val home: String, val away: String, val total: String)
