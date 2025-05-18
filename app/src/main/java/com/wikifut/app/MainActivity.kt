@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
                 ){
                     //NavigationWrapper(navHostController, auth)
                     //NavigationWrapper(navHostController = navHostController, auth = auth)
-                    PlayerScreen(276, 2022)
+                    PlayerScreen(1100, 2023)
                 }
             }
         }

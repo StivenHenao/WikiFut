@@ -13,7 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun StatisticBar(label: String, value: Int, maxValue: Int = 100) {
@@ -22,7 +24,7 @@ fun StatisticBar(label: String, value: Int, maxValue: Int = 100) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = label, color = Color.White)
+            Text(text = label, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
             Text(text = "$value${if (label == "Pases") "%" else ""}", color = Color.White)
         }
 
