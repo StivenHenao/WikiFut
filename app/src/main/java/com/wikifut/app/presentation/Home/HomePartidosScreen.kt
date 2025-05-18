@@ -60,23 +60,13 @@ fun HomeScreenWithDrawer(
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    var userName by remember { mutableStateOf<String?>(null) }
-    var avatar by remember { mutableStateOf<String?>(null) }
+    val userName by viewModel.userName.collectAsState()
+    val avatar by viewModel.avatar.collectAsState()
 
     LaunchedEffect(Unit) {
-        val auth = FirebaseAuth.getInstance()
-        val email = auth.currentUser?.email
-        if (!email.isNullOrEmpty()) {
-            FirebaseFirestore.getInstance().collection("users").document(email)
-                .get()
-                .addOnSuccessListener { document: DocumentSnapshot ->
-                    if (document.exists()) {
-                        userName = document.getString("username")
-                        avatar = document.getString("avatar")
-                    }
-                }
-        }
+        viewModel.cargarUsuario()
     }
+
 
     ModalNavigationDrawer(
         drawerContent = {

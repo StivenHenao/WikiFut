@@ -35,8 +35,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ){
-                    NavigationWrapper(navHostController, auth)
-                    //NavigationWrapper(navHostController = navHostController, auth = auth)
+                    //NavigationWrapper(navHostController, auth)
+                    NavigationWrapper(navHostController = navHostController, auth = auth)
                 }
             }
         }

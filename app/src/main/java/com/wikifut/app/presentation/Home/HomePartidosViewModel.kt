@@ -4,6 +4,8 @@ package com.wikifut.app.presentation.Home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.wikifut.app.model.Partido
 import com.wikifut.app.model.TipoBusqueda
 import com.wikifut.app.repository.PartidosRepository
@@ -12,6 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -24,12 +27,33 @@ import java.util.TimeZone
 class HomePartidosViewModel @Inject constructor(
     private val partidosRepository: PartidosRepository
 ) : ViewModel() {
+    private val _userName = MutableStateFlow<String?>(null)
+    val userName: StateFlow<String?> = _userName
+
+    private val _avatar = MutableStateFlow<String?>(null)
+    val avatar: StateFlow<String?> = _avatar
 
     private val _state = MutableStateFlow(emptyList<Partido>())
     val state: StateFlow<List<Partido>>
         get() = _state
 
+    fun cargarUsuario() {
+        viewModelScope.launch {
+            val email = FirebaseAuth.getInstance().currentUser?.email
+            if (!email.isNullOrEmpty()) {
+                val document = FirebaseFirestore.getInstance()
+                    .collection("users")
+                    .document(email)
+                    .get()
+                    .await()
 
+                if (document.exists()) {
+                    _userName.value = document.getString("username")
+                    _avatar.value = document.getString("avatar")
+                }
+            }
+        }
+    }
     private val ligasImportantes = setOf(
 
         45, // FA Cup (Inglaterra)

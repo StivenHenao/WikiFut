@@ -40,7 +40,7 @@ import com.wikifut.app.utils.Constans.CLIENT_ID_FIREBASE
 
 @Composable
 fun LoginScreen(
-    auth: FirebaseAuth? = null,
+    auth: FirebaseAuth,
     navigateToInitial: () -> Unit = {},
     navigateToSignUp: () -> Unit = {},
     navigateToHome: () -> Unit = {}
@@ -267,8 +267,8 @@ fun PasswordTextField(
     )
 }
 
-@Preview(showSystemUi = true, showBackground = true)
-@Composable
-fun LoginScreenPreview() {
-    LoginScreen()
-}
+//@Preview(showSystemUi = true, showBackground = true)
+//@Composable
+//fun LoginScreenPreview() {
+//    LoginScreen()
+//}

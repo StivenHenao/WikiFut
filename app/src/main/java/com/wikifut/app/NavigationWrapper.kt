@@ -1,6 +1,8 @@
 package com.wikifut.app
 
+import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
@@ -16,16 +18,27 @@ import com.wikifut.app.presentation.editprofile.EditProfileScreen
 import com.wikifut.app.presentation.Home.HomeScreenWithDrawer
 import com.wikifut.app.model.TipoBusqueda
 import com.wikifut.app.model.Venue
+import com.wikifut.app.presentation.Favoritos.FavoritesViewModel
 import com.wikifut.app.presentation.Search.SearchScreen
 import com.wikifut.app.presentation.Team.TeamScreen
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.wikifut.app.presentation.Favoritos.FavoritosScreen
 
 @Composable
 fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) {
+
+
     val isUserLoggedIn = auth.currentUser != null
     val startDestination = if (isUserLoggedIn) "home" else "initial"
+    if (isUserLoggedIn) {
+        val userId = auth.currentUser!!.uid
+        //favoritesViewModel.cargarFavoritos()
+    }
+    Log.i("wikifut", "isUserLoggedIn: $isUserLoggedIn")
+    //val favoritesViewModel: FavoritesViewModel = hiltViewModel()
 
     // Función que maneja la navegación a búsqueda
     val onSearchNavigate: (TipoBusqueda, String) -> Unit = { tipo, query ->
@@ -77,6 +90,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
         }
 
         composable("home") {
+            Log.i("wikifut", "Entro a home")
             HomeScreenWithDrawer(
                 navigateToEditProfile = { navHostController.navigate("edit_profile") },
                 navigateToInitial = {
@@ -108,7 +122,8 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
             val tipo = when (tipoString) {
                 "Ligas" -> TipoBusqueda.Ligas
                 "Partidos" -> TipoBusqueda.Partidos
-                "jugadores" -> TipoBusqueda.Jugadores
+                "Jugadores" -> TipoBusqueda.Jugadores
+                "Equipos" -> TipoBusqueda.Equipos
                 else -> TipoBusqueda.Equipos
             }
 
@@ -128,8 +143,26 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
             val venuejson = URLDecoder.decode(backStackEntry.arguments?.getString("venueJson") ?: "", StandardCharsets.UTF_8.toString())
             val team = Gson().fromJson(teamjson, Team::class.java)
             val venue = Gson().fromJson(venuejson, Venue::class.java)
-            TeamScreen(team = team, venue = venue, onBackClick = { navHostController.popBackStack()})
+            TeamScreen(team = team,
+                venue = venue,
+                onBackClick = { navHostController.popBackStack()},
+                //imfavorite = { favoritesViewModel.isFavorite(it) },
+                imfavorite = { _ -> false },
+                //add_to_favorites = { favoritesViewModel.addToFavorites(team, venue) },
+                add_to_favorites = {  ->  },
+                //remove_from_favorites = { favoritesViewModel.remove_from_favorites(team.id) }
+                remove_from_favorites = { ->  }
+            )
         }
+
+        //composable("favoritos") {
+        //    val favoritesViewModel: FavoritesViewModel = hiltViewModel()
+        //    FavoritosScreen(
+        //        viewModel = favoritesViewModel,
+        //        onTeamClick = onTeamNavigate,
+        //        onBackClick = { navHostController.popBackStack() }
+        //    )
+        //}
     }
 }
 

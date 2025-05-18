@@ -104,6 +104,11 @@ data class Teams(
     val away: Team
 )
 
+data class FavoriteTeam(
+    val team: Team,
+    val venue: Venue
+)
+
 data class Team(
     val id: Int,
     val name: String,

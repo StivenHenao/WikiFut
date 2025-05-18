@@ -28,9 +28,10 @@ import com.wikifut.app.R
 import com.wikifut.app.model.Team
 import com.wikifut.app.model.Venue
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import com.wikifut.app.model.TeamStatsResponse
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
 
 
 @Composable
@@ -38,6 +39,9 @@ fun TeamScreen(
     team: Team,
     venue: Venue,
     onBackClick: () -> Unit,
+    add_to_favorites: () -> Unit,
+    imfavorite: (teamId: Int) -> Boolean = { false },
+    remove_from_favorites: () -> Unit = {},
     viewModel: TeamViewModel = hiltViewModel()
 ) {
     //val anioActual: Int = Calendar.getInstance().get(Calendar.YEAR)
@@ -49,7 +53,12 @@ fun TeamScreen(
     }
     val resultadoState by viewModel.statsList.collectAsState()
     val resultado = resultadoState ?: emptyList()
+    //var isFavorite by remember { mutableStateOf(false) }
+    var isFavorite = false
 
+    LaunchedEffect(team.id) {
+        isFavorite = imfavorite(team.id)
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -92,9 +101,19 @@ fun TeamScreen(
                     }
 
                     Row {
-                        IconButton(onClick = { /* Acción de favorito */ }) {
+                        IconButton(
+                            onClick = {
+                                if (isFavorite) {
+                                    remove_from_favorites()
+                                } else {
+                                    add_to_favorites()
+                                    Log.d("TeamScreen", "teamId: ${team.id}, season: $anioActual")
+                                }
+                                isFavorite = !isFavorite
+                            }
+                        ) {
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_star),
+                                imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
                                 contentDescription = "Favorito",
                                 tint = Color.White
                             )
@@ -168,7 +187,7 @@ fun TeamScreen(
                 Spacer(modifier = Modifier.height(20.dp))
             }
 
-            if (resultado == null || resultado.isEmpty()) {
+            if (resultado.isEmpty()) {
                 item {
                     Text(
                         text = "No hay resultados de ligas",
