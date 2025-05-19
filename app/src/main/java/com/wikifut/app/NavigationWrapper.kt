@@ -33,13 +33,14 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
 
     val isUserLoggedIn = auth.currentUser != null
     val startDestination = if (isUserLoggedIn) "home" else "initial"
-    if (isUserLoggedIn) {
-        val userId = auth.currentUser!!.uid
-        //favoritesViewModel.cargarFavoritos()
-    }
-    Log.i("wikifut", "isUserLoggedIn: $isUserLoggedIn")
-    //val favoritesViewModel: FavoritesViewModel = hiltViewModel()
+    val favoritesViewModel: FavoritesViewModel = hiltViewModel()
+    val currentUser = auth.currentUser
 
+    LaunchedEffect(currentUser) {
+        currentUser?.let {
+            favoritesViewModel.cargarFavoritos()
+        }
+    }
     // Función que maneja la navegación a búsqueda
     val onSearchNavigate: (TipoBusqueda, String) -> Unit = { tipo, query ->
         when(tipo){
@@ -98,7 +99,8 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
                         popUpTo("home") { inclusive = true }
                     }
                 },
-                onSearchNavigate = onSearchNavigate
+                onSearchNavigate = onSearchNavigate,
+                onFavoritosNavigate = { navHostController.navigate("favoritos") }
             )
         }
 
@@ -146,23 +148,23 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
             TeamScreen(team = team,
                 venue = venue,
                 onBackClick = { navHostController.popBackStack()},
-                //imfavorite = { favoritesViewModel.isFavorite(it) },
-                imfavorite = { _ -> false },
-                //add_to_favorites = { favoritesViewModel.addToFavorites(team, venue) },
-                add_to_favorites = {  ->  },
-                //remove_from_favorites = { favoritesViewModel.remove_from_favorites(team.id) }
-                remove_from_favorites = { ->  }
+                imfavorite = { favoritesViewModel.isFavorite(it) },
+                //imfavorite = { _ -> false },
+                add_to_favorites = { favoritesViewModel.addToFavorites(team, venue) },
+                //add_to_favorites = {  ->  },
+                remove_from_favorites = { favoritesViewModel.remove_from_favorites(team.id) }
+                //remove_from_favorites = { ->  }
             )
         }
 
-        //composable("favoritos") {
-        //    val favoritesViewModel: FavoritesViewModel = hiltViewModel()
-        //    FavoritosScreen(
-        //        viewModel = favoritesViewModel,
-        //        onTeamClick = onTeamNavigate,
-        //        onBackClick = { navHostController.popBackStack() }
-        //    )
-        //}
+        composable("favoritos") {
+            val favoritesViewModel: FavoritesViewModel = hiltViewModel()
+            FavoritosScreen(
+                viewModel = favoritesViewModel,
+                onTeamClick = onTeamNavigate,
+                onBackClick = { navHostController.popBackStack() }
+            )
+        }
     }
 }
 

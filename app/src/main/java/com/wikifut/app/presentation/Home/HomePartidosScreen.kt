@@ -56,7 +56,8 @@ fun HomeScreenWithDrawer(
     navigateToEditProfile: () -> Unit,
     navigateToInitial: () -> Unit,
     viewModel: HomePartidosViewModel = hiltViewModel(),
-    onSearchNavigate: (TipoBusqueda, String) -> Unit
+    onSearchNavigate: (TipoBusqueda, String) -> Unit,
+    onFavoritosNavigate: () -> Unit,
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -75,7 +76,8 @@ fun HomeScreenWithDrawer(
                 navigateToEditProfile = navigateToEditProfile,
                 navigateToInitial = navigateToInitial,
                 userName = userName,
-                avatar = avatar
+                avatar = avatar,
+                onFavoritosNavigate = onFavoritosNavigate
             )
         },
         drawerState = drawerState
@@ -130,7 +132,8 @@ fun DrawerContent(
     navigateToEditProfile: () -> Unit,
     navigateToInitial: () -> Unit,
     userName: String?,
-    avatar: String?
+    avatar: String?,
+    onFavoritosNavigate: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -208,7 +211,9 @@ fun DrawerContent(
                 DrawerOption(
                     icon = Icons.Default.Star,
                     label = "Favoritos",
-                    onClick = { closeDrawer() }
+                    onClick = {
+                        closeDrawer()
+                        onFavoritosNavigate() }
                 )
 
                 DrawerOption(

@@ -53,8 +53,9 @@ fun Header(
 ) {
     var dropdownExpanded by remember { mutableStateOf(false) }
     var selectedOption by remember { mutableStateOf("Equipos") }
+    var modoBusquedaActiva by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
-    val menuOptions = listOf("Equipos", "Ligas", "Partidos","Jugador")
+    val menuOptions = listOf("Equipos", "Ligas", "Partidos", "Jugador")
     val dropdownBackgroundColor = Color(0xFF4A148C)
 
     Row(
@@ -104,9 +105,7 @@ fun Header(
                                 "Jugador" -> TipoBusqueda.Jugadores
                                 else -> TipoBusqueda.Equipos
                             }
-                            Log.d("TipoBusqueda", tipoBusqueda.toString())
                             onBuscar(tipoBusqueda, searchQuery)
-                            //noHacerNada(tipoBusqueda, searchQuery)
                             true
                         } else false
                     },
@@ -121,6 +120,25 @@ fun Header(
                 singleLine = true,
                 maxLines = 1,
             )
+
+            if (modoBusquedaActiva) {
+                IconButton(onClick = {
+                    val tipoBusqueda = when (selectedOption) {
+                        "Ligas" -> TipoBusqueda.Ligas
+                        "Partidos" -> TipoBusqueda.Partidos
+                        "Jugador" -> TipoBusqueda.Jugadores
+                        else -> TipoBusqueda.Equipos
+                    }
+                    focusManager.clearFocus()
+                    onBuscar(tipoBusqueda, searchQuery)
+                }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_search), // Usa un ícono de búsqueda
+                        contentDescription = "Buscar",
+                        tint = Color.Black
+                    )
+                }
+            }
 
             Box(
                 modifier = Modifier
@@ -153,7 +171,29 @@ fun Header(
 
         Spacer(modifier = Modifier.width(8.dp))
 
+        if (!modoBusquedaActiva) {
+            // Botón de activar modo búsqueda
+            IconButton(onClick = { modoBusquedaActiva = true }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_search), // mismo ícono de búsqueda
+                    contentDescription = "Activar búsqueda",
+                    tint = Color.White
+                )
+            }
 
-        actions()
+            actions()
+        } else {
+            // Botón para salir del modo búsqueda
+            IconButton(onClick = {
+                modoBusquedaActiva = false
+                focusManager.clearFocus()
+            }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_close), // ícono de cerrar
+                    contentDescription = "Cerrar búsqueda",
+                    tint = Color.White
+                )
+            }
+        }
     }
 }

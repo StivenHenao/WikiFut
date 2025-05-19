@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import com.wikifut.app.R
 
 import com.wikifut.app.model.Team
@@ -30,27 +31,47 @@ fun FavoritosScreen(viewModel: FavoritesViewModel, onTeamClick: (Team, Venue) ->
         viewModel.cargarFavoritos()
     }
 
-    if (equipos.isEmpty()) {
-        Text("No tienes equipos favoritos", color = Color.White)
-    } else {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = com.wikifut.app.presentation.Search.MoradoOscuro
-        ) {
-            var searchQuery = ""
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = com.wikifut.app.presentation.Search.MoradoOscuro
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
             Header(
-                searchQuery = searchQuery,
-                onSearchChange = { searchQuery = it },
-                onBuscar = {  _, _ ->},
+                searchQuery = "",
+                onSearchChange = {},
+                onBuscar = { _, _ -> },
                 actions = {
-                    IconButton(onClick = { onBackClick()  }) {
-                        Icon(painterResource(R.drawable.ic_back), contentDescription = "Atrás", tint = Color.White)
+                    IconButton(onClick = { onBackClick() }) {
+                        Icon(
+                            painterResource(R.drawable.ic_back),
+                            contentDescription = "Atrás",
+                            tint = Color.White
+                        )
                     }
                 }
             )
-            LazyColumn {
-                items(equipos) { favoriteTeam ->
-                    TeamItem(team = favoriteTeam.team, onClick = { onTeamClick(favoriteTeam.team, favoriteTeam.venue) })
+
+            Text(
+                text = "Tus equipos favoritos",
+                color = Color.White,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+
+            if (equipos.isEmpty()) {
+                Text(
+                    text = "No tienes equipos favoritos",
+                    color = Color.White,
+                    modifier = Modifier
+                        .padding(16.dp)
+                )
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(equipos) { favoriteTeam ->
+                        TeamItem(
+                            team = favoriteTeam.team,
+                            onClick = { onTeamClick(favoriteTeam.team, favoriteTeam.venue) }
+                        )
+                    }
                 }
             }
         }
