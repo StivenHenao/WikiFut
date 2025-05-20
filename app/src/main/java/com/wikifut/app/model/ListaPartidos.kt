@@ -34,17 +34,6 @@ data class Fixture(
     val status: Status
 )
 
-data class Venue(
-    val id: Int?,
-    val name: String?,
-    val address: String?,
-    val city: String?,
-    val capacity: Int?,
-    val surface: String?,
-    val image: String?
-)
-
-
 data class Status(
     val long: String,
     val short: String,
@@ -103,18 +92,27 @@ data class Teams(
     val home: Team,
     val away: Team
 )
-
 data class FavoriteTeam(
-    val team: Team,
-    val venue: Venue
+    val team: Team = Team(),
+    val venue: Venue = Venue()
 )
 
 data class Team(
-    val id: Int,
-    val name: String,
-    val logo: String,
+    val id: Int = 0,
+    val name: String = "",
+    val logo: String = "",
     val winner: Boolean? = null,
-    val country: String? = null,
+    val country: String? = null
+)
+
+data class Venue(
+    val id: Int? = 0,
+    val name: String? = "",
+    val address: String? = "",
+    val city: String? = "",
+    val capacity: Int? = 0,
+    val surface: String? = "",
+    val image: String? = ""
 )
 
 data class Goals(

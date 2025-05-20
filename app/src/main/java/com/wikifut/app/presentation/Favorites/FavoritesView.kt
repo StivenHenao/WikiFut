@@ -16,15 +16,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.wikifut.app.R
 
 import com.wikifut.app.model.Team
 import com.wikifut.app.model.Venue
 import com.wikifut.app.presentation.Header.Header
+import com.wikifut.app.presentation.Search.SearchViewModel
 import com.wikifut.app.presentation.Search.TeamItem
 
 @Composable
-fun FavoritosScreen(viewModel: FavoritesViewModel, onTeamClick: (Team, Venue) -> Unit, onBackClick: () -> Unit) {
+fun FavoritosScreen(
+    onTeamClick: (Team, Venue) -> Unit,
+    onBackClick: () -> Unit,
+    viewModel: FavoritesViewModel = hiltViewModel()
+) {
     val equipos by viewModel.favoritos.collectAsState()
 
     LaunchedEffect(Unit) {

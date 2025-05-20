@@ -1,5 +1,6 @@
 package com.wikifut.app.presentation.Favoritos
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wikifut.app.model.FavoriteTeam
@@ -11,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 @HiltViewModel
 class FavoritesViewModel @Inject constructor(
     private val repository: FavoritesRepository
@@ -20,27 +20,31 @@ class FavoritesViewModel @Inject constructor(
     private val _favoritos = MutableStateFlow<List<FavoriteTeam>>(emptyList())
     val favoritos: StateFlow<List<FavoriteTeam>> = _favoritos
 
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
+
     fun cargarFavoritos() {
         viewModelScope.launch {
-            _favoritos.value = repository.obtenerFavoritos()
+            try {
+                _favoritos.value = repository.obtenerFavoritos()
+                Log.d("FavoritesViewModel", "Favoritos cargados: ${_favoritos.value.toString()}")
+            } catch (e: Exception) {
+                Log.e("FavoritesViewModel", "Error al cargar favoritos", e)
+                _error.value = "Error al cargar favoritos: ${e.message}"
+            }
         }
-    }
-    fun isFavorite(teamId: Int): Boolean {
-        return _favoritos.value.any { it.team.id == teamId }
     }
 
     fun addToFavorites(team: Team, venue: Venue) {
-        val favoriteTeam = FavoriteTeam (team, venue)
+        val favoriteTeam = FavoriteTeam(team, venue)
         viewModelScope.launch {
-            repository.agregarAFavoritos(favoriteTeam)
-            cargarFavoritos()
-        }
-    }
-
-    fun remove_from_favorites(teamId: Int) {
-        viewModelScope.launch {
-            repository.eliminarFavorito(teamId)
-            cargarFavoritos()
+            try {
+                repository.agregarAFavoritos(favoriteTeam)
+                cargarFavoritos()
+            } catch (e: Exception) {
+                _error.value = "Error al agregar a favoritos: ${e.message}"
+            }
         }
     }
 }
+

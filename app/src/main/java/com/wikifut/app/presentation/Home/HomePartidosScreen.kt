@@ -138,7 +138,7 @@ fun DrawerContent(
     Box(
         modifier = Modifier
             .fillMaxHeight()
-            .fillMaxWidth(0.85f)
+            .fillMaxWidth(0.85f) //
             .clip(RoundedCornerShape(topEnd = 0.dp, bottomEnd = 0.dp, topStart = 32.dp, bottomStart = 32.dp))
             .background(
                 brush = Brush.verticalGradient(
@@ -223,19 +223,17 @@ fun DrawerContent(
                 )
 
                 Spacer(modifier = Modifier.height(200.dp))
-
-                DrawerOption(
-                    icon = Icons.Default.Logout,
-                    label = "Cerrar sesión",
-
-                    onClick = {
-                        FirebaseAuth.getInstance().signOut()
-                        navigateToInitial()
-                        closeDrawer()
-                    }
-                )
-
             }
+            DrawerOption(
+                icon = Icons.Default.Logout,
+                label = "Cerrar sesión",
+
+                onClick = {
+                    FirebaseAuth.getInstance().signOut()
+                    navigateToInitial()
+                    closeDrawer()
+                }
+            )
         }
     }
 }

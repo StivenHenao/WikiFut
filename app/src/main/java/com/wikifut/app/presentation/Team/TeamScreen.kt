@@ -32,6 +32,9 @@ import androidx.compose.ui.text.style.TextAlign
 import com.wikifut.app.model.TeamStatsResponse
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
+import androidx.compose.runtime.rememberCoroutineScope
+import com.wikifut.app.model.FavoriteTeam
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -39,26 +42,30 @@ fun TeamScreen(
     team: Team,
     venue: Venue,
     onBackClick: () -> Unit,
-    add_to_favorites: () -> Unit,
-    imfavorite: (teamId: Int) -> Boolean = { false },
-    remove_from_favorites: () -> Unit = {},
     viewModel: TeamViewModel = hiltViewModel()
 ) {
     //val anioActual: Int = Calendar.getInstance().get(Calendar.YEAR)
     // limitacion de la api solo se pueden consultar datos entre 2021 y 2023 en el plan gratis papu sad :C
     val anioActual = 2023
     LaunchedEffect(Unit) {
-        Log.d("TeamScreen", "teamId: ${team.id}, season: $anioActual")
+        //Log.d("TeamScreen", "teamId: ${team.id}, season: $anioActual")
         viewModel.cargarEstadisticasDeTodasLasLigas(team.id,anioActual)
     }
+
     val resultadoState by viewModel.statsList.collectAsState()
     val resultado = resultadoState ?: emptyList()
     //var isFavorite by remember { mutableStateOf(false) }
-    var isFavorite = false
 
-    LaunchedEffect(team.id) {
-        isFavorite = imfavorite(team.id)
+    val favoritos by viewModel.favoritos.collectAsState()
+    val isFavorite = favoritos.any { it.team.id == team.id }
+
+    LaunchedEffect(Unit) {
+        viewModel.cargarFavoritos()
     }
+
+    val coroutineScope = rememberCoroutineScope()
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -104,18 +111,27 @@ fun TeamScreen(
                         IconButton(
                             onClick = {
                                 if (isFavorite) {
-                                    remove_from_favorites()
+                                    Log.d("TeamScreen", "Se elimino el favorito")
+                                    coroutineScope.launch {
+                                        viewModel.removeFromFavorites(team.id)
+                                    }
                                 } else {
-                                    add_to_favorites()
-                                    Log.d("TeamScreen", "teamId: ${team.id}, season: $anioActual")
+                                    coroutineScope.launch {
+                                        viewModel.agregarAFavoritos(
+                                            FavoriteTeam(
+                                                team = team,
+                                                venue = venue
+                                            )
+                                        )
+                                    }
+                                    Log.d("TeamScreen", "Se agrego el favorito teamId: ${team.id}")
                                 }
-                                isFavorite = !isFavorite
                             }
                         ) {
                             Icon(
                                 imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
                                 contentDescription = "Favorito",
-                                tint = Color.White
+                                tint = if (isFavorite) Color.White else Color.Black,
                             )
                         }
                         IconButton(onClick = { /* Acción de notificaciones */ }) {

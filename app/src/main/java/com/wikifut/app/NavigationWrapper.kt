@@ -33,14 +33,15 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
 
     val isUserLoggedIn = auth.currentUser != null
     val startDestination = if (isUserLoggedIn) "home" else "initial"
-    val favoritesViewModel: FavoritesViewModel = hiltViewModel()
+    //val favoritesViewModel: FavoritesViewModel = hiltViewModel()
     val currentUser = auth.currentUser
 
-    LaunchedEffect(currentUser) {
-        currentUser?.let {
-            favoritesViewModel.cargarFavoritos()
-        }
-    }
+    //LaunchedEffect(currentUser) {
+    //currentUser?.let {
+            //favoritesViewModel.cargarFavoritos()
+            //Log.d("NavigationWrapper", "Favoritos cargados: ${favoritesViewModel.favoritos.value.toString()}")
+    //}
+    //}
     // Función que maneja la navegación a búsqueda
     val onSearchNavigate: (TipoBusqueda, String) -> Unit = { tipo, query ->
         when(tipo){
@@ -148,19 +149,12 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
             TeamScreen(team = team,
                 venue = venue,
                 onBackClick = { navHostController.popBackStack()},
-                imfavorite = { favoritesViewModel.isFavorite(it) },
-                //imfavorite = { _ -> false },
-                add_to_favorites = { favoritesViewModel.addToFavorites(team, venue) },
-                //add_to_favorites = {  ->  },
-                remove_from_favorites = { favoritesViewModel.remove_from_favorites(team.id) }
-                //remove_from_favorites = { ->  }
             )
         }
 
         composable("favoritos") {
-            val favoritesViewModel: FavoritesViewModel = hiltViewModel()
+            //val favoritesViewModel: FavoritesViewModel = hiltViewModel()
             FavoritosScreen(
-                viewModel = favoritesViewModel,
                 onTeamClick = onTeamNavigate,
                 onBackClick = { navHostController.popBackStack() }
             )

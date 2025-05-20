@@ -1,6 +1,7 @@
 package com.wikifut.app.presentation.Home
 
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -39,20 +40,26 @@ class HomePartidosViewModel @Inject constructor(
 
     fun cargarUsuario() {
         viewModelScope.launch {
-            val email = FirebaseAuth.getInstance().currentUser?.email
-            if (!email.isNullOrEmpty()) {
-                val document = FirebaseFirestore.getInstance()
-                    .collection("users")
-                    .document(email)
-                    .get()
-                    .await()
+            try {
+                val email = FirebaseAuth.getInstance().currentUser?.email
+                if (!email.isNullOrEmpty()) {
+                    val document = FirebaseFirestore.getInstance()
+                        .collection("users")
+                        .document(email)
+                        .get()
+                        .await()
 
-                if (document.exists()) {
-                    _userName.value = document.getString("username")
-                    _avatar.value = document.getString("avatar")
+                    if (document.exists()) {
+                        _userName.value = document.getString("username") ?: "UsuarioDesconocido"
+                        _avatar.value = document.getString("avatar") ?: "default_avatar_url"
+                    }
                 }
+                Log.d("Usuario", "Se cargó: ${_userName.value} ${_avatar.value}")
+            } catch (e: Exception) {
+                Log.e("Usuario", "Error al cargar usuario", e)
             }
         }
+
     }
     private val ligasImportantes = setOf(
 
@@ -114,23 +121,22 @@ class HomePartidosViewModel @Inject constructor(
 
     fun cargarPartidosPorFecha(fechaColombia: String) {
         viewModelScope.launch {
-
-            val fechaHoy = fechaColombia
-            val fechaManana = obtenerFechaSiguiente(fechaColombia)
-
-
-            val partidosHoy = partidosRepository.getPartidos(fechaHoy).response
-            val partidosManana = partidosRepository.getPartidos(fechaManana).response
+            //val fechaHoy = fechaColombia
+            //val fechaManana = obtenerFechaSiguiente(fechaColombia)
 
 
-            val partidosTotales = (partidosHoy + partidosManana)
+            //val partidosHoy = partidosRepository.getPartidos(fechaHoy).response
+            //val partidosManana = partidosRepository.getPartidos(fechaManana).response
 
 
-            val partidosFiltrados = partidosTotales.filter { partido ->
-                partido.league.id in ligasImportantes && partidoEnFechaColombiana(partido, fechaHoy)
-            }
+            //val partidosTotales = (partidosHoy + partidosManana)
 
-            _state.value = partidosFiltrados
+
+            //val partidosFiltrados = partidosTotales.filter { partido ->
+            //partido.league.id in ligasImportantes && partidoEnFechaColombiana(partido, fechaHoy)
+            //}
+
+            //_state.value = partidosFiltrados
         }
     }
 

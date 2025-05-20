@@ -1,18 +1,25 @@
 package com.wikifut.app.presentation.Team
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.wikifut.app.model.FavoriteTeam
 import com.wikifut.app.model.TeamStatisticsResponse
+import com.wikifut.app.repository.FavoritesRepository
 import com.wikifut.app.repository.TeamsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 @HiltViewModel
 class TeamViewModel @Inject constructor(
-    private val repository: TeamsRepository
+    private val repository: TeamsRepository,
+    private val favoritesRepository: FavoritesRepository
 ) : ViewModel() {
 
     private val _statsList = MutableStateFlow<List<TeamStatisticsResponse>>(emptyList())
@@ -20,6 +27,48 @@ class TeamViewModel @Inject constructor(
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
+
+    private val _favoritos = MutableStateFlow<List<FavoriteTeam>>(emptyList())
+    val favoritos: StateFlow<List<FavoriteTeam>> = _favoritos
+
+    fun cargarFavoritos() {
+        viewModelScope.launch {
+            try {
+                _favoritos.value = favoritesRepository.obtenerFavoritos()
+                Log.d("FavoritesViewModel", "Favoritos cargados: ${_favoritos.value.toString()}")
+            } catch (e: Exception) {
+                Log.e("FavoritesViewModel", "Error al cargar favoritos", e)
+                _error.value = "Error al cargar favoritos: ${e.message}"
+            }
+        }
+    }
+
+    fun agregarAFavoritos(equipoFavorito: FavoriteTeam) {
+        viewModelScope.launch {
+            try {
+                favoritesRepository.agregarAFavoritos(equipoFavorito)
+                cargarFavoritos()
+            } catch (e: Exception) {
+                _error.value = "Error al agregar a favoritos: ${e.message}"
+            }
+        }
+    }
+
+    suspend fun isFavorite(teamId: Int): Boolean {
+        val favoritos = favoritesRepository.obtenerFavoritos()
+        return favoritos.any { it.team.id == teamId }
+    }
+
+    fun removeFromFavorites(teamId: Int) {
+        viewModelScope.launch {
+            try {
+                favoritesRepository.eliminarFavorito(teamId)
+                cargarFavoritos()
+            } catch (e: Exception) {
+                _error.value = "Error al eliminar favorito: ${e.message}"
+            }
+        }
+    }
 
     fun cargarEstadisticasDeTodasLasLigas(teamId: Int, season: Int) {
         viewModelScope.launch {
