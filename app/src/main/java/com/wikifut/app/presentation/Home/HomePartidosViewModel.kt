@@ -121,22 +121,22 @@ class HomePartidosViewModel @Inject constructor(
 
     fun cargarPartidosPorFecha(fechaColombia: String) {
         viewModelScope.launch {
-            //val fechaHoy = fechaColombia
-            //val fechaManana = obtenerFechaSiguiente(fechaColombia)
+            val fechaHoy = fechaColombia
+            val fechaManana = obtenerFechaSiguiente(fechaColombia)
 
 
-            //val partidosHoy = partidosRepository.getPartidos(fechaHoy).response
-            //val partidosManana = partidosRepository.getPartidos(fechaManana).response
+            val partidosHoy = partidosRepository.getPartidos(fechaHoy).response
+            val partidosManana = partidosRepository.getPartidos(fechaManana).response
 
 
-            //val partidosTotales = (partidosHoy + partidosManana)
+            val partidosTotales = (partidosHoy + partidosManana)
 
 
-            //val partidosFiltrados = partidosTotales.filter { partido ->
-            //partido.league.id in ligasImportantes && partidoEnFechaColombiana(partido, fechaHoy)
-            //}
+            val partidosFiltrados = partidosTotales.filter { partido ->
+            partido.league.id in ligasImportantes && partidoEnFechaColombiana(partido, fechaHoy)
+            }
 
-            //_state.value = partidosFiltrados
+            _state.value = partidosFiltrados
         }
     }
 
