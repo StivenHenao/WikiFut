@@ -21,7 +21,9 @@ class MatchViewModel @Inject constructor(
     val match: StateFlow<MatchResponse?> = _match.asStateFlow()
 
     init {
-        Log.i("wikifut", "MatchViewModel created")
+        Log.i("wikifut", "MatchViewModel created");
+        Log.i("Información de partidos","${match.value}")
+        Log.i("Información de partidos","Pasada")
     }
 
     fun fetchMatch(matchId: Long) {
@@ -29,8 +31,9 @@ class MatchViewModel @Inject constructor(
             try {
                 val response = repository.getMatchById(matchId)
                 _match.value = response
+                Log.i("wikifut", "Partido obtenido: ${response?.fixture?.id}")
             } catch (e: Exception) {
-                // Puedes manejar el error como quieras (log, estado de error, etc.)
+                Log.e("MatchViewModel", "Error al obtener el partido", e)
                 _match.value = null
             }
         }

@@ -235,11 +235,5 @@ data class MRTeamStatistics(
 
 data class MRStatistic(
     val type: String,
-    val value: MRStatValue
+    val value: String? // o Any? si estás usando Gson
 )
-
-sealed class MRStatValue {
-    class IntegerValue(val value: Long) : MRStatValue()
-    class StringValue(val value: String) : MRStatValue()
-    class NullValue : MRStatValue()
-}
