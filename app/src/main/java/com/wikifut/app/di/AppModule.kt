@@ -2,6 +2,9 @@ package com.wikifut.app.di
 
 import com.wikifut.app.api.PartidosApi
 import com.wikifut.app.api.PlayerApi
+import com.wikifut.app.api.SeasonApi
+import com.wikifut.app.api.LigaDetalleApi
+import com.wikifut.app.api.LigaApi
 import com.wikifut.app.utils.Constans
 import dagger.Module
 import dagger.Provides
@@ -53,6 +56,18 @@ object AppModule {
     fun providePlayerApi(retrofit: Retrofit): PlayerApi {
         return retrofit.create(PlayerApi::class.java)
     }
+
+    @Provides
+    fun provideSeasonApi(retrofit: Retrofit): SeasonApi =
+        retrofit.create(SeasonApi::class.java)
+
+    @Provides
+    fun provideLigaDetalleApi(retrofit: Retrofit): LigaDetalleApi =
+        retrofit.create(LigaDetalleApi::class.java)
+
+    @Provides
+    fun provideLigaApi(retrofit: Retrofit): LigaApi =
+        retrofit.create(LigaApi::class.java)
 
     class ApiKeyInterceptor(private val apiKey: String) : Interceptor {
         override fun intercept(chain: Interceptor.Chain): Response {

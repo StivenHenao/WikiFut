@@ -90,15 +90,7 @@ data class PlayerLeague(
     val season: Int
 )
 
-data class PlayerGames(
-    val appearences: Int?,
-    val lineups: Int?,
-    val minutes: Int?,
-    val number: Int?,
-    val position: String?,
-    val rating: String?,
-    val captain: Boolean?
-)
+
 
 data class Substitutes(
     val in_: Int?, // `in` es palabra reservada en Kotlin
@@ -109,13 +101,6 @@ data class Substitutes(
 data class Shots(
     val total: Int?,
     val on: Int?
-)
-
-data class PlayerGoals(
-    val total: Int?,
-    val conceded: Int?,
-    val assists: Int?,
-    val saves: Int?
 )
 
 data class Passes(

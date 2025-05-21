@@ -24,13 +24,20 @@ data class PlayerTeamInfo(
 data class PlayerGames(
     val appearences: Int?,
     val minutes: Int?,
-    val position: String?
+    val lineups: Int?,
+    val number: Int?,
+    val position: String?,
+    val rating: String?,
+    val captain: Boolean?
 )
 
 data class PlayerGoals(
     val total: Int?,
-    val assists: Int?
+    val conceded: Int?,
+    val assists: Int?,
+    val saves: Int?
 )
+
 data class TopScorerStatistics(
     val team: PlayerTeamInfo,
     val games: PlayerGames,

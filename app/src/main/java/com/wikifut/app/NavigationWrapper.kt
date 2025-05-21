@@ -21,6 +21,7 @@ import com.wikifut.app.model.Venue
 import com.wikifut.app.presentation.Favoritos.FavoritesViewModel
 import com.wikifut.app.presentation.Search.SearchScreen
 import com.wikifut.app.presentation.Team.TeamScreen
+import com.wikifut.app.presentation.Ligas.LigaDetalleScreen
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -62,8 +63,8 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
         navHostController.navigate("playerscreen/$playerId/$season")
     }
 
-    val onLigasNavigate: () -> Unit = {
-
+    val onLigasNavigate: (leagueId: Int, season: Int) -> Unit = { leagueId, season ->
+        navHostController.navigate("ligaDetalle/$leagueId/$season")
     }
 
 
@@ -177,6 +178,16 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
             val playerId = backStackEntry.arguments?.getString("playerId")
             val season = backStackEntry.arguments?.getString("season")
             PlayerScreen(playerId = playerId!!.toInt(), season = season!!.toInt())
+        }
+
+        composable("ligaDetalle/{leagueId}/{season}") { backStackEntry ->
+            val leagueId = backStackEntry.arguments?.getString("leagueId")?.toIntOrNull() ?: return@composable
+            val season = backStackEntry.arguments?.getString("season")?.toIntOrNull() ?: return@composable
+            LigaDetalleScreen(
+                leagueId = leagueId,
+                season = season,
+                navController = navHostController // para el botón "Atrás"
+            )
         }
     }
 }

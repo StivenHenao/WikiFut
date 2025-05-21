@@ -46,11 +46,6 @@ data class LigaResponse(
     val seasons: List<Season>
 )
 
-data class CountryInfo(
-    val name: String,
-    val flag: String?
-)
-
 data class League(
     val id: Int,
     val name: String,

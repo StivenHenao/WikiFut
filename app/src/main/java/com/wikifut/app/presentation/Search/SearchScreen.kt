@@ -38,7 +38,7 @@ fun SearchScreen(
     HomeNavigate: () -> Unit,
     onTeamNavigate: (team: Team, venue: Venue) -> Unit,
     onPlayerNavigate: (playerId: String, season: String) -> Unit,
-    onLigasNavigate: () -> Unit,
+    onLigasNavigate: (leagueId: Int, season: Int) -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     // Estado para la búsqueda de texto
@@ -108,7 +108,7 @@ fun SearchScreen(
                     EquiposResult(viewModel, onTeamNavigate)
                 }
                 TipoBusqueda.Ligas -> {
-                    LigasResult(viewModel)
+                    LigasResult(viewModel, onLigasNavigate)
                 }
                 TipoBusqueda.Jugadores -> {
                     PlayerResult(viewModel,onPlayerNavigate)

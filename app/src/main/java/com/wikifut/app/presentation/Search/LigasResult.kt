@@ -1,5 +1,6 @@
 package com.wikifut.app.presentation.Search
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,7 +25,7 @@ import coil.compose.AsyncImage
 
 
 @Composable
-fun LigasResult(viewModel: SearchViewModel) {
+fun LigasResult(viewModel: SearchViewModel, onLigasNavigate: (leagueId: Int, season: Int) -> Unit) {
     val resultadoState by viewModel.resultadoLigas.collectAsState()
     val resultado = resultadoState
 
@@ -41,7 +42,8 @@ fun LigasResult(viewModel: SearchViewModel) {
                 LeagueItem(
                     name = liga.name,
                     logo = liga.logo,
-                    country = pais
+                    country = pais,
+                    onClick = { onLigasNavigate(liga.id, 2023) }
                 )
             }
         }
@@ -49,7 +51,7 @@ fun LigasResult(viewModel: SearchViewModel) {
 }
 
 @Composable
-fun LeagueItem(name: String, logo: String, country: String) {
+fun LeagueItem(name: String, logo: String, country: String, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -60,7 +62,8 @@ fun LeagueItem(name: String, logo: String, country: String) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(8.dp)
+                .clickable{onClick()},
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
