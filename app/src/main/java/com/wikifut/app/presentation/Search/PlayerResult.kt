@@ -1,5 +1,6 @@
 package com.wikifut.app.presentation.Search
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,18 +25,18 @@ import coil.compose.AsyncImage
 import com.wikifut.app.model.Player
 
 @Composable
-fun PlayerResult(viewModel: SearchViewModel) {
+fun PlayerResult(viewModel: SearchViewModel, onPlayerNavigate: (playerId: String, season: String) -> Unit) {
     val resultadoState by viewModel.resultadoJugadores.collectAsState()
     val resultado = resultadoState
     if (resultado == null || resultado.response.isEmpty()) {
         Text(
-            text = "No hay resultados de jugadores",
+            text = "No hay jugadores disponibles en este momento",
             color = Color.White
         )
     } else {
         LazyColumn {
             items(resultado.response) { jugadorResponse ->
-                PlayerItem(player = jugadorResponse.player)
+                PlayerItem(player = jugadorResponse.player, onPlayerNavigate = onPlayerNavigate)
             }
         }
     }
@@ -43,7 +44,7 @@ fun PlayerResult(viewModel: SearchViewModel) {
 
 
 @Composable
-fun PlayerItem(player: Player) {
+fun PlayerItem(player: Player, onPlayerNavigate: (playerId: String,season: String) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -54,7 +55,8 @@ fun PlayerItem(player: Player) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(8.dp)
+                .clickable{onPlayerNavigate(player.id.toString(), "2023")},
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(

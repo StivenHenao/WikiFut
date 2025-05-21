@@ -32,7 +32,7 @@ fun EquiposResult(viewModel: SearchViewModel, onTeamNavigate: (team: Team, venue
     val resultado = resultadoState
     if (resultado == null || resultado.response.isEmpty()) {
         Text(
-            text = "No hay resultados",
+            text = "No hay equipos disponibles en este momento",
             color = Color.White
         )
     } else {

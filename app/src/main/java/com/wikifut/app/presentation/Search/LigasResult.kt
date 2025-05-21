@@ -30,7 +30,7 @@ fun LigasResult(viewModel: SearchViewModel) {
 
     if (resultado == null || resultado.response.isEmpty()) {
         Text(
-            text = "No hay resultados de ligas",
+            text = "No hay ligas disponibles en este momento",
             color = Color.White
         )
     } else {
