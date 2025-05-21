@@ -106,5 +106,6 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.google.android.gms:play-services-auth:20.7.0")
     implementation("androidx.navigation:navigation-compose:2.7.5") // o la versión que uses
+    implementation("io.coil-kt:coil-svg:2.4.0")
 
 }

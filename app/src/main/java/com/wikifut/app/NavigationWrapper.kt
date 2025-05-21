@@ -49,7 +49,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
             TipoBusqueda.Equipos -> navHostController.navigate("busqueda/Equipos/$query")
             TipoBusqueda.Ligas -> navHostController.navigate("busqueda/Ligas/$query")
             TipoBusqueda.Partidos -> navHostController.navigate("busqueda/Partidos/$query")
-            TipoBusqueda.Jugadores -> navHostController.navigate("busqueda/jugadores/$query")
+            TipoBusqueda.Jugadores -> navHostController.navigate("busqueda/Jugadores/$query")
         }
     }
     val onTeamNavigate: (Team, Venue) -> Unit = { team, venue ->

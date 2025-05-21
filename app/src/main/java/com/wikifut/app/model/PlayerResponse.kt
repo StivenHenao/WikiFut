@@ -45,7 +45,7 @@ data class Player(
     val birth: PlayerBirth,
     val nationality: String,
     val height: String,
-    val weight: String,
+    val weight: String?,
     val number: Int,
     val position: String,
     val photo: String,

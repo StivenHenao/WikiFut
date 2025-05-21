@@ -16,6 +16,13 @@ interface PartidosApi {
     @GET("teams")
     suspend fun buscarEquipos(@Query("search") query: String): ListaEquipos
 
+    @GET("fixtures")
+    suspend fun getPartidosPorLigaYTemporada(
+        @Query("league") leagueId: Int,
+        @Query("season") season: Int
+    ): ListaPartidos
+
+
     @GET("teams/statistics")
     suspend fun getTeamStats(
         @Query("league") leagueId: Int,

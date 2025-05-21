@@ -222,15 +222,17 @@ fun PlayerDetails(playerDataResponse: PlayerDataResponse) =
 
             if (statisticTeamPlayer != null) {
                 if (team_player != null) {
-                    containerBasicInfo(team = team_player,
-                        imageTeam = statisticTeamPlayer.logo,
-                        nacionalidad = player.nationality,
-                        nacimiento = player.age,
-                        altura = player.height,
-                        posicion = position,
-                        camiseta = numberPlayer,
-                        peso = player.weight
-                    )
+                    player.weight?.let {
+                        containerBasicInfo(team = team_player,
+                            imageTeam = statisticTeamPlayer.logo,
+                            nacionalidad = player.nationality,
+                            nacimiento = player.age,
+                            altura = player.height,
+                            posicion = position,
+                            camiseta = numberPlayer,
+                            peso = it
+                        )
+                    }
                 }
             }
 

@@ -102,8 +102,10 @@ fun Header(
                                 "Ligas" -> TipoBusqueda.Ligas
                                 "Partidos" -> TipoBusqueda.Partidos
                                 "Jugador" -> TipoBusqueda.Jugadores
-                                else -> TipoBusqueda.Equipos
+                                "Equipos" -> TipoBusqueda.Equipos
+                                else -> TipoBusqueda.Jugadores
                             }
+                            //Log.d("Header", "Buscando: $searchQuery - ${tipoBusqueda.toString()}")
                             onBuscar(tipoBusqueda, searchQuery)
                             true
                         } else false
