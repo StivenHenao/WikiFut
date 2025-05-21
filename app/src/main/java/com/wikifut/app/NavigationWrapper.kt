@@ -26,6 +26,7 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.wikifut.app.presentation.Favoritos.FavoritosScreen
+import com.wikifut.app.presentation.player.PlayerScreen
 
 @Composable
 fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) {
@@ -55,6 +56,14 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
         val teamJson = URLEncoder.encode(Gson().toJson(team), StandardCharsets.UTF_8.toString())
         val venueJson = URLEncoder.encode(Gson().toJson(venue), StandardCharsets.UTF_8.toString())
         navHostController.navigate("teamScreen/$teamJson/$venueJson")
+    }
+
+    val onPlayerNavigate: (String, String) -> Unit = { playerId, season ->
+        navHostController.navigate("playerscreen/$playerId/$season")
+    }
+
+    val onLigasNavigate: () -> Unit = {
+
     }
 
 
@@ -137,7 +146,11 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
                 HomeNavigate = {
                     navHostController.popBackStack("home", inclusive = false)
                 },
-                onTeamNavigate = onTeamNavigate)
+
+                onTeamNavigate = onTeamNavigate,
+                onPlayerNavigate = onPlayerNavigate,
+                onLigasNavigate = onLigasNavigate
+            )
         }
 
 
@@ -158,6 +171,12 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
                 onTeamClick = onTeamNavigate,
                 onBackClick = { navHostController.popBackStack() }
             )
+        }
+
+        composable("playerscreen/{playerId}/{season}") { backStackEntry ->
+            val playerId = backStackEntry.arguments?.getString("playerId")
+            val season = backStackEntry.arguments?.getString("season")
+            PlayerScreen(playerId = playerId!!.toInt(), season = season!!.toInt())
         }
     }
 }

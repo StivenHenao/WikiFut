@@ -313,7 +313,7 @@ fun SignUpScreen(
                             else {
                                 errorMessage = when {
                                     task.exception?.message?.contains("email address") == true -> "Correo inválido o en uso"
-                                    password.length < 6 -> "La contraseña debe tener al menos 6 caracteres"
+                                    password.length < 8 -> "La contraseña debe tener al menos 8 caracteres"
                                     else -> "Error al registrar"
                                 }
                             }

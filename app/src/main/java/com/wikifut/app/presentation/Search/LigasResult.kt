@@ -19,7 +19,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 
@@ -31,12 +30,8 @@ fun LigasResult(viewModel: SearchViewModel) {
 
     if (resultado == null || resultado.response.isEmpty()) {
         Text(
-            text = "No hay resultados de ligas",
-            color = Color.White,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            textAlign = TextAlign.Center
+            text = "No hay ligas disponibles en este momento",
+            color = Color.White
         )
     } else {
         LazyColumn {
