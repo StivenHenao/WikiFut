@@ -112,9 +112,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
                         popUpTo("home") { inclusive = true }
                     }
                 },
-                navigateToMatchDetail = { matchId ->
-                    navHostController.navigate("matchDetail/$matchId")
-                }
+                navigateToMatchDetail = { matchId -> navHostController.navigate("matchDetail/$matchId" )},
                 onSearchNavigate = onSearchNavigate,
                 onFavoritosNavigate = { navHostController.navigate("favoritos") }
             )

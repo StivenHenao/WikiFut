@@ -53,6 +53,7 @@ import com.wikifut.app.utils.obtenerFechaActual
 
 @Composable
 fun HomeScreenWithDrawer(
+    navigateToMatchDetail: (Long) -> Unit,
     navigateToEditProfile: () -> Unit,
     navigateToInitial: () -> Unit,
     viewModel: HomePartidosViewModel = hiltViewModel(),
@@ -89,7 +90,8 @@ fun HomeScreenWithDrawer(
             navigateToEditProfile = navigateToEditProfile,
             navigateToInitial = navigateToInitial,
             openDrawer = { scope.launch { drawerState.open() } },
-            onSearchNavigate = onSearchNavigate
+            onSearchNavigate = onSearchNavigate,
+            navigateToMatchDetail = navigateToMatchDetail
         )
     }
 }
