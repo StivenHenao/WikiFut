@@ -1,30 +1,36 @@
 package com.wikifut.app.presentation.Favoritos
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.wikifut.app.R
-
 import com.wikifut.app.model.Team
 import com.wikifut.app.model.Venue
 import com.wikifut.app.presentation.Header.Header
 import com.wikifut.app.presentation.Search.SearchViewModel
 import com.wikifut.app.presentation.Search.TeamItem
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoritosScreen(
     onTeamClick: (Team, Venue) -> Unit,
@@ -37,30 +43,49 @@ fun FavoritosScreen(
         viewModel.cargarFavoritos()
     }
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = com.wikifut.app.presentation.Search.MoradoOscuro
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Header(
-                searchQuery = "",
-                onSearchChange = {},
-                onBuscar = { _, _ -> },
-                actions = {
-                    IconButton(onClick = { onBackClick() }) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                modifier = Modifier.height(56.dp),
+                title = { Text("Favoritos") },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
                         Icon(
                             painterResource(R.drawable.ic_back),
                             contentDescription = "Atrás",
                             tint = Color.White
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF1F1235),
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
+                )
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF2D1B45))
+                .padding(paddingValues)
+        ) {
+            Header(
+                searchQuery = "",
+                onSearchChange = {},
+                onBuscar = { _, _ -> },
+                actions = {}
+
             )
 
             Text(
                 text = "Tus equipos favoritos",
                 color = Color.White,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
 
             if (equipos.isEmpty()) {
@@ -69,6 +94,8 @@ fun FavoritosScreen(
                     color = Color.White,
                     modifier = Modifier
                         .padding(16.dp)
+                        .fillMaxWidth(),
+                    textAlign = TextAlign.Center
                 )
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {

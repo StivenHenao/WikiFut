@@ -1,6 +1,7 @@
 package com.wikifut.app.presentation.Search
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,14 +17,19 @@ import com.wikifut.app.model.Team
 import com.wikifut.app.model.TipoBusqueda
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import com.wikifut.app.presentation.Header.Header
 import com.wikifut.app.R
 import com.wikifut.app.model.Venue
+import com.wikifut.app.presentation.Search.EquiposResult
+import com.wikifut.app.presentation.Search.LigasResult
+import com.wikifut.app.presentation.Search.PlayerResult
 //import com.wikifut.app.presentation.Search.EquiposResult
 
 val MoradoOscuro = Color(0xFF2E0854)    // Morado oscuro
 val MoradoClaro = Color(0xFF7E57C2)    // Morado más claro para el Card
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
     tipo: TipoBusqueda, // El tipo de búsqueda que quieres realizar
@@ -32,7 +38,6 @@ fun SearchScreen(
     HomeNavigate: () -> Unit,
     onTeamNavigate: (team: Team, venue: Venue) -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
-
 ) {
     // Estado para la búsqueda de texto
     var searchQuery by remember { mutableStateOf("") }
@@ -43,30 +48,62 @@ fun SearchScreen(
             viewModel.buscar(tipo, query)
         }
     }
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MoradoOscuro
-    ) {
 
-        Column(modifier = Modifier.padding(16.dp)) {
-            // barra de busqueda
-            Header(
-                searchQuery = searchQuery,
-                onSearchChange = { searchQuery = it },
-                onBuscar = onSearchNavigate,
-                actions = {
-                    IconButton(onClick = { /* abrir filtro */ }) {
-                        Icon(painterResource(R.drawable.ic_filter), contentDescription = "Filtrar", tint = Color.White)
-                    }
-                    IconButton(onClick = { HomeNavigate()  }) {
-                        Icon(painterResource(R.drawable.ic_back), contentDescription = "Atrás", tint = Color.White)
-                    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MoradoOscuro)
+            .windowInsetsPadding(WindowInsets.statusBars)
+    ) {
+        Header(
+            searchQuery = searchQuery,
+            onSearchChange = { searchQuery = it },
+            onBuscar = onSearchNavigate,
+            actions = {
+                IconButton(
+                    onClick = { /* abrir filtro */ },
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_filter),
+                        contentDescription = "Filtrar",
+                        tint = Color.White,
+                        modifier = Modifier.size(36.dp)
+                    )
                 }
-            )
+                IconButton(
+                    onClick = { HomeNavigate() },
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_back),
+                        contentDescription = "Atrás",
+                        tint = Color.White,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+            }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (query.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Ingresa algo para buscar",
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        } else {
             // Aquí solo mostramos el resultado que el usuario busco
             when (tipo) {
                 TipoBusqueda.Equipos -> {
-                    EquiposResult(viewModel,onTeamNavigate)
+                    EquiposResult(viewModel, onTeamNavigate)
                 }
                 TipoBusqueda.Ligas -> {
                     LigasResult(viewModel)

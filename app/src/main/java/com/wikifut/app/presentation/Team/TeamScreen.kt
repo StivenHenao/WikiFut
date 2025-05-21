@@ -131,7 +131,7 @@ fun TeamScreen(
                             Icon(
                                 imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
                                 contentDescription = "Favorito",
-                                tint = if (isFavorite) Color.White else Color.Black,
+                                tint = if (isFavorite) Color.Yellow else Color.White,
                             )
                         }
                         IconButton(onClick = { /* Acción de notificaciones */ }) {

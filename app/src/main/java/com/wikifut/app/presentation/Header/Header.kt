@@ -40,7 +40,6 @@ import com.wikifut.app.R
 import com.wikifut.app.model.TipoBusqueda
 
 fun noHacerNada(tipoBusqueda: TipoBusqueda  , string: String) {
-    // No hace nada
 }
 
 
@@ -61,7 +60,7 @@ fun Header(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0x991F1235))
+            .background(Color(0xFF1F1235))
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -87,13 +86,13 @@ fun Header(
             modifier = Modifier
                 .weight(1f)
                 .background(Color.White, shape = RoundedCornerShape(8.dp))
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .padding(horizontal = 3.dp, vertical = 2.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             TextField(
                 value = searchQuery,
                 onValueChange = onSearchChange,
-                placeholder = { Text("Buscar $selectedOption...") },
+                placeholder = { Text("🔍 Buscar $selectedOption") },
                 modifier = Modifier
                     .weight(1f)
                     .onKeyEvent { keyEvent ->
@@ -120,25 +119,6 @@ fun Header(
                 singleLine = true,
                 maxLines = 1,
             )
-
-            if (modoBusquedaActiva) {
-                IconButton(onClick = {
-                    val tipoBusqueda = when (selectedOption) {
-                        "Ligas" -> TipoBusqueda.Ligas
-                        "Partidos" -> TipoBusqueda.Partidos
-                        "Jugador" -> TipoBusqueda.Jugadores
-                        else -> TipoBusqueda.Equipos
-                    }
-                    focusManager.clearFocus()
-                    onBuscar(tipoBusqueda, searchQuery)
-                }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_search), // Usa un ícono de búsqueda
-                        contentDescription = "Buscar",
-                        tint = Color.Black
-                    )
-                }
-            }
 
             Box(
                 modifier = Modifier
@@ -171,29 +151,6 @@ fun Header(
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        if (!modoBusquedaActiva) {
-            // Botón de activar modo búsqueda
-            IconButton(onClick = { modoBusquedaActiva = true }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_search), // mismo ícono de búsqueda
-                    contentDescription = "Activar búsqueda",
-                    tint = Color.White
-                )
-            }
-
-            actions()
-        } else {
-            // Botón para salir del modo búsqueda
-            IconButton(onClick = {
-                modoBusquedaActiva = false
-                focusManager.clearFocus()
-            }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_close), // ícono de cerrar
-                    contentDescription = "Cerrar búsqueda",
-                    tint = Color.White
-                )
-            }
-        }
+        actions()
     }
 }
