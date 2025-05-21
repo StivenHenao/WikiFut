@@ -35,6 +35,9 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import com.wikifut.app.R
 import com.wikifut.app.model.TipoBusqueda
@@ -120,6 +123,22 @@ fun Header(
                 ),
                 singleLine = true,
                 maxLines = 1,
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Search
+                ),
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+                        focusManager.clearFocus()
+                        val tipoBusqueda = when (selectedOption) {
+                            "Ligas" -> TipoBusqueda.Ligas
+                            "Partidos" -> TipoBusqueda.Partidos
+                            "Jugador" -> TipoBusqueda.Jugadores
+                            "Equipos" -> TipoBusqueda.Equipos
+                            else -> TipoBusqueda.Jugadores
+                        }
+                        onBuscar(tipoBusqueda, searchQuery)
+                    }
+                )
             )
 
             Box(
