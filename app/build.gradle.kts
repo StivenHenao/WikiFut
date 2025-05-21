@@ -63,7 +63,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashtlytics)
@@ -77,6 +76,9 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.media3.common.ktx)
+    implementation(libs.androidx.runtime.livedata)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -93,6 +95,9 @@ dependencies {
 
     implementation("androidx.compose.material:material-icons-extended-android:1.3.1")
 
+    implementation("com.google.firebase:firebase-firestore:24.7.1")
+
+
     val hilt_navigation_compose_version = "1.1.0"
     val hilt_version = "2.50"
     implementation("androidx.hilt:hilt-navigation-compose:$hilt_navigation_compose_version")
@@ -100,4 +105,7 @@ dependencies {
     kapt("com.google.dagger:hilt-android-compiler:$hilt_version")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.google.android.gms:play-services-auth:20.7.0")
+    implementation("androidx.navigation:navigation-compose:2.7.5") // o la versión que uses
+    implementation("io.coil-kt:coil-svg:2.4.0")
+
 }
