@@ -43,7 +43,7 @@ fun LigasResult(viewModel: SearchViewModel, onLigasNavigate: (leagueId: Int, sea
                     name = liga.name,
                     logo = liga.logo,
                     country = pais,
-                    onClick = { onLigasNavigate(liga.id, 2023) }
+                    onClick = { onLigasNavigate(liga.id, 2025) }
                 )
             }
         }
