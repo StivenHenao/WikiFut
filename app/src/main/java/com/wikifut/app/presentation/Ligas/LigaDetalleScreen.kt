@@ -1,14 +1,14 @@
 package com.wikifut.app.presentation.Ligas
 
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,8 +30,15 @@ import com.wikifut.app.model.TopScorerItem
 import com.wikifut.app.model.LeagueDetailItem
 import com.wikifut.app.model.TeamBasicInfo
 import com.wikifut.app.model.TopAssistItem
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.layout.ContentScale
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LigaDetalleScreen(
     leagueId: Int,
@@ -43,42 +50,52 @@ fun LigaDetalleScreen(
     var selectedTab by remember { mutableStateOf(0) }
 
     val nombreLiga = viewModel.nombreLiga.value
-
     val temporada = viewModel.temporada.value
     val temporadas = viewModel.temporadasDisponibles.value
-
     var temporadaSeleccionada by remember { mutableStateOf(season) }
     var expanded by remember { mutableStateOf(false) }
 
     // Actualizar valores cuando cambia la temporada seleccionada
-
     LaunchedEffect(temporadaSeleccionada) {
         viewModel.cargarTabla(leagueId, temporadaSeleccionada)
         viewModel.cargarEquipos(leagueId, temporadaSeleccionada)
         viewModel.cargarTopScorers(leagueId, temporadaSeleccionada)
         viewModel.cargarPartidosPorLigaYTemporada(leagueId, temporadaSeleccionada)
-        //viewModel.cargarStandings(leagueId, temporadaSeleccionada)
         viewModel.cargarAsistidores(leagueId, temporadaSeleccionada)
+        viewModel.cargarInfoLiga(leagueId)
     }
+
     // Solo una vez
     LaunchedEffect(Unit) {
+        viewModel.obtenerTemporadaActual(leagueId)
         viewModel.cargarTabla(leagueId, temporadaSeleccionada)
         viewModel.cargarEquipos(leagueId, temporadaSeleccionada)
         viewModel.cargarTopScorers(leagueId, temporadaSeleccionada)
         viewModel.cargarPartidosPorLigaYTemporada(leagueId, temporadaSeleccionada)
-        //viewModel.cargarStandings(leagueId, temporadaSeleccionada)
         viewModel.cargarAsistidores(leagueId, temporadaSeleccionada)
+        viewModel.cargarInfoLiga(leagueId)
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        // Botón de regreso
-        Text(
-            text = "Atrás",
-            modifier = Modifier
-                .padding(12.dp)
-                .clickable { navController.popBackStack() },
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.primary
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.statusBars)
+    ) {
+        // Header con botón de regreso
+        CenterAlignedTopAppBar(
+            title = { },
+            navigationIcon = {
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Atrás",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            },
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = MaterialTheme.colorScheme.background
+            )
         )
 
         // Nombre de liga y logo
@@ -125,24 +142,26 @@ fun LigaDetalleScreen(
         }
 
         // Tabs: Informacion General | Partidos | Tabla | Goleadores | Asistidores
-        TabRow(selectedTabIndex = selectedTab) {
-            Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }) {
-                Text("Informacion general", modifier = Modifier.padding(12.dp))
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(horizontal = 12.dp)
+        ) {
+            items(listOf(
+                "Información general" to 0,
+                "Partidos" to 1,
+                "Clasificación" to 2,
+                "Goleadores" to 3,
+                "Asistidores" to 4
+            )) { (text, index) ->
+                NavigationOption(
+                    text = text,
+                    isSelected = selectedTab == index,
+                    onClick = { selectedTab = index }
+                )
             }
-            Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }) {
-                Text("Partidos", modifier = Modifier.padding(12.dp))
-            }
-            Tab(selected = selectedTab == 2, onClick = { selectedTab = 2 }) {
-                Text("Clasificacion", modifier = Modifier.padding(12.dp))
-
-            }
-            Tab(selected = selectedTab == 3, onClick = { selectedTab = 3 }) {
-                Text("Goleadores", modifier = Modifier.padding(12.dp))
-            }
-            Tab(selected = selectedTab == 4, onClick = { selectedTab = 4 }) {
-                Text("Asistidores", modifier = Modifier.padding(12.dp))
-            }
-
         }
 
         // Contenido según tab
@@ -315,7 +334,6 @@ fun TablaGoleadores(goleadores: List<TopScorerItem>) {
     }
 }
 
-
 @Composable
 fun ListaDePartidos(partidos: List<Partido>) {
     LazyColumn(
@@ -333,13 +351,66 @@ fun ListaDePartidos(partidos: List<Partido>) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(12.dp),
+                        .padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(partido.teams.home.name)
-                    Text("${partido.goals?.home ?: "-"} - ${partido.goals?.away ?: "-"}")
-                    Text(partido.teams.away.name)
+                    // Equipo local
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        AsyncImage(
+                            model = partido.teams.home.logo,
+                            contentDescription = partido.teams.home.name,
+                            modifier = Modifier.size(40.dp),
+                            contentScale = ContentScale.Fit
+                        )
+                        Text(
+                            text = partido.teams.home.name,
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                            maxLines = 2,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+
+                    // Marcador
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    ) {
+                        Text(
+                            text = "${partido.goals?.home ?: "-"} - ${partido.goals?.away ?: "-"}",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = partido.fixture.status.long,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    // Equipo visitante
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        AsyncImage(
+                            model = partido.teams.away.logo,
+                            contentDescription = partido.teams.away.name,
+                            modifier = Modifier.size(40.dp),
+                            contentScale = ContentScale.Fit
+                        )
+                        Text(
+                            text = partido.teams.away.name,
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                            maxLines = 2,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
                 }
             }
         }
@@ -348,8 +419,8 @@ fun ListaDePartidos(partidos: List<Partido>) {
 
 @Composable
 fun LigaInfoConEquiposTab(
-    info: LeagueDetailItem, // tu modelo con los datos de la liga
-    equipos: List<TeamBasicInfo> // lista de equipos
+    info: LeagueDetailItem,
+    equipos: List<TeamBasicInfo>
 ) {
     LazyColumn(
         modifier = Modifier
@@ -371,7 +442,11 @@ fun LigaInfoConEquiposTab(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(top = 8.dp)
                 )
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     val imageLoader = ImageLoader.Builder(LocalContext.current)
                         .components {
                             add(SvgDecoder.Factory())
@@ -396,7 +471,9 @@ fun LigaInfoConEquiposTab(
             Text(
                 text = "Equipos participantes",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
         }
 
@@ -406,35 +483,72 @@ fun LigaInfoConEquiposTab(
                 columns = GridCells.Fixed(3),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 1000.dp), // ajusta según el contenido
+                    .heightIn(max = 1000.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
-                userScrollEnabled = false //  para evitar doble scroll
+                userScrollEnabled = false
             ) {
                 items(equipos) { equipo ->
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                     ) {
                         Column(
-                            modifier = Modifier.padding(8.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
                         ) {
                             AsyncImage(
                                 model = equipo.logo,
                                 contentDescription = equipo.name,
-                                modifier = Modifier.size(40.dp)
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .padding(bottom = 8.dp),
+                                contentScale = ContentScale.Fit
                             )
                             Text(
                                 text = equipo.name,
                                 style = MaterialTheme.typography.bodySmall,
-                                maxLines = 1
+                                maxLines = 2,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
                             )
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun NavigationOption(
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) 
+                MaterialTheme.colorScheme.primary 
+            else 
+                MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            color = if (isSelected) 
+                MaterialTheme.colorScheme.onPrimary 
+            else 
+                MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }

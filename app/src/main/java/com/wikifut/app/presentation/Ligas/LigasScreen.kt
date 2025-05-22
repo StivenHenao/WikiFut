@@ -62,6 +62,7 @@ fun LigasScreen(
             items(ligas) { liga ->
                 LigaItem(liga = liga) {
                     val temporadaActual = liga.seasons.find { it.current }?.year ?: 2024
+
                     navController.navigate("ligaDetalle/${liga.league.id}/$temporadaActual")
                 }
             }
