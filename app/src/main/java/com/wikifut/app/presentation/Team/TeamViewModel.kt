@@ -34,7 +34,7 @@ class TeamViewModel @Inject constructor(
     fun cargarFavoritos() {
         viewModelScope.launch {
             try {
-                _favoritos.value = favoritesRepository.obtenerFavoritos()
+                _favoritos.value = favoritesRepository.obtenerEquiposFavoritos()
                 Log.d("FavoritesViewModel", "Favoritos cargados: ${_favoritos.value.toString()}")
             } catch (e: Exception) {
                 Log.e("FavoritesViewModel", "Error al cargar favoritos", e)
@@ -46,7 +46,7 @@ class TeamViewModel @Inject constructor(
     fun agregarAFavoritos(equipoFavorito: FavoriteTeam) {
         viewModelScope.launch {
             try {
-                favoritesRepository.agregarAFavoritos(equipoFavorito)
+                favoritesRepository.agregarEquipoAFavoritos(equipoFavorito)
                 cargarFavoritos()
             } catch (e: Exception) {
                 _error.value = "Error al agregar a favoritos: ${e.message}"
@@ -55,14 +55,14 @@ class TeamViewModel @Inject constructor(
     }
 
     suspend fun isFavorite(teamId: Int): Boolean {
-        val favoritos = favoritesRepository.obtenerFavoritos()
+        val favoritos = favoritesRepository.obtenerEquiposFavoritos()
         return favoritos.any { it.team.id == teamId }
     }
 
     fun removeFromFavorites(teamId: Int) {
         viewModelScope.launch {
             try {
-                favoritesRepository.eliminarFavorito(teamId)
+                favoritesRepository.eliminarEquipoFavorito(teamId)
                 cargarFavoritos()
             } catch (e: Exception) {
                 _error.value = "Error al eliminar favorito: ${e.message}"

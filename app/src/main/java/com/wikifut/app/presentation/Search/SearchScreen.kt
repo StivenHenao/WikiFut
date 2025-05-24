@@ -20,6 +20,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import com.wikifut.app.presentation.Header.Header
 import com.wikifut.app.R
+import com.wikifut.app.model.League
+import com.wikifut.app.model.LigaResponse
 import com.wikifut.app.model.Venue
 import com.wikifut.app.presentation.Search.EquiposResult
 import com.wikifut.app.presentation.Search.LigasResult
@@ -38,7 +40,7 @@ fun SearchScreen(
     HomeNavigate: () -> Unit,
     onTeamNavigate: (team: Team, venue: Venue) -> Unit,
     onPlayerNavigate: (playerId: String, season: String) -> Unit,
-    onLigasNavigate: (leagueId: Int, season: Int) -> Unit,
+    onLigasNavigate: (leagueId: League, season: Int) -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     // Estado para la búsqueda de texto

@@ -22,10 +22,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.wikifut.app.model.League
+import com.wikifut.app.model.LigaResponse
 
 
 @Composable
-fun LigasResult(viewModel: SearchViewModel, onLigasNavigate: (leagueId: Int, season: Int) -> Unit) {
+fun LigasResult(viewModel: SearchViewModel, onLigasNavigate: (leagueId: League, season: Int) -> Unit) {
     val resultadoState by viewModel.resultadoLigas.collectAsState()
     val resultado = resultadoState
 
@@ -37,13 +39,14 @@ fun LigasResult(viewModel: SearchViewModel, onLigasNavigate: (leagueId: Int, sea
     } else {
         LazyColumn {
             items(resultado.response) { ligaResponse ->
-                val liga = ligaResponse.league
-                val pais = ligaResponse.country.name
+                val ligaOriginal = ligaResponse.league
+                val ligaConDatosCompletos = ligaOriginal.copy(
+                    country = ligaResponse.country.name,
+                    flag = ligaResponse.country.flag
+                )
                 LeagueItem(
-                    name = liga.name,
-                    logo = liga.logo,
-                    country = pais,
-                    onClick = { onLigasNavigate(liga.id, 2025) }
+                    league = ligaConDatosCompletos,
+                    onClick = { onLigasNavigate(ligaConDatosCompletos, 2025) }
                 )
             }
         }
@@ -51,7 +54,11 @@ fun LigasResult(viewModel: SearchViewModel, onLigasNavigate: (leagueId: Int, sea
 }
 
 @Composable
-fun LeagueItem(name: String, logo: String, country: String, onClick: () -> Unit) {
+fun LeagueItem(league: League, onClick: () -> Unit) {
+    val name = league.name
+    val logo = league.logo
+    val country = league.country
+
     Card(
         modifier = Modifier
             .fillMaxWidth()

@@ -28,6 +28,8 @@ import java.net.URLDecoder
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.wikifut.app.model.League
+import com.wikifut.app.model.LigaResponse
 import com.wikifut.app.presentation.Favoritos.FavoritosScreen
 import com.wikifut.app.presentation.player.PlayerScreen
 
@@ -65,8 +67,9 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
         navHostController.navigate("playerscreen/$playerId/$season")
     }
 
-    val onLigasNavigate: (leagueId: Int, season: Int) -> Unit = { leagueId, season ->
-        navHostController.navigate("ligaDetalle/$leagueId/$season")
+    val onLigasNavigate: (league: League, season: Int) -> Unit = { league, season ->
+        val teamJson = URLEncoder.encode(Gson().toJson(league), StandardCharsets.UTF_8.toString())
+        navHostController.navigate("ligaDetalle/$teamJson/$season")
     }
 
 
@@ -200,10 +203,12 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
         }
 
         composable("ligaDetalle/{leagueId}/{season}") { backStackEntry ->
-            val leagueId = backStackEntry.arguments?.getString("leagueId")?.toIntOrNull() ?: return@composable
+            val leaguejson = URLDecoder.decode(backStackEntry.arguments?.getString("leagueId") ?: "", StandardCharsets.UTF_8.toString())
+            val league = Gson().fromJson(leaguejson, League::class.java)
+
             val season = backStackEntry.arguments?.getString("season")?.toIntOrNull() ?: return@composable
             LigaDetalleScreen(
-                leagueId = leagueId,
+                league = league,
                 season = season,
                 navController = navHostController // para el botón "Atrás"
             )

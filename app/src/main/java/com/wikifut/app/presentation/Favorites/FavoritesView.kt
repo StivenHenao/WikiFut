@@ -26,6 +26,7 @@ import com.wikifut.app.R
 import com.wikifut.app.model.Team
 import com.wikifut.app.model.Venue
 import com.wikifut.app.presentation.Header.Header
+import com.wikifut.app.presentation.Search.LeagueItem
 import com.wikifut.app.presentation.Search.SearchViewModel
 import com.wikifut.app.presentation.Search.TeamItem
 
@@ -37,10 +38,12 @@ fun FavoritosScreen(
     onBackClick: () -> Unit,
     viewModel: FavoritesViewModel = hiltViewModel()
 ) {
-    val equipos by viewModel.favoritos.collectAsState()
+    val equipos by viewModel.favoritos_equipo.collectAsState()
+    val ligas by viewModel.favoritos_liga.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.cargarFavoritos()
+        viewModel.cargarEquipoFavoritos()
+        viewModel.cargarLigaFavoritos()
     }
 
     Scaffold(
@@ -98,7 +101,7 @@ fun FavoritosScreen(
                     textAlign = TextAlign.Center
                 )
             } else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                LazyColumn() {
                     items(equipos) { favoriteTeam ->
                         TeamItem(
                             team = favoriteTeam.team,
@@ -106,6 +109,36 @@ fun FavoritosScreen(
                         )
                     }
                 }
+            }
+
+            Text(
+                text = "Tus ligas favoritas",
+                color = Color.White,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+
+            if(ligas.isEmpty()){
+                Text(
+                    text = "No tienes Ligas favoritos",
+                    color = Color.White,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(ligas) { favoriteLeague ->
+                        LeagueItem(
+                            league = favoriteLeague,
+                            onClick = { /* Acción al hacer clic en la liga */ }
+                        )
+                    }
+                }
+
             }
         }
     }

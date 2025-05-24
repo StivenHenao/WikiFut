@@ -1,5 +1,6 @@
 package com.wikifut.app.presentation.Ligas
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -35,18 +36,28 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.layout.ContentScale
+import com.wikifut.app.model.FavoriteTeam
+import com.wikifut.app.model.League
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.collectAsState
+import com.wikifut.app.model.LigaResponse
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LigaDetalleScreen(
-    leagueId: Int,
+    league: League,
     season: Int,
     navController: NavHostController,
     viewModel: LigaDetalleViewModel = hiltViewModel()
 ) {
     // Estado para el tab seleccionado
+    val leagueId = league.id
     var selectedTab by remember { mutableStateOf(0) }
 
     val nombreLiga = viewModel.nombreLiga.value
@@ -54,6 +65,11 @@ fun LigaDetalleScreen(
     val temporadas = viewModel.temporadasDisponibles.value
     var temporadaSeleccionada by remember { mutableStateOf(season) }
     var expanded by remember { mutableStateOf(false) }
+
+    // variables para favoritos
+    val favoritos by viewModel.favoritos.collectAsState()
+    val isFavorite = favoritos.any { it.id == leagueId }
+    val coroutineScope = rememberCoroutineScope()
 
     // Actualizar valores cuando cambia la temporada seleccionada
     LaunchedEffect(temporadaSeleccionada) {
@@ -74,6 +90,7 @@ fun LigaDetalleScreen(
         viewModel.cargarPartidosPorLigaYTemporada(leagueId, temporadaSeleccionada)
         viewModel.cargarAsistidores(leagueId, temporadaSeleccionada)
         viewModel.cargarInfoLiga(leagueId)
+        viewModel.cargarFavoritos()
     }
 
     Column(
@@ -81,6 +98,7 @@ fun LigaDetalleScreen(
             .fillMaxSize()
             .windowInsetsPadding(WindowInsets.statusBars)
     ) {
+
         // Header con botón de regreso
         CenterAlignedTopAppBar(
             title = { },
@@ -97,6 +115,29 @@ fun LigaDetalleScreen(
                 containerColor = MaterialTheme.colorScheme.background
             )
         )
+        IconButton(
+            onClick = {
+
+                if (isFavorite) {
+                    Log.d("TeamScreen", "Se elimino el favorito")
+
+                    coroutineScope.launch {
+                        viewModel.removeFromFavorites(leagueId)
+                    }
+                } else {
+                    coroutineScope.launch {
+                        viewModel.agregarLigaAFavoritos(league)
+                    }
+                    Log.d("TeamScreen", "Se agrego el favorito teamId: ${leagueId}")
+                }
+            }
+        ) {
+            Icon(
+                imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
+                contentDescription = "Favorito",
+                tint = if (isFavorite) Color.Yellow else Color.White,
+            )
+        }
 
         // Nombre de liga y logo
         Row(

@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wikifut.app.model.FavoriteTeam
+import com.wikifut.app.model.League
+import com.wikifut.app.model.LigaResponse
 import com.wikifut.app.repository.FavoritesRepository
 import com.wikifut.app.model.Team
 import com.wikifut.app.model.Venue
@@ -17,17 +19,20 @@ class FavoritesViewModel @Inject constructor(
     private val repository: FavoritesRepository
 ) : ViewModel() {
 
-    private val _favoritos = MutableStateFlow<List<FavoriteTeam>>(emptyList())
-    val favoritos: StateFlow<List<FavoriteTeam>> = _favoritos
+    private val _favoritos_equipo = MutableStateFlow<List<FavoriteTeam>>(emptyList())
+    val favoritos_equipo: StateFlow<List<FavoriteTeam>> = _favoritos_equipo
+
+    private val _favoritos_liga = MutableStateFlow<List<League>>(emptyList())
+    val favoritos_liga: StateFlow<List<League>> = _favoritos_liga
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
-    fun cargarFavoritos() {
+    fun cargarEquipoFavoritos() {
         viewModelScope.launch {
             try {
-                _favoritos.value = repository.obtenerFavoritos()
-                Log.d("FavoritesViewModel", "Favoritos cargados: ${_favoritos.value.toString()}")
+                _favoritos_equipo.value = repository.obtenerEquiposFavoritos()
+                Log.d("FavoritesViewModel", "Favoritos cargados: ${_favoritos_equipo.value.toString()}")
             } catch (e: Exception) {
                 Log.e("FavoritesViewModel", "Error al cargar favoritos", e)
                 _error.value = "Error al cargar favoritos: ${e.message}"
@@ -35,14 +40,14 @@ class FavoritesViewModel @Inject constructor(
         }
     }
 
-    fun addToFavorites(team: Team, venue: Venue) {
-        val favoriteTeam = FavoriteTeam(team, venue)
+    fun cargarLigaFavoritos(){
         viewModelScope.launch {
             try {
-                repository.agregarAFavoritos(favoriteTeam)
-                cargarFavoritos()
+                _favoritos_liga.value = repository.obtenerLigasFavoritas()
+                Log.d("FavoritesViewModel", "Favoritos cargados: ${_favoritos_liga.value.toString()}")
             } catch (e: Exception) {
-                _error.value = "Error al agregar a favoritos: ${e.message}"
+                Log.e("FavoritesViewModel", "Error al cargar favoritos", e)
+                _error.value = "Error al cargar favoritos: ${e.message}"
             }
         }
     }
