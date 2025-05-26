@@ -37,25 +37,26 @@ data class ResponseItem(
 )
 
 data class Player(
-    val id: Int,
-    val name: String,
-    val firstname: String,
-    val lastname: String,
-    val age: Int,
-    val birth: PlayerBirth,
-    val nationality: String,
-    val height: String,
-    val weight: String?,
-    val number: Int,
-    val position: String,
-    val photo: String,
-    val injured: Boolean?,
+    val id: Int = 0,
+    val name: String = "",
+    val firstname: String = "",
+    val lastname: String = "",
+    val age: Int = 0,
+    val birth: PlayerBirth = PlayerBirth(),
+    val nationality: String = "",
+    val height: String = "",
+    val weight: String? = null,
+    val number: Int = 0,
+    val position: String = "",
+    val photo: String = "",
+    val injured: Boolean? = null
 )
 
+
 data class PlayerBirth(
-    val date: String,
-    val place: String,
-    val country: String
+    val date: String = "",
+    val place: String = "",
+    val country: String = ""
 )
 
 data class PlayerStatistic(

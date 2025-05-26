@@ -36,7 +36,11 @@ fun PlayerResult(viewModel: SearchViewModel, onPlayerNavigate: (playerId: String
     } else {
         LazyColumn {
             items(resultado.response) { jugadorResponse ->
-                PlayerItem(player = jugadorResponse.player, onPlayerNavigate = onPlayerNavigate)
+                PlayerItem(
+                    player = jugadorResponse.player,
+
+                    onPlayerNavigate = { onPlayerNavigate(jugadorResponse.player.id.toString(), "2023") }
+                )
             }
         }
     }
@@ -44,7 +48,7 @@ fun PlayerResult(viewModel: SearchViewModel, onPlayerNavigate: (playerId: String
 
 
 @Composable
-fun PlayerItem(player: Player, onPlayerNavigate: (playerId: String,season: String) -> Unit) {
+fun PlayerItem(player: Player, onPlayerNavigate: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -56,7 +60,7 @@ fun PlayerItem(player: Player, onPlayerNavigate: (playerId: String,season: Strin
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
-                .clickable{onPlayerNavigate(player.id.toString(), "2023")},
+                .clickable{onPlayerNavigate()},
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(

@@ -192,6 +192,8 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
             //val favoritesViewModel: FavoritesViewModel = hiltViewModel()
             FavoritosScreen(
                 onTeamClick = onTeamNavigate,
+                onLeagueClick = onLigasNavigate,
+                onPlayerClick = onPlayerNavigate,
                 onBackClick = { navHostController.popBackStack() }
             )
         }

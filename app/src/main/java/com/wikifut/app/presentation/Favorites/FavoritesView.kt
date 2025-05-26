@@ -8,7 +8,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -23,11 +22,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.wikifut.app.R
+import com.wikifut.app.model.League
 import com.wikifut.app.model.Team
 import com.wikifut.app.model.Venue
 import com.wikifut.app.presentation.Header.Header
 import com.wikifut.app.presentation.Search.LeagueItem
-import com.wikifut.app.presentation.Search.SearchViewModel
+import com.wikifut.app.presentation.Search.PlayerItem
 import com.wikifut.app.presentation.Search.TeamItem
 
 
@@ -35,15 +35,18 @@ import com.wikifut.app.presentation.Search.TeamItem
 @Composable
 fun FavoritosScreen(
     onTeamClick: (Team, Venue) -> Unit,
+    onLeagueClick: (League, Int) -> Unit,
+    onPlayerClick: (String,String) -> Unit,
     onBackClick: () -> Unit,
     viewModel: FavoritesViewModel = hiltViewModel()
 ) {
     val equipos by viewModel.favoritos_equipo.collectAsState()
     val ligas by viewModel.favoritos_liga.collectAsState()
-
+    val players by viewModel.favoritos_player.collectAsState()
     LaunchedEffect(Unit) {
         viewModel.cargarEquipoFavoritos()
         viewModel.cargarLigaFavoritos()
+        viewModel.cargarPlayerFavoritos()
     }
 
     Scaffold(
@@ -125,20 +128,44 @@ fun FavoritosScreen(
                     text = "No tienes Ligas favoritos",
                     color = Color.White,
                     modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
+                        .padding(16.dp),
                     textAlign = TextAlign.Center
                 )
             } else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                LazyColumn() {
                     items(ligas) { favoriteLeague ->
                         LeagueItem(
                             league = favoriteLeague,
-                            onClick = { /* Acción al hacer clic en la liga */ }
+                            onClick = { onLeagueClick(favoriteLeague, favoriteLeague.season) }
                         )
                     }
                 }
 
+            }
+
+            Text(
+                text = "Tus jugadores favoritos",
+                color = Color.White,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .fillMaxWidth(),
+            )
+
+            if(players.isEmpty()) {
+                Text(
+                    text = "No tienes jugadores favoritos",
+                    color = Color.White,
+                    modifier = Modifier
+                )
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(players) { favoritePlayer ->
+                        PlayerItem(
+                            player = favoritePlayer,
+                            onPlayerNavigate = { onPlayerClick(favoritePlayer.id.toString(), "2023") }
+                        )
+                    }
+                }
             }
         }
     }

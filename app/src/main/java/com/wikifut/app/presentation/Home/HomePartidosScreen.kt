@@ -271,12 +271,12 @@ fun HomePartidosScreen(
     }
 
     // Filtro de partidos según la búsqueda
-    //val partidosFiltrados = state.filter { partido ->
-        //partido.league.name.contains(searchQuery, ignoreCase = true) ||
-                //partido.teams.home.name.contains(searchQuery, ignoreCase = true) ||
-                //partido.teams.away.name.contains(searchQuery, ignoreCase = true)
-    //}
-    val partidosFiltrados = state;
+    val partidosFiltrados = state.filter { partido ->
+        partido.league.name.contains(searchQuery, ignoreCase = true) ||
+                partido.teams.home.name.contains(searchQuery, ignoreCase = true) ||
+                partido.teams.away.name.contains(searchQuery, ignoreCase = true)
+    }
+    //val partidosFiltrados = state;
 
 
     if (showDatePicker) {

@@ -1,5 +1,6 @@
 package com.wikifut.app.presentation.player
 
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -10,7 +11,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -33,6 +39,7 @@ import androidx.compose.ui.unit.Dp
 import com.wikifut.app.model.*
 import com.wikifut.app.viewmodel.PlayerViewModel
 import com.wikifut.app.presentation.player.components.StatisticBar
+import kotlinx.coroutines.launch
 
 /**
  * Vista de Preview que utiliza un mock, para evitar inyección de dependencias en el preview.
@@ -141,6 +148,8 @@ fun PlayerScreen(
         viewModel.fetchPlayerData(playerId, season)
     }
 
+
+
     // Layout principal con fondo oscuro.
     Box(
         modifier = Modifier
@@ -162,7 +171,7 @@ fun PlayerScreen(
                 )
             }
             playerDataState != null -> {
-                PlayerDetails(playerDataResponse = playerDataState!!)
+                PlayerDetails(playerDataResponse = playerDataState!!, viewModel = viewModel)
             }
             else -> {
                 Text(text = "No se encontraron datos", color = Color.White)
@@ -177,7 +186,7 @@ fun PlayerScreen(
  * La posición se obtiene del primer estadístico (dentro de games) y se muestra.
  */
 @Composable
-fun PlayerDetails(playerDataResponse: PlayerDataResponse) =
+fun PlayerDetails(playerDataResponse: PlayerDataResponse, viewModel: PlayerViewModel = hiltViewModel()) =
     if (playerDataResponse.response.isEmpty()) {
         // Mostrar un mensaje informando que no se encontraron datos
         Box(
@@ -203,7 +212,10 @@ fun PlayerDetails(playerDataResponse: PlayerDataResponse) =
 
         val position = playerData.statistics?.firstOrNull()?.games?.position ?: "N/A"
         val numberPlayer =statisticGame?.number?: 0
-
+        // variables para favoritos
+        val favoritos by viewModel.favoritePlayersList.collectAsState()
+        val isFavorite = favoritos.any { it.id == player.id }
+        val coroutineScope = rememberCoroutineScope()
 
         Column(
             modifier = Modifier
@@ -216,6 +228,32 @@ fun PlayerDetails(playerDataResponse: PlayerDataResponse) =
             //---------------------------HEADER------------------
             if (team_player != null) {
                 headerVistaPlayer(name = player.name, player.photo, team_player ,rating)
+            }
+
+            // boton Favoritos
+            IconButton(
+                onClick = {
+
+                    if (isFavorite) {
+                        Log.d("TeamScreen", "Se elimino el favorito")
+
+
+                        coroutineScope.launch {
+                            viewModel.eliminarJugadorDeFavoritos(player)
+                        }
+                    } else {
+                        coroutineScope.launch {
+                            viewModel.agregarJugadorAFavoritos(player)
+                        }
+                        Log.d("TeamScreen", "Se agrego el favorito teamId: ${player.id}")
+                    }
+                }
+            ) {
+                Icon(
+                    imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
+                    contentDescription = "Favorito",
+                    tint = if (isFavorite) Color.Yellow else Color.White,
+                )
             }
 
             Spacer(Modifier.height(8.dp))
