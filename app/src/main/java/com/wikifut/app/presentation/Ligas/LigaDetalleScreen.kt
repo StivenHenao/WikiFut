@@ -2,6 +2,7 @@ package com.wikifut.app.presentation.Ligas
 
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.wikifut.app.model.StandingTeam
@@ -96,9 +98,9 @@ fun LigaDetalleScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color(0xFF2D1B45))
             .windowInsetsPadding(WindowInsets.statusBars)
     ) {
-
         // Header con botón de regreso
         CenterAlignedTopAppBar(
             title = { },
@@ -107,20 +109,19 @@ fun LigaDetalleScreen(
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
                         contentDescription = "Atrás",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = Color.White
                     )
                 }
             },
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                containerColor = MaterialTheme.colorScheme.background
+                containerColor = Color(0xFF1F1235)
             )
         )
+
         IconButton(
             onClick = {
-
                 if (isFavorite) {
                     Log.d("TeamScreen", "Se elimino el favorito")
-
                     coroutineScope.launch {
                         viewModel.removeFromFavorites(leagueId)
                     }
@@ -140,68 +141,78 @@ fun LigaDetalleScreen(
         }
 
         // Nombre de liga y logo
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 6.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .background(Color(0xFF1F1235))
         ) {
-            Text(
-                text = nombreLiga.ifEmpty { "Liga" },
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-            Image(
-                painter = rememberAsyncImagePainter("https://media.api-sports.io/football/leagues/$leagueId.png"),
-                contentDescription = "Logo liga",
-                modifier = Modifier.size(40.dp)
-            )
-        }
-
-        // Menu desplegable con temporadas
-        Box(
-            modifier = Modifier
-                .padding(horizontal = 12.dp, vertical = 8.dp)
-                .clickable { expanded = true }
-        ) {
-            Text("Temporada: $temporadaSeleccionada")
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                temporadas.forEach { year ->
-                    DropdownMenuItem(
-                        text = { Text("Temporada $year") },
-                        onClick = {
-                            expanded = false
-                            temporadaSeleccionada = year
-                        }
-                    )
+                Text(
+                    text = nombreLiga.ifEmpty { "Liga" },
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                Image(
+                    painter = rememberAsyncImagePainter("https://media.api-sports.io/football/leagues/$leagueId.png"),
+                    contentDescription = "Logo liga",
+                    modifier = Modifier.size(40.dp)
+                )
+            }
+
+            // Menu desplegable con temporadas
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .clickable { expanded = true }
+            ) {
+                Text(
+                    "Temporada: $temporadaSeleccionada",
+                    color = Color.White
+                )
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    temporadas.forEach { year ->
+                        DropdownMenuItem(
+                            text = { Text("Temporada $year") },
+                            onClick = {
+                                expanded = false
+                                temporadaSeleccionada = year
+                            }
+                        )
+                    }
                 }
             }
-        }
 
-        // Tabs: Informacion General | Partidos | Tabla | Goleadores | Asistidores
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(horizontal = 12.dp)
-        ) {
-            items(listOf(
-                "Información general" to 0,
-                "Partidos" to 1,
-                "Clasificación" to 2,
-                "Goleadores" to 3,
-                "Asistidores" to 4
-            )) { (text, index) ->
-                NavigationOption(
-                    text = text,
-                    isSelected = selectedTab == index,
-                    onClick = { selectedTab = index }
-                )
+            // Tabs: Informacion General | Partidos | Tabla | Goleadores | Asistidores
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(horizontal = 12.dp)
+            ) {
+                items(listOf(
+                    "Información general" to 0,
+                    "Partidos" to 1,
+                    "Clasificación" to 2,
+                    "Goleadores" to 3,
+                    "Asistidores" to 4
+                )) { (text, index) ->
+                    NavigationOption(
+                        text = text,
+                        isSelected = selectedTab == index,
+                        onClick = { selectedTab = index }
+                    )
+                }
             }
         }
 
@@ -481,7 +492,8 @@ fun LigaInfoConEquiposTab(
                     text = info.league.name,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 8.dp)
+                    modifier = Modifier.padding(top = 8.dp),
+                    color = Color.White
                 )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -502,7 +514,10 @@ fun LigaInfoConEquiposTab(
                         contentDescription = "Bandera país",
                         modifier = Modifier.size(30.dp)
                     )
-                    Text(text = info.country.name)
+                    Text(
+                        text = info.country.name,
+                        color = Color.White
+                    )
                 }
             }
         }
@@ -514,7 +529,8 @@ fun LigaInfoConEquiposTab(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = Color.White
             )
         }
 

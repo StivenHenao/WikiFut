@@ -3,6 +3,7 @@ package com.wikifut.app.presentation.Header
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +17,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -63,14 +65,14 @@ fun Header(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFF1F1235))
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 4.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         // Logo
         Box(
             modifier = Modifier
-                .size(50.dp)
+                .size(40.dp)
                 .background(Color.White, shape = CircleShape)
                 .clip(CircleShape),
             contentAlignment = Alignment.Center
@@ -78,16 +80,15 @@ fun Header(
             Image(
                 painter = painterResource(id = R.drawable.wikifutlogo),
                 contentDescription = "Logo",
-                modifier = Modifier.size(50.dp)
+                modifier = Modifier.size(40.dp)
             )
         }
-
-        Spacer(modifier = Modifier.width(8.dp))
 
         // Buscador + Dropdown
         Row(
             modifier = Modifier
                 .weight(1f)
+                .padding(horizontal = 4.dp)
                 .background(Color.White, shape = RoundedCornerShape(8.dp))
                 .padding(horizontal = 3.dp, vertical = 2.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -95,7 +96,12 @@ fun Header(
             TextField(
                 value = searchQuery,
                 onValueChange = onSearchChange,
-                placeholder = { Text("🔍 Buscar $selectedOption") },
+                placeholder = { 
+                    Text(
+                        "🔍 Buscar $selectedOption",
+                        style = MaterialTheme.typography.bodyLarge
+                    ) 
+                },
                 modifier = Modifier
                     .weight(1f)
                     .onKeyEvent { keyEvent ->
@@ -108,7 +114,6 @@ fun Header(
                                 "Equipos" -> TipoBusqueda.Equipos
                                 else -> TipoBusqueda.Jugadores
                             }
-                            //Log.d("Header", "Buscando: $searchQuery - ${tipoBusqueda.toString()}")
                             onBuscar(tipoBusqueda, searchQuery)
                             true
                         } else false
@@ -121,6 +126,7 @@ fun Header(
                     focusedTextColor = Color.Black,
                     unfocusedTextColor = Color.Black
                 ),
+                textStyle = MaterialTheme.typography.bodyLarge,
                 singleLine = true,
                 maxLines = 1,
                 keyboardOptions = KeyboardOptions(
@@ -145,11 +151,15 @@ fun Header(
                 modifier = Modifier
                     .background(dropdownBackgroundColor, shape = RoundedCornerShape(6.dp))
             ) {
-                IconButton(onClick = { dropdownExpanded = true }) {
+                IconButton(
+                    onClick = { dropdownExpanded = true },
+                    modifier = Modifier.size(32.dp)
+                ) {
                     Icon(
                         painter = painterResource(id = R.drawable.arrow_drop_down),
                         contentDescription = "Seleccionar tipo",
-                        tint = Color.White
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
@@ -170,8 +180,12 @@ fun Header(
             }
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
-
-        actions()
+        // Iconos de acción
+        Row(
+            modifier = Modifier.padding(start = 2.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            actions()
+        }
     }
 }

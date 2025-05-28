@@ -4,9 +4,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -15,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -29,7 +33,11 @@ import com.wikifut.app.presentation.Header.Header
 import com.wikifut.app.presentation.Search.LeagueItem
 import com.wikifut.app.presentation.Search.PlayerItem
 import com.wikifut.app.presentation.Search.TeamItem
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 
+private val MoradoClaro = Color(0xFF4A256F)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,14 +60,29 @@ fun FavoritosScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                modifier = Modifier.height(56.dp),
-                title = { Text("Favoritos") },
+                modifier = Modifier.height(70.dp),
+                title = { 
+                    Box(
+                        modifier = Modifier.fillMaxHeight(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "Favoritos",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
+                    IconButton(
+                        onClick = onBackClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
                         Icon(
                             painterResource(R.drawable.ic_back),
                             contentDescription = "Atrás",
-                            tint = Color.White
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 },
@@ -82,7 +105,6 @@ fun FavoritosScreen(
                 onSearchChange = {},
                 onBuscar = { _, _ -> },
                 actions = {}
-
             )
 
             Text(
@@ -95,14 +117,22 @@ fun FavoritosScreen(
             )
 
             if (equipos.isEmpty()) {
-                Text(
-                    text = "No tienes equipos favoritos",
-                    color = Color.White,
+                Card(
                     modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MoradoClaro),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Text(
+                        text = "No tienes equipos favoritos",
+                        color = Color.White,
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                }
             } else {
                 LazyColumn() {
                     items(equipos) { favoriteTeam ->
@@ -124,13 +154,22 @@ fun FavoritosScreen(
             )
 
             if(ligas.isEmpty()){
-                Text(
-                    text = "No tienes Ligas favoritos",
-                    color = Color.White,
+                Card(
                     modifier = Modifier
+                        .fillMaxWidth()
                         .padding(16.dp),
-                    textAlign = TextAlign.Center
-                )
+                    colors = CardDefaults.cardColors(containerColor = MoradoClaro),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Text(
+                        text = "No tienes ligas favoritas",
+                        color = Color.White,
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                }
             } else {
                 LazyColumn() {
                     items(ligas) { favoriteLeague ->
@@ -140,7 +179,6 @@ fun FavoritosScreen(
                         )
                     }
                 }
-
             }
 
             Text(
@@ -149,14 +187,26 @@ fun FavoritosScreen(
                 modifier = Modifier
                     .padding(horizontal = 16.dp, vertical = 8.dp)
                     .fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
 
             if(players.isEmpty()) {
-                Text(
-                    text = "No tienes jugadores favoritos",
-                    color = Color.White,
+                Card(
                     modifier = Modifier
-                )
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MoradoClaro),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Text(
+                        text = "No tienes jugadores favoritos",
+                        color = Color.White,
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                }
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(players) { favoritePlayer ->

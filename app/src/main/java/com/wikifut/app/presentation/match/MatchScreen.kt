@@ -13,8 +13,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.StarBorder
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
@@ -44,6 +46,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
+import androidx.navigation.NavHostController
 
 // Colores
 val DarkPurpleBackground = Color(0xFF1A1032)
@@ -53,10 +56,12 @@ val AccentPurple = Color(0xFFE040FB)
 val TextColorLight = Color.White
 val TextColorSecondary = Color.LightGray
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MatchScreen(
     matchId: Long,
-    viewModel: MatchViewModel = hiltViewModel()
+    viewModel: MatchViewModel = hiltViewModel(),
+    navController: NavHostController
 ) {
 
     val match: MatchResponse? by viewModel.match.collectAsState()
@@ -72,15 +77,48 @@ fun MatchScreen(
 
     match?.let { currentMatchData ->
         Scaffold(
-            containerColor = DarkPurpleBackground,
-
-            // TODO: Agregar barra de navegación
-
+            topBar = {
+                TopAppBar(
+                    modifier = Modifier.height(70.dp),
+                    title = { 
+                        Box(
+                            modifier = Modifier.fillMaxHeight(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Detalles del Partido",
+                                color = TextColorLight,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = { navController.popBackStack() },
+                            modifier = Modifier.size(48.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "Atrás",
+                                tint = TextColorLight,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = DarkPurpleBackground,
+                        titleContentColor = TextColorLight,
+                        navigationIconContentColor = TextColorLight
+                    )
+                )
+            },
+            containerColor = DarkPurpleBackground
         ) { paddingValues ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
+                    .padding(top = paddingValues.calculateTopPadding())
                     .background(DarkPurpleBackground)
             ) {
                 MatchHeader(match = currentMatchData)
@@ -88,7 +126,13 @@ fun MatchScreen(
             }
         }
     } ?: run {
-        Box(modifier = Modifier.fillMaxSize().background(DarkPurpleBackground), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(DarkPurpleBackground)
+                .statusBarsPadding(), 
+            contentAlignment = Alignment.Center
+        ) {
             CircularProgressIndicator(color = AccentYellow)
         }
     }
@@ -109,27 +153,24 @@ fun MatchHeader(match: MatchResponse) {
             val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.getDefault())
             val outputFormat = SimpleDateFormat("EEEE, d 'de' MMMM yyyy - HH:mm", Locale("es", "ES"))
             val date = inputFormat.parse(fixture.date)
-            date?.let { outputFormat.format(it) } ?: fixture.date // Fallback a la fecha original
+            date?.let { outputFormat.format(it) } ?: fixture.date
         } catch (e: Exception) {
             Log.e("MatchHeader", "Error parsing date: ${fixture.date}", e)
             fixture.date
         }
     }
 
-    Column(modifier = Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .padding(vertical = 4.dp)
         ) {
-
-
-            // Icono de "Atrás" (si no usas una TopAppBar con navigationIcon)
-            // IconButton(onClick = { /* TODO: Navegar hacia atrás */ }) {
-            //    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás", tint = TextColorLight)
-            // }
-            // Spacer(Modifier.width(8.dp)) // Si el icono de atrás está aquí
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = league.name,
@@ -144,7 +185,6 @@ fun MatchHeader(match: MatchResponse) {
                 )
             }
 
-            // TODO: implementar logicas?
             IconButton(onClick = { /* TODO: Lógica de favorito */ }) {
                 Icon(Icons.Default.StarBorder, contentDescription = "Favorito", tint = TextColorLight)
             }
@@ -152,11 +192,11 @@ fun MatchHeader(match: MatchResponse) {
                 Icon(Icons.Default.Share, contentDescription = "Compartir", tint = TextColorLight)
             }
         }
-        Spacer(modifier = Modifier.height(16.dp))
+        
+        Spacer(modifier = Modifier.height(4.dp))
+        
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceAround
         ) {
@@ -166,7 +206,6 @@ fun MatchHeader(match: MatchResponse) {
             Spacer(Modifier.width(8.dp))
             TeamDisplay(team = teams.away, alignment = Alignment.CenterHorizontally)
         }
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 

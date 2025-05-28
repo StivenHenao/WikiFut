@@ -137,7 +137,10 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
             val matchId = backStackEntry.arguments?.getLong("matchId")
 
             if (matchId != null) {
-                MatchScreen(matchId = matchId)
+                MatchScreen(
+                    matchId = matchId,
+                    navController = navHostController
+                )
             } else {
                 navHostController.popBackStack("home", false)
             }

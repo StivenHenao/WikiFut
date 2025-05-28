@@ -37,6 +37,7 @@ import com.wikifut.app.model.FavoriteTeam
 import kotlinx.coroutines.launch
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TeamScreen(
     team: Team,
@@ -79,10 +80,84 @@ fun TeamScreen(
         ) {
             // Imagen de fondo
             Image(
-                painter = painterResource(id = R.drawable.bg_team_header), // Asegúrate de tener esta imagen
+                painter = painterResource(id = R.drawable.bg_team_header),
                 contentDescription = "Fondo del equipo",
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
+            )
+
+            // TopAppBar
+            TopAppBar(
+                modifier = Modifier.height(61.dp),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent
+                ),
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            IconButton(
+                                onClick = onBackClick,
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_back_24),
+                                    contentDescription = "Volver",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            Text(
+                                text = team.name,
+                                color = Color.White,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
+                        }
+                        
+                        Row {
+                            IconButton(
+                                onClick = {
+                                    if (isFavorite) {
+                                        Log.d("TeamScreen", "Se elimino el favorito")
+                                        coroutineScope.launch {
+                                            viewModel.removeFromFavorites(team.id)
+                                        }
+                                    } else {
+                                        coroutineScope.launch {
+                                            viewModel.agregarAFavoritos(
+                                                FavoriteTeam(
+                                                    team = team,
+                                                    venue = venue
+                                                )
+                                            )
+                                        }
+                                        Log.d("TeamScreen", "Se agrego el favorito teamId: ${team.id}")
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
+                                    contentDescription = "Favorito",
+                                    tint = if (isFavorite) Color.Yellow else Color.White,
+                                )
+                            }
+                            IconButton(onClick = { /* Acción de notificaciones */ }) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.baseline_notifications_24),
+                                    contentDescription = "Notificaciones",
+                                    tint = Color.White
+                                )
+                            }
+                        }
+                    }
+                }
             )
 
             // Contenido sobre la imagen
@@ -93,60 +168,10 @@ fun TeamScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                // Barra superior con botón de atrás y acciones
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_back_24),
-                            contentDescription = "Atrás",
-                            tint = Color.White
-                        )
-                    }
-
-                    Row {
-                        IconButton(
-                            onClick = {
-                                if (isFavorite) {
-                                    Log.d("TeamScreen", "Se elimino el favorito")
-                                    coroutineScope.launch {
-                                        viewModel.removeFromFavorites(team.id)
-                                    }
-                                } else {
-                                    coroutineScope.launch {
-                                        viewModel.agregarAFavoritos(
-                                            FavoriteTeam(
-                                                team = team,
-                                                venue = venue
-                                            )
-                                        )
-                                    }
-                                    Log.d("TeamScreen", "Se agrego el favorito teamId: ${team.id}")
-                                }
-                            }
-                        ) {
-                            Icon(
-                                imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
-                                contentDescription = "Favorito",
-                                tint = if (isFavorite) Color.Yellow else Color.White,
-                            )
-                        }
-                        IconButton(onClick = { /* Acción de notificaciones */ }) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.baseline_notifications_24),
-                                contentDescription = "Notificaciones",
-                                tint = Color.White
-                            )
-                        }
-                    }
-                }
-
                 // Logo y nombre del equipo centrado
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(top = 61.dp)
                 ) {
                     Image(
                         painter = rememberAsyncImagePainter(team.logo),
@@ -173,7 +198,6 @@ fun TeamScreen(
                             color = Color.White
                         )
                     }
-
                 }
             }
         }
