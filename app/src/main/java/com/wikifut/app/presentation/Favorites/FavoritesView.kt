@@ -11,6 +11,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -18,6 +20,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -107,113 +112,132 @@ fun FavoritosScreen(
                 actions = {}
             )
 
-            Text(
-                text = "Tus equipos favoritos",
-                color = Color.White,
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
+            var selectedTab by remember { mutableStateOf(0) }
+            val tabs = listOf("Equipos", "Ligas", "Jugadores")
 
-            if (equipos.isEmpty()) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MoradoClaro),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                ) {
-                    Text(
-                        text = "No tienes equipos favoritos",
-                        color = Color.White,
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
-                        textAlign = TextAlign.Center
+            TabRow(
+                selectedTabIndex = selectedTab,
+                containerColor = Color(0xFF1F1235),
+                contentColor = Color.White
+            ) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(
+                        selected = selectedTab == index,
+                        onClick = { selectedTab = index },
+                        text = {
+                            Text(
+                                text = title,
+                                color = if (selectedTab == index) Color.White else Color.Gray
+                            )
+                        }
                     )
-                }
-            } else {
-                LazyColumn() {
-                    items(equipos) { favoriteTeam ->
-                        TeamItem(
-                            team = favoriteTeam.team,
-                            onClick = { onTeamClick(favoriteTeam.team, favoriteTeam.venue) }
-                        )
-                    }
                 }
             }
 
-            Text(
-                text = "Tus ligas favoritas",
-                color = Color.White,
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-
-            if(ligas.isEmpty()){
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MoradoClaro),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                ) {
-                    Text(
-                        text = "No tienes ligas favoritas",
-                        color = Color.White,
+            when (selectedTab) {
+                0 -> {
+                    LazyColumn(
                         modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
-                        textAlign = TextAlign.Center
-                    )
-                }
-            } else {
-                LazyColumn() {
-                    items(ligas) { favoriteLeague ->
-                        LeagueItem(
-                            league = favoriteLeague,
-                            onClick = { onLeagueClick(favoriteLeague, favoriteLeague.season) }
-                        )
+                            .fillMaxSize()
+                            .padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(5.dp),
+                        contentPadding = PaddingValues(bottom = 16.dp)
+                    ) {
+                        if (equipos.isEmpty()) {
+                            item {
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = CardDefaults.cardColors(containerColor = MoradoClaro),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                                ) {
+                                    Text(
+                                        text = "No tienes equipos favoritos",
+                                        color = Color.White,
+                                        modifier = Modifier
+                                            .padding(16.dp)
+                                            .fillMaxWidth(),
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
+                        } else {
+                            items(equipos) { favoriteTeam ->
+                                TeamItem(
+                                    team = favoriteTeam.team,
+                                    onClick = { onTeamClick(favoriteTeam.team, favoriteTeam.venue) }
+                                )
+                            }
+                        }
                     }
                 }
-            }
-
-            Text(
-                text = "Tus jugadores favoritos",
-                color = Color.White,
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-
-            if(players.isEmpty()) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MoradoClaro),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                ) {
-                    Text(
-                        text = "No tienes jugadores favoritos",
-                        color = Color.White,
+                1 -> {
+                    LazyColumn(
                         modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
-                        textAlign = TextAlign.Center
-                    )
+                            .fillMaxSize()
+                            .padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(5.dp),
+                        contentPadding = PaddingValues(bottom = 16.dp)
+                    ) {
+                        if(ligas.isEmpty()) {
+                            item {
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = CardDefaults.cardColors(containerColor = MoradoClaro),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                                ) {
+                                    Text(
+                                        text = "No tienes ligas favoritas",
+                                        color = Color.White,
+                                        modifier = Modifier
+                                            .padding(16.dp)
+                                            .fillMaxWidth(),
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
+                        } else {
+                            items(ligas) { favoriteLeague ->
+                                LeagueItem(
+                                    league = favoriteLeague,
+                                    onClick = { onLeagueClick(favoriteLeague, favoriteLeague.season) }
+                                )
+                            }
+                        }
+                    }
                 }
-            } else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(players) { favoritePlayer ->
-                        PlayerItem(
-                            player = favoritePlayer,
-                            onPlayerNavigate = { onPlayerClick(favoritePlayer.id.toString(), "2023") }
-                        )
+                2 -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(5.dp),
+                        contentPadding = PaddingValues(bottom = 16.dp)
+                    ) {
+                        if(players.isEmpty()) {
+                            item {
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = CardDefaults.cardColors(containerColor = MoradoClaro),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                                ) {
+                                    Text(
+                                        text = "No tienes jugadores favoritos",
+                                        color = Color.White,
+                                        modifier = Modifier
+                                            .padding(16.dp)
+                                            .fillMaxWidth(),
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
+                        } else {
+                            items(players) { favoritePlayer ->
+                                PlayerItem(
+                                    player = favoritePlayer,
+                                    onPlayerNavigate = { onPlayerClick(favoritePlayer.id.toString(), "2023") }
+                                )
+                            }
+                        }
                     }
                 }
             }

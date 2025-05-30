@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -23,29 +24,36 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.wikifut.app.model.Player
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 
 @Composable
 fun PlayerResult(viewModel: SearchViewModel, onPlayerNavigate: (playerId: String, season: String) -> Unit) {
     val resultadoState by viewModel.resultadoJugadores.collectAsState()
     val resultado = resultadoState
+
     if (resultado == null || resultado.response.isEmpty()) {
         Text(
             text = "No hay jugadores disponibles en este momento",
             color = Color.White
         )
     } else {
-        LazyColumn {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(bottom = 80.dp)
+        ) {
             items(resultado.response) { jugadorResponse ->
                 PlayerItem(
                     player = jugadorResponse.player,
-
                     onPlayerNavigate = { onPlayerNavigate(jugadorResponse.player.id.toString(), "2023") }
                 )
             }
         }
     }
 }
-
 
 @Composable
 fun PlayerItem(player: Player, onPlayerNavigate: () -> Unit) {

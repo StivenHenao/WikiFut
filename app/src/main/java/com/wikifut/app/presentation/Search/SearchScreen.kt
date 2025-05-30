@@ -26,6 +26,8 @@ import com.wikifut.app.model.Venue
 import com.wikifut.app.presentation.Search.EquiposResult
 import com.wikifut.app.presentation.Search.LigasResult
 import com.wikifut.app.presentation.Search.PlayerResult
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 //import com.wikifut.app.presentation.Search.EquiposResult
 
 val MoradoOscuro = Color(0xFF2E0854)    // Morado oscuro
@@ -34,8 +36,8 @@ val MoradoClaro = Color(0xFF7E57C2)    // Morado más claro para el Card
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
-    tipo: TipoBusqueda, // El tipo de búsqueda que quieres realizar
-    query: String, // La consulta de búsqueda
+    tipo: TipoBusqueda,
+    query: String,
     onSearchNavigate: (TipoBusqueda, String) -> Unit,
     HomeNavigate: () -> Unit,
     onTeamNavigate: (team: Team, venue: Venue) -> Unit,
@@ -43,79 +45,87 @@ fun SearchScreen(
     onLigasNavigate: (leagueId: League, season: Int) -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
-    // Estado para la búsqueda de texto
     var searchQuery by remember { mutableStateOf("") }
 
-    // Disparar la búsqueda al entrar a la pantalla o si cambian el tipo o la consulta
     LaunchedEffect(key1 = tipo, key2 = query) {
         if (query.isNotEmpty()) {
             viewModel.buscar(tipo, query)
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MoradoOscuro)
-            .windowInsetsPadding(WindowInsets.statusBars)
-    ) {
-        Header(
-            searchQuery = searchQuery,
-            onSearchChange = { searchQuery = it },
-            onBuscar = onSearchNavigate,
-            actions = {
-                IconButton(
-                    onClick = { /* abrir filtro */ },
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_filter),
-                        contentDescription = "Filtrar",
-                        tint = Color.White,
-                        modifier = Modifier.size(36.dp)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                modifier = Modifier.height(70.dp),
+                title = { 
+                    Text(
+                        "Inicio",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
                     )
-                }
-                IconButton(
-                    onClick = { HomeNavigate() },
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_back),
-                        contentDescription = "Atrás",
-                        tint = Color.White,
-                        modifier = Modifier.size(30.dp)
-                    )
-                }
-            }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (query.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Ingresa algo para buscar",
-                    color = Color.White,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(16.dp)
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = { HomeNavigate() },
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            painterResource(R.drawable.ic_back),
+                            contentDescription = "Atrás",
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF1F1235),
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
                 )
-            }
-        } else {
-            // Aquí solo mostramos el resultado que el usuario busco
-            when (tipo) {
-                TipoBusqueda.Equipos -> {
-                    EquiposResult(viewModel, onTeamNavigate)
+            )
+        },
+        containerColor = Color(0xFF2D1B45)
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = paddingValues.calculateTopPadding())
+        ) {
+            Header(
+                searchQuery = searchQuery,
+                onSearchChange = { searchQuery = it },
+                onBuscar = onSearchNavigate,
+                actions = {}
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (query.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Ingresa algo para buscar",
+                        color = Color.White,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(16.dp)
+                    )
                 }
-                TipoBusqueda.Ligas -> {
-                    LigasResult(viewModel, onLigasNavigate)
+            } else {
+                when (tipo) {
+                    TipoBusqueda.Equipos -> {
+                        EquiposResult(viewModel, onTeamNavigate)
+                    }
+                    TipoBusqueda.Ligas -> {
+                        LigasResult(viewModel, onLigasNavigate)
+                    }
+                    TipoBusqueda.Jugadores -> {
+                        PlayerResult(viewModel,onPlayerNavigate)
+                    }
+                    TipoBusqueda.Partidos -> TODO()
                 }
-                TipoBusqueda.Jugadores -> {
-                    PlayerResult(viewModel,onPlayerNavigate)
-                }
-                TipoBusqueda.Partidos -> TODO()
             }
         }
     }

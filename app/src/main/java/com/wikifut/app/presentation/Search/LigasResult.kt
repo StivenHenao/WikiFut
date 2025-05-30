@@ -2,8 +2,10 @@ package com.wikifut.app.presentation.Search
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.wikifut.app.model.League
 import com.wikifut.app.model.LigaResponse
-
+import androidx.compose.foundation.layout.Arrangement
 
 @Composable
 fun LigasResult(viewModel: SearchViewModel, onLigasNavigate: (leagueId: League, season: Int) -> Unit) {
@@ -37,7 +39,13 @@ fun LigasResult(viewModel: SearchViewModel, onLigasNavigate: (leagueId: League, 
             color = Color.White
         )
     } else {
-        LazyColumn {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(bottom = 80.dp)
+        ) {
             items(resultado.response) { ligaResponse ->
                 val ligaOriginal = ligaResponse.league
                 val ligaConDatosCompletos = ligaOriginal.copy(

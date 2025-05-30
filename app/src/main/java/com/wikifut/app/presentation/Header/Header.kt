@@ -65,6 +65,7 @@ fun Header(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .background(Color(0xFF1F1235))
             .padding(horizontal = 4.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween

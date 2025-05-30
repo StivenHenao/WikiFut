@@ -148,13 +148,6 @@ fun TeamScreen(
                                     tint = if (isFavorite) Color.Yellow else Color.White,
                                 )
                             }
-                            IconButton(onClick = { /* Acción de notificaciones */ }) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.baseline_notifications_24),
-                                    contentDescription = "Notificaciones",
-                                    tint = Color.White
-                                )
-                            }
                         }
                     }
                 }

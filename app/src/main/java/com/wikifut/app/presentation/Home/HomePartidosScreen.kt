@@ -290,111 +290,118 @@ fun HomePartidosScreen(
         )
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF2D1B45))
-            .windowInsetsPadding(WindowInsets.statusBars)
-    ) {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    modifier = Modifier.height(74.dp),
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color(0xFF1F1235)
-                    ),
-                    title = {
-                        Header(
-                            searchQuery = searchQuery,
-                            onSearchChange = { searchQuery = it },
-                            onBuscar = onSearchNavigate,
-                            actions = {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    IconButton(
-                                        onClick = {showDatePicker = true},
-                                        modifier = Modifier.size(36.dp)
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_calendar),
-                                            contentDescription = "Seleccionar fecha",
-                                            tint = Color.White,
-                                            modifier = Modifier.size(24.dp)
-                                        )
-                                    }
-                                    IconButton(
-                                        onClick = openDrawer,
-                                        modifier = Modifier.size(36.dp)
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_menu),
-                                            contentDescription = "Menú",
-                                            tint = Color.White,
-                                            modifier = Modifier.size(36.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        )
-                    }
-                )
-            },
-            containerColor = Color.Transparent
-        ) { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(paddingValues)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .weight(0.2f)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                modifier = Modifier.height(70.dp),
+                title = { 
+                    Box(
+                        modifier = Modifier.fillMaxHeight(),
+                        contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            "Partidos del día",
+                            "WikiFut",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
-                        )
-
-                        Text(
-                            selectedDate,
-                            fontSize = 16.sp,
-                            color = Color.Gray,
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
+                            color = Color.White
                         )
                     }
-                }
-
-                LazyColumn(
-                    modifier = Modifier
-                        .weight(2.5f)
-                        .padding(horizontal = 16.dp)
-                ) {
-                    items(partidosFiltrados) { partido -> PartidoCard(partido, onMatchClick = navigateToMatchDetail) }
-
-                    if (partidosFiltrados.isEmpty()) {
-                        item {
-                            Text(
-                                "No se encontraron partidos.",
-                                color = Color.White,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                textAlign = TextAlign.Center
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF1F1235)
+                )
+            )
+        },
+        containerColor = Color(0xFF2D1B45),
+        modifier = Modifier.fillMaxSize()
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = paddingValues.calculateTopPadding())
+        ) {
+            Header(
+                searchQuery = searchQuery,
+                onSearchChange = { searchQuery = it },
+                onBuscar = onSearchNavigate,
+                actions = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        IconButton(
+                            onClick = {showDatePicker = true},
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_calendar),
+                                contentDescription = "Seleccionar fecha",
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp)
                             )
                         }
+                        IconButton(
+                            onClick = openDrawer,
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_menu),
+                                contentDescription = "Menú",
+                                tint = Color.White,
+                                modifier = Modifier.size(36.dp)
+                            )
+                        }
+                    }
+                }
+            )
+
+            // Lista de partidos
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+                    .padding(12.dp),
+                contentPadding = PaddingValues(bottom = 80.dp)
+            ) {
+                item {
+                    Text(
+                        text = "Partidos del día",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
+                
+                item {
+                    Text(
+                        text = selectedDate,
+                        fontSize = 16.sp,
+                        color = Color.Gray,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 4.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
+
+                items(partidosFiltrados) { partido -> 
+                    PartidoCard(partido, onMatchClick = navigateToMatchDetail) 
+                }
+
+                if (partidosFiltrados.isEmpty()) {
+                    item {
+                        Text(
+                            "No se encontraron partidos.",
+                            color = Color.White,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            textAlign = TextAlign.Center
+                        )
                     }
                 }
             }
@@ -556,19 +563,6 @@ fun PartidoCard(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center
-                )
-
-                var isClicked by remember { mutableStateOf(false) }
-
-                Image(
-                    painter = painterResource(id = R.drawable.baseline_notifications_24),
-                    contentDescription = "Notificación",
-                    modifier = Modifier
-                        .size(24.dp)
-                        .weight(1f)
-                        .clickable { isClicked = !isClicked },
-                    colorFilter = ColorFilter.tint(if (isClicked) Color.Yellow else Color.White),
-                    alignment = Alignment.CenterEnd
                 )
             }
         }

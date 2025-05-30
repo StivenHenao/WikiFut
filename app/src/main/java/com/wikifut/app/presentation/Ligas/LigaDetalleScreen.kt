@@ -113,38 +113,40 @@ fun LigaDetalleScreen(
                     )
                 }
             },
+            actions = {
+                IconButton(
+                    onClick = {
+                        if (isFavorite) {
+                            Log.d("TeamScreen", "Se elimino el favorito")
+                            coroutineScope.launch {
+                                viewModel.removeFromFavorites(leagueId)
+                            }
+                        } else {
+                            coroutineScope.launch {
+                                viewModel.agregarLigaAFavoritos(league)
+                            }
+                            Log.d("TeamScreen", "Se agrego el favorito teamId: ${leagueId}")
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
+                        contentDescription = "Favorito",
+                        tint = if (isFavorite) Color.Yellow else Color.White,
+                    )
+                }
+            },
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                containerColor = Color(0xFF1F1235)
+                containerColor = Color(0xFF2D1B45)
             )
         )
-
-        IconButton(
-            onClick = {
-                if (isFavorite) {
-                    Log.d("TeamScreen", "Se elimino el favorito")
-                    coroutineScope.launch {
-                        viewModel.removeFromFavorites(leagueId)
-                    }
-                } else {
-                    coroutineScope.launch {
-                        viewModel.agregarLigaAFavoritos(league)
-                    }
-                    Log.d("TeamScreen", "Se agrego el favorito teamId: ${leagueId}")
-                }
-            }
-        ) {
-            Icon(
-                imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
-                contentDescription = "Favorito",
-                tint = if (isFavorite) Color.Yellow else Color.White,
-            )
-        }
 
         // Nombre de liga y logo
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFF1F1235))
+                .background(Color(0xFF2D1B45))
+                .statusBarsPadding()
         ) {
             Row(
                 modifier = Modifier
@@ -225,13 +227,27 @@ fun LigaDetalleScreen(
                 if (info != null) {
                     LigaInfoConEquiposTab(info = info, equipos = equipos)
                 } else {
-                    Text("Cargando información de la liga...", modifier = Modifier.padding(16.dp))
+                    Text(
+                        "Cargando información de la liga...",
+                        color = Color.White,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    )
                 }
             }
             1 -> {
                 val partidos = viewModel.partidos.value
                 if (partidos.isEmpty()) {
-                    Text("No hay equipos disponibles de la temporada $temporadaSeleccionada", modifier = Modifier.padding(16.dp))
+                    Text(
+                        "No hay equipos disponibles de la temporada $temporadaSeleccionada",
+                        color = Color.White,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    )
                 } else {
                     ListaDePartidos(partidos)
                 }

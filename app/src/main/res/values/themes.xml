@@ -10,4 +10,12 @@
         <item name="android:navigationBarColor">@color/purple_900</item> <!-- Barra de navegación negra -->
     </style>
 
+    <!-- Tema principal de la aplicación -->
+    <style name="Theme.Wikifut" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/purple_900</item>
+        <item name="android:statusBarColor">@color/purple_900</item>
+        <item name="android:navigationBarColor">@color/purple_900</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
 </resources>

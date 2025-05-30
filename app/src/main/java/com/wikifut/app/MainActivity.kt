@@ -54,6 +54,9 @@ class MainActivity : ComponentActivity() {
                 // Configurar la apariencia de la barra de navegación para que sea transparente en ambos modos
                 insetsController.isAppearanceLightNavigationBars = false
                 
+                // Configurar el color del texto de la barra de estado
+                insetsController.isAppearanceLightStatusBars = false
+                
                 // Asegurar que la barra de navegación sea transparente
                 window.navigationBarColor = AndroidColor.TRANSPARENT
                 
