@@ -204,7 +204,11 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
         composable("playerscreen/{playerId}/{season}") { backStackEntry ->
             val playerId = backStackEntry.arguments?.getString("playerId")
             val season = backStackEntry.arguments?.getString("season")
-            PlayerScreen(playerId = playerId!!.toInt(), season = season!!.toInt())
+            PlayerScreen(
+                playerId = playerId!!.toInt(), 
+                season = season!!.toInt(),
+                navController = navHostController
+            )
         }
 
         composable("ligaDetalle/{leagueId}/{season}") { backStackEntry ->

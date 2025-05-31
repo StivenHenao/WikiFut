@@ -7,17 +7,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
@@ -34,7 +33,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
-
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 
 import com.wikifut.app.model.*
 import com.wikifut.app.viewmodel.PlayerViewModel
@@ -124,7 +124,11 @@ fun PreviewPlayerScreen(
             .fillMaxSize()
             .background(Color(0xFF1F1235))
     ) {
-        PlayerDetails(playerDataResponse = playerDataResponse)
+        PlayerDetails(
+            playerDataResponse = playerDataResponse,
+            viewModel = viewModel,
+            navController = rememberNavController()
+        )
     }
 }
 
@@ -132,49 +136,134 @@ fun PreviewPlayerScreen(
  * PlayerScreen: Se encarga de observar el estado (loading, error y datos) del ViewModel.
  * Si se detectan datos, llama a PlayerDetails para mostrarlos.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlayerScreen(
     playerId: Int,
     season: Int,
+    navController: NavController,
     viewModel: PlayerViewModel = hiltViewModel()
 ) {
-    // Observamos los LiveData del ViewModel.
     val playerDataState by viewModel.playerData.observeAsState()
     val loading by viewModel.loading.observeAsState(initial = false)
     val error by viewModel.error.observeAsState()
 
-    // Llamamos a la API al iniciar el Composable.
     LaunchedEffect(playerId) {
         viewModel.fetchPlayerData(playerId, season)
     }
 
-
-
-    // Layout principal con fondo oscuro.
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF1F1235))
     ) {
+        TopAppBar(
+            modifier = Modifier.height(70.dp),
+            title = { 
+                Box(
+                    modifier = Modifier.fillMaxHeight(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "Detalles del Jugador",
+                        color = Color.White,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            navigationIcon = {
+                IconButton(
+                    onClick = { navController.popBackStack() },
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Atrás",
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            },
+            actions = {
+                if (playerDataState != null) {
+                    val player = playerDataState!!.response.first().player
+                    val favoritos by viewModel.favoritePlayersList.collectAsState()
+                    val isFavorite = favoritos.any { it.id == player.id }
+                    val coroutineScope = rememberCoroutineScope()
+
+                    LaunchedEffect(Unit) {
+                        viewModel.cargarJugadoresFavoritos()
+                    }
+
+                    IconButton(
+                        onClick = {
+                            if (isFavorite) {
+                                Log.d("TeamScreen", "Se elimino el favorito")
+                                coroutineScope.launch {
+                                    viewModel.eliminarJugadorDeFavoritos(player)
+                                    viewModel.cargarJugadoresFavoritos()
+                                }
+                            } else {
+                                coroutineScope.launch {
+                                    viewModel.agregarJugadorAFavoritos(player)
+                                    viewModel.cargarJugadoresFavoritos()
+                                }
+                                Log.d("TeamScreen", "Se agrego el favorito teamId: ${player.id}")
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
+                            contentDescription = "Favorito",
+                            tint = if (isFavorite) Color.Yellow else Color.White,
+                        )
+                    }
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = Color(0xFF1F1235),
+                titleContentColor = Color.White,
+                navigationIconContentColor = Color.White
+            )
+        )
+
         when {
             loading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center),
-                    color = Color.White
-                )
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        color = Color.White
+                    )
+                }
             }
             error != null -> {
-                Text(
-                    text = error ?: "",
-                    color = Color.Red,
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = error ?: "",
+                        color = Color.Red
+                    )
+                }
             }
             playerDataState != null -> {
-                PlayerDetails(playerDataResponse = playerDataState!!, viewModel = viewModel)
+                PlayerDetails(
+                    playerDataResponse = playerDataState!!, 
+                    viewModel = viewModel,
+                    navController = navController
+                )
             }
             else -> {
-                Text(text = "No se encontraron datos", color = Color.White)
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "No se encontraron datos", color = Color.White)
+                }
             }
         }
     }
@@ -185,83 +274,54 @@ fun PlayerScreen(
  * Se extrae el primer elemento de la lista response.
  * La posición se obtiene del primer estadístico (dentro de games) y se muestra.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlayerDetails(playerDataResponse: PlayerDataResponse, viewModel: PlayerViewModel = hiltViewModel()) =
-    if (playerDataResponse.response.isEmpty()) {
-        // Mostrar un mensaje informando que no se encontraron datos
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFF1F1235)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = "No se encontraron datos del jugador", color = Color.White)
-        }
-    } else {
-        val playerData = playerDataResponse.response.first()
+fun PlayerDetails(
+    playerDataResponse: PlayerDataResponse, 
+    viewModel: PlayerViewModel = hiltViewModel(),
+    navController: NavController
+) = if (playerDataResponse.response.isEmpty()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF1F1235)),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = "No se encontraron datos del jugador", color = Color.White)
+    }
+} else {
+    val playerData = playerDataResponse.response.first()
+    val player = playerData.player
+    val statistic = playerData.statistics?.first()
+    val statisticGame = statistic?.games
+    val statisticTeamPlayer = statistic?.team
+    val statisticPlayerLeague = statistic?.league
+    val rating = statisticGame?.rating
+    val team_player = statisticTeamPlayer?.name
+    val position = playerData.statistics?.firstOrNull()?.games?.position ?: "N/A"
+    val numberPlayer = statisticGame?.number ?: 0
 
-        val player = playerData.player
-        val statistic = playerData.statistics?.first()
-
-        val statisticGame = statistic?.games
-        val statisticTeamPlayer = statistic?.team
-        val statisticPlayerLeague = statistic?.league
-
-        val rating = statisticGame?.rating
-        val team_player = statisticTeamPlayer?.name
-
-        val position = playerData.statistics?.firstOrNull()?.games?.position ?: "N/A"
-        val numberPlayer =statisticGame?.number?: 0
-        // variables para favoritos
-        val favoritos by viewModel.favoritePlayersList.collectAsState()
-        val isFavorite = favoritos.any { it.id == player.id }
-        val coroutineScope = rememberCoroutineScope()
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState())
-
-        ) {
-
-            //---------------------------HEADER------------------
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        item {
             if (team_player != null) {
-                headerVistaPlayer(name = player.name, player.photo, team_player ,rating)
+                headerVistaPlayer(name = player.name, player.photo, team_player, rating)
             }
+        }
 
-            // boton Favoritos
-            IconButton(
-                onClick = {
-
-                    if (isFavorite) {
-                        Log.d("TeamScreen", "Se elimino el favorito")
-
-
-                        coroutineScope.launch {
-                            viewModel.eliminarJugadorDeFavoritos(player)
-                        }
-                    } else {
-                        coroutineScope.launch {
-                            viewModel.agregarJugadorAFavoritos(player)
-                        }
-                        Log.d("TeamScreen", "Se agrego el favorito teamId: ${player.id}")
-                    }
-                }
-            ) {
-                Icon(
-                    imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
-                    contentDescription = "Favorito",
-                    tint = if (isFavorite) Color.Yellow else Color.White,
-                )
-            }
-
+        item {
             Spacer(Modifier.height(8.dp))
+        }
 
+        item {
             if (statisticTeamPlayer != null) {
                 if (team_player != null) {
                     player.weight?.let {
-                        containerBasicInfo(team = team_player,
+                        containerBasicInfo(
+                            team = team_player,
                             imageTeam = statisticTeamPlayer.logo,
                             nacionalidad = player.nationality,
                             nacimiento = player.age,
@@ -273,17 +333,31 @@ fun PlayerDetails(playerDataResponse: PlayerDataResponse, viewModel: PlayerViewM
                     }
                 }
             }
+        }
 
+        item {
             Spacer(Modifier.height(8.dp))
+        }
 
-            Text("TEMPORADA",
-                color=Color.White,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(alignment = Alignment.CenterHorizontally),
-                fontSize = 20.sp)
+        item {
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    "TEMPORADA",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
+            }
+        }
 
+        item {
             Spacer(Modifier.height(8.dp))
+        }
 
+        item {
             if (statistic != null) {
                 containerStatisticInfo(
                     statistic.shots,
@@ -297,14 +371,19 @@ fun PlayerDetails(playerDataResponse: PlayerDataResponse, viewModel: PlayerViewM
                     statistic.penalty
                 )
             }
-            Spacer(Modifier.height(8.dp))
+        }
 
+        item {
+            Spacer(Modifier.height(8.dp))
+        }
+
+        item {
             if (statisticPlayerLeague != null) {
                 containerResume(statisticPlayerLeague, statisticGame)
             }
-
         }
     }
+}
 
 @Composable
 fun headerVistaPlayer(name: String, photo: String, team: String ,rating: String?){
