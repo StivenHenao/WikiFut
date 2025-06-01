@@ -110,4 +110,9 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.5") // o la versión que uses
     implementation("io.coil-kt:coil-svg:2.4.0")
 
+    // Testing
+    testImplementation("org.mockito:mockito-core:5.10.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1")
+    testImplementation("org.mockito:mockito-inline:5.2.0")
 }
