@@ -27,26 +27,47 @@ import com.wikifut.app.model.Team
 import com.wikifut.app.model.Venue
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
+import com.wikifut.app.R
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.Image
+import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun EquiposResult(viewModel: SearchViewModel, onTeamNavigate: (team: Team, venue: Venue) -> Unit) {
     val resultadoState by viewModel.resultadoEquipos.collectAsState()
     val resultado = resultadoState
-    if (resultado == null || resultado.response.isEmpty()) {
-        Text(
-            text = "No hay equipos disponibles en este momento",
-            color = Color.White
+    Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(id = R.drawable.wikifutfondo1),
+            contentDescription = "Background",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillBounds
         )
-    } else {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(bottom = 80.dp)
-        ) {
-            items(resultado.response) { equipo ->
-                TeamItem(team = equipo.team, onClick = {onTeamNavigate(equipo.team, equipo.venue)})
+        if (resultado == null || resultado.response.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                Text(
+                    text = "No hay equipos disponibles en este momento",
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(vertical = 32.dp, horizontal = 16.dp)
+                )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(bottom = 80.dp)
+            ) {
+                items(resultado.response) { equipo ->
+                    TeamItem(team = equipo.team, onClick = {onTeamNavigate(equipo.team, equipo.venue)})
+                }
             }
         }
     }
@@ -80,5 +101,20 @@ fun TeamItem(team: Team, onClick: () -> Unit) {
                 Text(text = team_country, style = MaterialTheme.typography.bodySmall)
             }
         }
+    }
+}
+
+@Composable
+fun TeamResult(
+    // ... parámetros ...
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(id = R.drawable.wikifutfondo1),
+            contentDescription = "Background",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillBounds
+        )
+        // ... aquí va el contenido principal de la pantalla ...
     }
 }

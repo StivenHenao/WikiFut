@@ -33,9 +33,13 @@ import com.wikifut.app.model.TeamStatsResponse
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.graphicsLayer
 import com.wikifut.app.model.FavoriteTeam
 import kotlinx.coroutines.launch
-
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Shadow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,174 +71,199 @@ fun TeamScreen(
     val coroutineScope = rememberCoroutineScope()
 
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF1D0B27))
-    ) {
-        // Sección con imagen de fondo
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Fondo base
+        Image(
+            painter = painterResource(id = R.drawable.wikifutfondo1),
+            contentDescription = "Background",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillBounds
+        )
+
+        // Box con blur que coincide con el header
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(180.dp) // Altura del fondo
+                .height(180.dp)
+                .graphicsLayer {
+                    clip = true
+                }
+                .blur(radius = 20.dp)
         ) {
-            // Imagen de fondo
             Image(
-                painter = painterResource(id = R.drawable.bg_team_header),
-                contentDescription = "Fondo del equipo",
+                painter = painterResource(id = R.drawable.wikifutfondo1),
+                contentDescription = "Blurred Background",
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.FillBounds
             )
+        }
 
-            // TopAppBar
-            TopAppBar(
-                modifier = Modifier.height(61.dp),
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
-                ),
-                title = {
+        // Sombra semitransparente
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(180.dp)
+                .background(Color.Black.copy(alpha = 0.4f))
+        )
+
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // Sección con imagen de fondo
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp) // Altura del fondo
+            ) {
+                // TopAppBar
+                TopAppBar(
+                    modifier = Modifier.height(61.dp),
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent
+                    ),
+                    title = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                IconButton(
+                                    onClick = onBackClick,
+                                    modifier = Modifier.size(36.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_back_24),
+                                        contentDescription = "Volver",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                                Text(
+                                    text = team.name,
+                                    color = Color.White,
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(start = 8.dp)
+                                )
+                            }
+                            
+                            Row {
+                                IconButton(
+                                    onClick = {
+                                        if (isFavorite) {
+                                            Log.d("TeamScreen", "Se elimino el favorito")
+                                            coroutineScope.launch {
+                                                viewModel.removeFromFavorites(team.id)
+                                            }
+                                        } else {
+                                            coroutineScope.launch {
+                                                viewModel.agregarAFavoritos(
+                                                    FavoriteTeam(
+                                                        team = team,
+                                                        venue = venue
+                                                    )
+                                                )
+                                            }
+                                            Log.d("TeamScreen", "Se agrego el favorito teamId: ${team.id}")
+                                        }
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
+                                        contentDescription = "Favorito",
+                                        tint = if (isFavorite) Color.Yellow else Color.White,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                )
+
+                // Contenido sobre la imagen
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Logo y nombre del equipo centrado
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.padding(top = 61.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            IconButton(
-                                onClick = onBackClick,
-                                modifier = Modifier.size(36.dp)
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_back_24),
-                                    contentDescription = "Volver",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
+                        Image(
+                            painter = rememberAsyncImagePainter(team.logo),
+                            contentDescription = "Logo de ${team.name}",
+                            modifier = Modifier
+                                .size(80.dp)
+                                .background(Color.White, shape = CircleShape)
+                                .padding(8.dp),
+                            contentScale = ContentScale.Fit
+                        )
+
+                        Spacer(modifier = Modifier.width(30.dp))
+                        Column(
+                        ){
                             Text(
                                 text = team.name,
-                                color = Color.White,
-                                fontSize = 20.sp,
+                                fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(start = 8.dp)
+                                color = Color.White
+                            )
+                            Text(
+                                text = team.country ?: "País no disponible",
+                                fontSize = 16.sp,
+                                color = Color.White
                             )
                         }
-                        
-                        Row {
-                            IconButton(
-                                onClick = {
-                                    if (isFavorite) {
-                                        Log.d("TeamScreen", "Se elimino el favorito")
-                                        coroutineScope.launch {
-                                            viewModel.removeFromFavorites(team.id)
-                                        }
-                                    } else {
-                                        coroutineScope.launch {
-                                            viewModel.agregarAFavoritos(
-                                                FavoriteTeam(
-                                                    team = team,
-                                                    venue = venue
-                                                )
-                                            )
-                                        }
-                                        Log.d("TeamScreen", "Se agrego el favorito teamId: ${team.id}")
-                                    }
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
-                                    contentDescription = "Favorito",
-                                    tint = if (isFavorite) Color.Yellow else Color.White,
-                                )
-                            }
-                        }
-                    }
-                }
-            )
-
-            // Contenido sobre la imagen
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(10.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                // Logo y nombre del equipo centrado
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 61.dp)
-                ) {
-                    Image(
-                        painter = rememberAsyncImagePainter(team.logo),
-                        contentDescription = "Logo de ${team.name}",
-                        modifier = Modifier
-                            .size(80.dp)
-                            .background(Color.White, shape = CircleShape)
-                            .padding(8.dp),
-                        contentScale = ContentScale.Fit
-                    )
-
-                    Spacer(modifier = Modifier.width(30.dp))
-                    Column(
-                    ){
-                        Text(
-                            text = team.name,
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                        Text(
-                            text = team.country ?: "País no disponible",
-                            fontSize = 16.sp,
-                            color = Color.White
-                        )
                     }
                 }
             }
-        }
-        // vista estadio y estadisticas
-        LazyColumn {
-            item {
-                Spacer(modifier = Modifier.height(20.dp))
-            }
-
-            item {
-                TextoCentradoIcono(text = "Estadio", icon = R.drawable.sport)
-            }
-
-            item {
-                VenueCard(venue = venue)
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(20.dp))
-            }
-
-            item {
-                TextoCentradoIcono(text = "Estadísticas", icon = R.drawable.analytics)
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(20.dp))
-            }
-
-            if (resultado.isEmpty()) {
+            // vista estadio y estadisticas
+            LazyColumn {
                 item {
-                    Text(
-                        text = "No hay resultados de ligas",
-                        color = Color.White,
-                        modifier = Modifier.padding(16.dp)
-                    )
+                    Spacer(modifier = Modifier.height(20.dp))
                 }
-            } else {
-                items(resultado) { statsResponse ->
-                    LeagueStatsCardModern(statsResponse.response)
+
+                item {
+                    TextoCentradoIcono(text = "Estadio", icon = R.drawable.sport)
+                }
+
+                item {
+                    VenueCard(venue = venue)
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
+
+                item {
+                    TextoCentradoIcono(text = "Estadísticas", icon = R.drawable.analytics)
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
+
+                if (resultado.isEmpty()) {
+                    item {
+                        Text(
+                            text = "No hay resultados de ligas",
+                            color = Color.White,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                } else {
+                    items(resultado) { statsResponse ->
+                        LeagueStatsCardModern(statsResponse.response)
+                    }
                 }
             }
         }
-
     }
 }
 
@@ -250,15 +279,22 @@ fun TextoCentradoIcono(text: String, icon: Int) {
         Icon(
             painter = painterResource(id = icon),
             contentDescription = "Icono de estadio",
-            tint = Color.Gray,
+            tint = Color.White,
             modifier = Modifier.size(20.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = text,
-            color = Color.Gray,
+            color = Color.White,
             fontSize = 16.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            style = TextStyle(
+                shadow = Shadow(
+                    color = Color.Black,
+                    offset = Offset(2f, 2f),
+                    blurRadius = 12f
+                )
+            )
         )
     }
 }
@@ -268,7 +304,6 @@ fun VenueCard(venue: Venue) {
     Row(
         modifier = Modifier
             .padding(16.dp)
-            //.background(Color(0xFFE3B505), shape = RoundedCornerShape(20.dp))
             .background(Color(0xFFE3B505))
             .padding(16.dp)
             .fillMaxWidth(),
@@ -278,9 +313,7 @@ fun VenueCard(venue: Venue) {
             painter = rememberAsyncImagePainter(venue.image),
             contentDescription = "Imagen del estadio",
             modifier = Modifier
-                .size(120.dp)
-                //.clip(RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp)),
-            //contentScale = ContentScale.Crop
+                .size(120.dp),
         )
 
         Spacer(modifier = Modifier.width(16.dp))
@@ -289,12 +322,21 @@ fun VenueCard(venue: Venue) {
             Text(
                 text = venue.name ?: "Nombre desconocido",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
             )
-            //Text(text = "Fundación: 1878") // puedes cambiar esto si tienes fecha
-            Text(text = "Ciudad: ${venue.city ?: "-"}")
-            Text(text = "Dirección: ${venue.address ?: "-"}")
-            Text(text = "Capacidad: ${venue.capacity?.toString() ?: "-"}")
+            Text(
+                text = "Ciudad: ${venue.city ?: "-"}",
+                color = Color.Black
+            )
+            Text(
+                text = "Dirección: ${venue.address ?: "-"}",
+                color = Color.Black
+            )
+            Text(
+                text = "Capacidad: ${venue.capacity?.toString() ?: "-"}",
+                color = Color.Black
+            )
         }
     }
 }
@@ -320,7 +362,11 @@ fun LeagueStatsCardModern(stats: TeamStatsResponse) {
                     modifier = Modifier.size(40.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = stats.league.name, style = MaterialTheme.typography.titleLarge)
+                Text(
+                    text = stats.league.name,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = Color.Black
+                )
             }
             SectionTitle("⚽ Juegos")
             StatTable(
@@ -386,7 +432,8 @@ fun StatTable(headers: List<String>, rows: List<Pair<String, List<Any>>>) {
                     text = it,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    color = Color.Black
                 )
             }
         }
@@ -404,9 +451,10 @@ fun StatTable(headers: List<String>, rows: List<Pair<String, List<Any>>>) {
                     text = label,
                     modifier = Modifier
                         .weight(1f)
-                        .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
+                        .background(Color(0xFFE0E0E0), shape = RoundedCornerShape(8.dp))
                         .padding(4.dp),
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    color = Color.Black
                 )
                 values.forEach {
                     Text(
@@ -415,7 +463,8 @@ fun StatTable(headers: List<String>, rows: List<Pair<String, List<Any>>>) {
                             .weight(1f)
                             .background(Color(0xFFE0E0E0), shape = RoundedCornerShape(8.dp))
                             .padding(4.dp),
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        color = Color.Black
                     )
                 }
             }

@@ -28,7 +28,10 @@ import com.wikifut.app.presentation.Search.LigasResult
 import com.wikifut.app.presentation.Search.PlayerResult
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-//import com.wikifut.app.presentation.Search.EquiposResult
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.graphicsLayer
 
 val MoradoOscuro = Color(0xFF2E0854)    // Morado oscuro
 val MoradoClaro = Color(0xFF7E57C2)    // Morado más claro para el Card
@@ -79,7 +82,7 @@ fun SearchScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF1F1235),
+                    containerColor = Color.Transparent,
                     titleContentColor = Color.White,
                     navigationIconContentColor = Color.White
                 )
@@ -87,44 +90,87 @@ fun SearchScreen(
         },
         containerColor = Color(0xFF2D1B45)
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = paddingValues.calculateTopPadding())
-        ) {
-            Header(
-                searchQuery = searchQuery,
-                onSearchChange = { searchQuery = it },
-                onBuscar = onSearchNavigate,
-                actions = {}
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Imagen de fondo que ocupa toda la pantalla
+            Image(
+                painter = painterResource(id = R.drawable.wikifutfondo1),
+                contentDescription = "Background",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.FillBounds
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (query.isEmpty()) {
-                Box(
+            // Box con blur
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(134.dp) // 70.dp (TopAppBar) + 64.dp (Header)
+                    .graphicsLayer {
+                        clip = true
+                    }
+                    .blur(radius = 20.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.wikifutfondo1),
+                    contentDescription = "Background Blur",
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    contentScale = ContentScale.FillBounds
+                )
+            }
+
+            // Sombra semitransparente
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(134.dp)
+                    .background(Color.Black.copy(alpha = 0.4f))
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = paddingValues.calculateTopPadding())
+            ) {
+                Box(
+                    modifier = Modifier
+                        .height(64.dp)
+                        .background(Color.Transparent)
                 ) {
-                    Text(
-                        text = "Ingresa algo para buscar",
-                        color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(16.dp)
+                    Header(
+                        searchQuery = searchQuery,
+                        onSearchChange = { searchQuery = it },
+                        onBuscar = onSearchNavigate,
+                        actions = {},
+                        applyStatusBarPadding = false
                     )
                 }
-            } else {
-                when (tipo) {
-                    TipoBusqueda.Equipos -> {
-                        EquiposResult(viewModel, onTeamNavigate)
+
+                Spacer(modifier = Modifier.height(0.dp))
+
+                if (query.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Ingresa algo para buscar",
+                            color = Color.White,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(16.dp)
+                        )
                     }
-                    TipoBusqueda.Ligas -> {
-                        LigasResult(viewModel, onLigasNavigate)
+                } else {
+                    when (tipo) {
+                        TipoBusqueda.Equipos -> {
+                            EquiposResult(viewModel, onTeamNavigate)
+                        }
+                        TipoBusqueda.Ligas -> {
+                            LigasResult(viewModel, onLigasNavigate)
+                        }
+                        TipoBusqueda.Jugadores -> {
+                            PlayerResult(viewModel,onPlayerNavigate)
+                        }
+                        TipoBusqueda.Partidos -> TODO()
                     }
-                    TipoBusqueda.Jugadores -> {
-                        PlayerResult(viewModel,onPlayerNavigate)
-                    }
-                    TipoBusqueda.Partidos -> TODO()
                 }
             }
         }

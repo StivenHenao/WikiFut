@@ -8,9 +8,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
@@ -53,7 +57,9 @@ fun Header(
     searchQuery: String,
     onSearchChange: (String) -> Unit,
     onBuscar: (TipoBusqueda, String) -> Unit,
-    actions: @Composable () -> Unit = {}
+    actions: @Composable () -> Unit = {},
+    backgroundColor: Color = Color.Transparent,
+    applyStatusBarPadding: Boolean = true
 ) {
     var dropdownExpanded by remember { mutableStateOf(false) }
     var selectedOption by remember { mutableStateOf("Equipos") }
@@ -65,8 +71,16 @@ fun Header(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFF1F1235))
-            .padding(horizontal = 4.dp, vertical = 8.dp),
+            .background(backgroundColor)
+            .then(
+                if (applyStatusBarPadding) {
+                    Modifier.windowInsetsPadding(WindowInsets.statusBars)
+                } else {
+                    Modifier
+                }
+            )
+            .padding(horizontal = 4.dp, vertical = 4.dp)
+            .height(60.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -91,7 +105,8 @@ fun Header(
                 .weight(1f)
                 .padding(horizontal = 4.dp)
                 .background(Color.White, shape = RoundedCornerShape(8.dp))
-                .padding(horizontal = 3.dp, vertical = 2.dp),
+                .padding(horizontal = 3.dp, vertical = 2.dp)
+                .height(60.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             TextField(

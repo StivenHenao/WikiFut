@@ -27,6 +27,12 @@ import coil.compose.AsyncImage
 import com.wikifut.app.model.League
 import com.wikifut.app.model.LigaResponse
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
+import com.wikifut.app.R
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.Image
+import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun LigasResult(viewModel: SearchViewModel, onLigasNavigate: (leagueId: League, season: Int) -> Unit) {
@@ -34,28 +40,43 @@ fun LigasResult(viewModel: SearchViewModel, onLigasNavigate: (leagueId: League, 
     val resultado = resultadoState
 
     if (resultado == null || resultado.response.isEmpty()) {
-        Text(
-            text = "No hay ligas disponibles en este momento",
-            color = Color.White
-        )
-    } else {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(bottom = 80.dp)
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.TopCenter
         ) {
-            items(resultado.response) { ligaResponse ->
-                val ligaOriginal = ligaResponse.league
-                val ligaConDatosCompletos = ligaOriginal.copy(
-                    country = ligaResponse.country.name,
-                    flag = ligaResponse.country.flag
-                )
-                LeagueItem(
-                    league = ligaConDatosCompletos,
-                    onClick = { onLigasNavigate(ligaConDatosCompletos, 2025) }
-                )
+            Text(
+                text = "No hay ligas disponibles en este momento",
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(vertical = 32.dp, horizontal = 16.dp)
+            )
+        }
+    } else {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Image(
+                painter = painterResource(id = R.drawable.wikifutfondo1),
+                contentDescription = "Background",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.FillBounds
+            )
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(bottom = 80.dp)
+            ) {
+                items(resultado.response) { ligaResponse ->
+                    val ligaOriginal = ligaResponse.league
+                    val ligaConDatosCompletos = ligaOriginal.copy(
+                        country = ligaResponse.country.name,
+                        flag = ligaResponse.country.flag
+                    )
+                    LeagueItem(
+                        league = ligaConDatosCompletos,
+                        onClick = { onLigasNavigate(ligaConDatosCompletos, 2025) }
+                    )
+                }
             }
         }
     }

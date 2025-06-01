@@ -1,6 +1,7 @@
 package com.wikifut.app.presentation.Search
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,11 +22,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.wikifut.app.model.Player
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
+import com.wikifut.app.R
+import androidx.compose.foundation.Image
 
 @Composable
 fun PlayerResult(viewModel: SearchViewModel, onPlayerNavigate: (playerId: String, season: String) -> Unit) {
@@ -33,23 +39,38 @@ fun PlayerResult(viewModel: SearchViewModel, onPlayerNavigate: (playerId: String
     val resultado = resultadoState
 
     if (resultado == null || resultado.response.isEmpty()) {
-        Text(
-            text = "No hay jugadores disponibles en este momento",
-            color = Color.White
-        )
-    } else {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(bottom = 80.dp)
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.TopCenter
         ) {
-            items(resultado.response) { jugadorResponse ->
-                PlayerItem(
-                    player = jugadorResponse.player,
-                    onPlayerNavigate = { onPlayerNavigate(jugadorResponse.player.id.toString(), "2023") }
-                )
+            Text(
+                text = "No hay jugadores disponibles en este momento",
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(vertical = 32.dp, horizontal = 16.dp)
+            )
+        }
+    } else {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Image(
+                painter = painterResource(id = R.drawable.wikifutfondo1),
+                contentDescription = "Background",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.FillBounds
+            )
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(bottom = 80.dp)
+            ) {
+                items(resultado.response) { jugadorResponse ->
+                    PlayerItem(
+                        player = jugadorResponse.player,
+                        onPlayerNavigate = { onPlayerNavigate(jugadorResponse.player.id.toString(), "2023") }
+                    )
+                }
             }
         }
     }

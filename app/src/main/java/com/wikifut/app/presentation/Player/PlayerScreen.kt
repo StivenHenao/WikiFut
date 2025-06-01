@@ -35,6 +35,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
+import com.wikifut.app.R
 
 import com.wikifut.app.model.*
 import com.wikifut.app.viewmodel.PlayerViewModel
@@ -152,117 +155,125 @@ fun PlayerScreen(
         viewModel.fetchPlayerData(playerId, season)
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF1F1235))
-    ) {
-        TopAppBar(
-            modifier = Modifier.height(70.dp),
-            title = { 
-                Box(
-                    modifier = Modifier.fillMaxHeight(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        "Detalles del Jugador",
-                        color = Color.White,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            },
-            navigationIcon = {
-                IconButton(
-                    onClick = { navController.popBackStack() },
-                    modifier = Modifier.size(48.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Atrás",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            },
-            actions = {
-                if (playerDataState != null) {
-                    val player = playerDataState!!.response.first().player
-                    val favoritos by viewModel.favoritePlayersList.collectAsState()
-                    val isFavorite = favoritos.any { it.id == player.id }
-                    val coroutineScope = rememberCoroutineScope()
-
-                    LaunchedEffect(Unit) {
-                        viewModel.cargarJugadoresFavoritos()
+    Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(id = R.drawable.wikifutfondo1),
+            contentDescription = "Background",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillBounds
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF1F1235))
+        ) {
+            TopAppBar(
+                modifier = Modifier.height(70.dp),
+                title = { 
+                    Box(
+                        modifier = Modifier.fillMaxHeight(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "Detalles del Jugador",
+                            color = Color.White,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
-
+                },
+                navigationIcon = {
                     IconButton(
-                        onClick = {
-                            if (isFavorite) {
-                                Log.d("TeamScreen", "Se elimino el favorito")
-                                coroutineScope.launch {
-                                    viewModel.eliminarJugadorDeFavoritos(player)
-                                    viewModel.cargarJugadoresFavoritos()
-                                }
-                            } else {
-                                coroutineScope.launch {
-                                    viewModel.agregarJugadorAFavoritos(player)
-                                    viewModel.cargarJugadoresFavoritos()
-                                }
-                                Log.d("TeamScreen", "Se agrego el favorito teamId: ${player.id}")
-                            }
-                        }
+                        onClick = { navController.popBackStack() },
+                        modifier = Modifier.size(48.dp)
                     ) {
                         Icon(
-                            imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
-                            contentDescription = "Favorito",
-                            tint = if (isFavorite) Color.Yellow else Color.White,
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Atrás",
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                },
+                actions = {
+                    if (playerDataState != null) {
+                        val player = playerDataState!!.response.first().player
+                        val favoritos by viewModel.favoritePlayersList.collectAsState()
+                        val isFavorite = favoritos.any { it.id == player.id }
+                        val coroutineScope = rememberCoroutineScope()
+
+                        LaunchedEffect(Unit) {
+                            viewModel.cargarJugadoresFavoritos()
+                        }
+
+                        IconButton(
+                            onClick = {
+                                if (isFavorite) {
+                                    Log.d("TeamScreen", "Se elimino el favorito")
+                                    coroutineScope.launch {
+                                        viewModel.eliminarJugadorDeFavoritos(player)
+                                        viewModel.cargarJugadoresFavoritos()
+                                    }
+                                } else {
+                                    coroutineScope.launch {
+                                        viewModel.agregarJugadorAFavoritos(player)
+                                        viewModel.cargarJugadoresFavoritos()
+                                    }
+                                    Log.d("TeamScreen", "Se agrego el favorito teamId: ${player.id}")
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
+                                contentDescription = "Favorito",
+                                tint = if (isFavorite) Color.Yellow else Color.White,
+                            )
+                        }
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF1F1235),
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
+                )
+            )
+
+            when {
+                loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = Color.White
                         )
                     }
                 }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color(0xFF1F1235),
-                titleContentColor = Color.White,
-                navigationIconContentColor = Color.White
-            )
-        )
-
-        when {
-            loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        color = Color.White
+                error != null -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = error ?: "",
+                            color = Color.Red
+                        )
+                    }
+                }
+                playerDataState != null -> {
+                    PlayerDetails(
+                        playerDataResponse = playerDataState!!, 
+                        viewModel = viewModel,
+                        navController = navController
                     )
                 }
-            }
-            error != null -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = error ?: "",
-                        color = Color.Red
-                    )
-                }
-            }
-            playerDataState != null -> {
-                PlayerDetails(
-                    playerDataResponse = playerDataState!!, 
-                    viewModel = viewModel,
-                    navController = navController
-                )
-            }
-            else -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = "No se encontraron datos", color = Color.White)
+                else -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "No se encontraron datos", color = Color.White)
+                    }
                 }
             }
         }

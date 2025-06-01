@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
@@ -49,6 +50,10 @@ import com.wikifut.app.model.Partido
 import com.wikifut.app.utils.convertirHoraAColombia
 import com.wikifut.app.utils.formatFechaParaApi
 import com.wikifut.app.utils.obtenerFechaActual
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.graphicsLayer
 
 
 @Composable
@@ -293,115 +298,160 @@ fun HomePartidosScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                modifier = Modifier.height(70.dp),
-                title = { 
-                    Box(
-                        modifier = Modifier.fillMaxHeight(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            "WikiFut",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                    }
-                },
+                modifier = Modifier.height(0.dp),
+                title = { },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color(0xFF1F1235)
                 )
             )
         },
-        containerColor = Color(0xFF2D1B45),
+        containerColor = Color.Transparent,
         modifier = Modifier.fillMaxSize()
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = paddingValues.calculateTopPadding())
+        Box(
+            modifier = Modifier.fillMaxSize()
         ) {
-            Header(
-                searchQuery = searchQuery,
-                onSearchChange = { searchQuery = it },
-                onBuscar = onSearchNavigate,
-                actions = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        IconButton(
-                            onClick = {showDatePicker = true},
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_calendar),
-                                contentDescription = "Seleccionar fecha",
-                                tint = Color.White,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                        IconButton(
-                            onClick = openDrawer,
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_menu),
-                                contentDescription = "Menú",
-                                tint = Color.White,
-                                modifier = Modifier.size(36.dp)
-                            )
-                        }
-                    }
-                }
+            // Fondo base
+            Image(
+                painter = painterResource(id = R.drawable.wikifutfondo1),
+                contentDescription = "Background",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.FillBounds
             )
 
-            // Lista de partidos
-            LazyColumn(
+            // Box con blur que coincide con el header
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp)
+                    .graphicsLayer {
+                        clip = true
+                    }
+                    .blur(radius = 20.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.wikifutfondo1),
+                    contentDescription = "Background Blur",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.FillBounds
+                )
+            }
+
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .weight(1f)
-                    .padding(12.dp),
-                contentPadding = PaddingValues(bottom = 80.dp)
+                    .padding(top = paddingValues.calculateTopPadding())
             ) {
-                item {
-                    Text(
-                        text = "Partidos del día",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        textAlign = TextAlign.Center
-                    )
-                }
-                
-                item {
-                    Text(
-                        text = selectedDate,
-                        fontSize = 16.sp,
-                        color = Color.Gray,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 4.dp),
-                        textAlign = TextAlign.Center
+                // Sombra semi-transparente
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp)
+                        .background(Color.Black.copy(alpha = 0.4f))
+                ) {
+                    Header(
+                        searchQuery = searchQuery,
+                        onSearchChange = { searchQuery = it },
+                        onBuscar = onSearchNavigate,
+                        actions = {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                IconButton(
+                                    onClick = {showDatePicker = true},
+                                    modifier = Modifier.size(36.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_calendar),
+                                        contentDescription = "Seleccionar fecha",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                                IconButton(
+                                    onClick = openDrawer,
+                                    modifier = Modifier.size(36.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_menu),
+                                        contentDescription = "Menú",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(36.dp)
+                                    )
+                                }
+                            }
+                        }
                     )
                 }
 
-                items(partidosFiltrados) { partido -> 
-                    PartidoCard(partido, onMatchClick = navigateToMatchDetail) 
-                }
-
-                if (partidosFiltrados.isEmpty()) {
+                // Lista de partidos
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .weight(1f)
+                        .padding(
+                            top = 0.dp,
+                            bottom = 35.dp,
+                            start = 8.dp,
+                            end = 8.dp
+                        ),
+                    contentPadding = PaddingValues(bottom = 80.dp)
+                ) {
                     item {
                         Text(
-                            "No se encontraron partidos.",
+                            text = "Partidos del día",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
                             color = Color.White,
+                            style = TextStyle(
+                                shadow = Shadow(
+                                    color = Color.Black,
+                                    offset = Offset(2f, 2f),
+                                    blurRadius = 12f
+                                )
+                            ),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
+                                .padding(vertical = 4.dp),
                             textAlign = TextAlign.Center
                         )
+                    }
+                    
+                    item {
+                        Text(
+                            text = selectedDate,
+                            fontSize = 16.sp,
+                            color = Color.White,
+                            style = TextStyle(
+                                shadow = Shadow(
+                                    color = Color.Black,
+                                    offset = Offset(2f, 2f),
+                                    blurRadius = 8f
+                                )
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 4.dp),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
+                    items(partidosFiltrados) { partido -> 
+                        PartidoCard(partido, onMatchClick = navigateToMatchDetail) 
+                    }
+
+                    if (partidosFiltrados.isEmpty()) {
+                        item {
+                            Text(
+                                "No se encontraron partidos.",
+                                color = Color.White,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
             }
@@ -457,13 +507,12 @@ fun PartidoCard(
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .clickable {
-                // Call the provided lambda with the fixture ID when the card is clicked
                 onMatchClick(partido.fixture.id.toLong())
             },
-
         colors = CardDefaults.cardColors(containerColor = Color(0xFF4A256F))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
+            // Liga
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -485,86 +534,85 @@ fun PartidoCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+            // Contenido principal
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Equipo local
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        AsyncImage(
-                            model = partido.teams.home.logo,
-                            contentDescription = partido.teams.home.name,
-                            modifier = Modifier.size(40.dp),
-                            contentScale = ContentScale.Fit
-                        )
-                        Text(
-                            text = partido.teams.home.name,
-                            fontSize = 12.sp,
-                            color = Color.White,
-                            maxLines = 1,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-
-                    Text(
-                        text = " ${partido.goals?.home ?: "-"} | ${partido.goals?.away ?: "-"} ",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.Center
+                    AsyncImage(
+                        model = partido.teams.home.logo,
+                        contentDescription = partido.teams.home.name,
+                        modifier = Modifier.size(40.dp),
+                        contentScale = ContentScale.Fit
                     )
+                    Text(
+                        text = partido.teams.home.name,
+                        fontSize = 12.sp,
+                        color = Color.White,
+                        maxLines = 1,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    )
+                }
 
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        AsyncImage(
-                            model = partido.teams.away.logo,
-                            contentDescription = partido.teams.away.name,
-                            modifier = Modifier.size(40.dp),
-                            contentScale = ContentScale.Fit
-                        )
-                        Text(
-                            text = partido.teams.away.name,
-                            fontSize = 12.sp,
-                            color = Color.White,
-                            maxLines = 1,
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                // Marcador y hora
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.weight(0.8f)
+                ) {
+                    Text(
+                        text = "${partido.goals?.home ?: "-"} - ${partido.goals?.away ?: "-"}",
+                        fontSize = 16.sp,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = convertirHoraAColombia(partido.fixture.timestamp),
+                        fontSize = 12.sp,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                // Equipo visitante
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    AsyncImage(
+                        model = partido.teams.away.logo,
+                        contentDescription = partido.teams.away.name,
+                        modifier = Modifier.size(40.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                    Text(
+                        text = partido.teams.away.name,
+                        fontSize = 12.sp,
+                        color = Color.White,
+                        maxLines = 1,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    )
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = getEstadoPartido(partido),
-                    fontSize = 14.sp,
-                    color = if (partido.fixture.status.short == "FT") Color.Red else Color.Yellow,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Start
-                )
-
-                Text(
-                    text = convertirHoraAColombia(partido.fixture.timestamp),
-                    fontSize = 14.sp,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center
-                )
-            }
+            // Estado del partido
+            Text(
+                text = getEstadoPartido(partido),
+                fontSize = 12.sp,
+                color = if (partido.fixture.status.short == "FT") Color.Red else Color.Yellow,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+            )
         }
     }
 }

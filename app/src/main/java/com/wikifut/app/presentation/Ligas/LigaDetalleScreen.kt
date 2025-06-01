@@ -48,7 +48,15 @@ import com.wikifut.app.model.League
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.collectAsState
 import com.wikifut.app.model.LigaResponse
-
+import androidx.compose.ui.res.painterResource
+import com.wikifut.app.R
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.graphicsLayer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,82 +103,137 @@ fun LigaDetalleScreen(
         viewModel.cargarFavoritos()
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF2D1B45))
-            .windowInsetsPadding(WindowInsets.statusBars)
-    ) {
-        // Header con botón de regreso
-        CenterAlignedTopAppBar(
-            title = { },
-            navigationIcon = {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Atrás",
-                        tint = Color.White
-                    )
-                }
-            },
-            actions = {
-                IconButton(
-                    onClick = {
-                        if (isFavorite) {
-                            Log.d("TeamScreen", "Se elimino el favorito")
-                            coroutineScope.launch {
-                                viewModel.removeFromFavorites(leagueId)
-                            }
-                        } else {
-                            coroutineScope.launch {
-                                viewModel.agregarLigaAFavoritos(league)
-                            }
-                            Log.d("TeamScreen", "Se agrego el favorito teamId: ${leagueId}")
-                        }
-                    }
-                ) {
-                    Icon(
-                        imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
-                        contentDescription = "Favorito",
-                        tint = if (isFavorite) Color.Yellow else Color.White,
-                    )
-                }
-            },
-            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                containerColor = Color(0xFF2D1B45)
-            )
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Fondo base
+        Image(
+            painter = painterResource(id = R.drawable.wikifutfondo1),
+            contentDescription = "Background",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillBounds
         )
 
-        // Nombre de liga y logo
-        Column(
+        // Box con blur que coincide con el header
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFF2D1B45))
-                .statusBarsPadding()
+                .height(224.dp)
+                .graphicsLayer {
+                    clip = true
+                }
+                .blur(radius = 20.dp)
         ) {
-            Row(
+            Image(
+                painter = painterResource(id = R.drawable.wikifutfondo1),
+                contentDescription = "Background Blur",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.FillBounds
+            )
+        }
+
+        // Sombra semitransparente
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(224.dp)
+                .background(Color.Black.copy(alpha = 0.4f))
+        )
+
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // Barra de notificaciones y TopAppBar
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .height(70.dp)
             ) {
-                Text(
-                    text = nombreLiga.ifEmpty { "Liga" },
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
+                // Header con botón de regreso
+                CenterAlignedTopAppBar(
+                    title = { },
+                    navigationIcon = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .clickable { navController.popBackStack() }
+                                .padding(horizontal = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "Atrás",
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Text(
+                                text = "Búsqueda",
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = {
+                                if (isFavorite) {
+                                    Log.d("TeamScreen", "Se elimino el favorito")
+                                    coroutineScope.launch {
+                                        viewModel.removeFromFavorites(leagueId)
+                                    }
+                                } else {
+                                    coroutineScope.launch {
+                                        viewModel.agregarLigaAFavoritos(league)
+                                    }
+                                    Log.d("TeamScreen", "Se agrego el favorito teamId: ${leagueId}")
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
+                                contentDescription = "Favorito",
+                                tint = if (isFavorite) Color.Yellow else Color.White
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = Color.Transparent
+                    )
                 )
-                Image(
-                    painter = rememberAsyncImagePainter("https://media.api-sports.io/football/leagues/$leagueId.png"),
-                    contentDescription = "Logo liga",
-                    modifier = Modifier.size(40.dp)
-                )
+            }
+
+            // Nombre de liga y logo
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = nombreLiga.ifEmpty { "Liga" },
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Image(
+                        painter = rememberAsyncImagePainter("https://media.api-sports.io/football/leagues/$leagueId.png"),
+                        contentDescription = "Logo liga",
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(Color.White.copy(alpha = 0.9f), shape = MaterialTheme.shapes.small)
+                            .padding(4.dp)
+                    )
+                }
             }
 
             // Menu desplegable con temporadas
             Box(
                 modifier = Modifier
+                    .fillMaxWidth()
+                    .height(36.dp)
                     .padding(horizontal = 12.dp, vertical = 8.dp)
                     .clickable { expanded = true }
             ) {
@@ -195,93 +258,99 @@ fun LigaDetalleScreen(
             }
 
             // Tabs: Informacion General | Partidos | Tabla | Goleadores | Asistidores
-            LazyRow(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(horizontal = 12.dp)
+                    .height(68.dp)
             ) {
-                items(listOf(
-                    "Información general" to 0,
-                    "Partidos" to 1,
-                    "Clasificación" to 2,
-                    "Goleadores" to 3,
-                    "Asistidores" to 4
-                )) { (text, index) ->
-                    NavigationOption(
-                        text = text,
-                        isSelected = selectedTab == index,
-                        onClick = { selectedTab = index }
-                    )
-                }
-            }
-        }
-
-        // Contenido según tab
-        when (selectedTab) {
-            0 -> {
-                val info = viewModel.infoLiga.value
-                val equipos = viewModel.equipos.value
-
-                if (info != null) {
-                    LigaInfoConEquiposTab(info = info, equipos = equipos)
-                } else {
-                    Text(
-                        "Cargando información de la liga...",
-                        color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    )
-                }
-            }
-            1 -> {
-                val partidos = viewModel.partidos.value
-                if (partidos.isEmpty()) {
-                    Text(
-                        "No hay equipos disponibles de la temporada $temporadaSeleccionada",
-                        color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    )
-                } else {
-                    ListaDePartidos(partidos)
-                }
-            }/*{  //Para mostrar la tabla de clasificacion completa
-                val standings = viewModel.standings.value
-                if (standings.isEmpty()) {
-                    Text("No hay equipos disponibles de la temporada $temporadaSeleccionada", modifier = Modifier.padding(16.dp))
-                } else {
-                    TablaClasificacionCompleta(standings)
-                }
-            }*/
-            2 -> {
-                StandingsWidget(
-                    leagueId = leagueId,
-                    season = temporada
-                )
-            }
-            3 -> {
-                val goleadores = viewModel.topScorers.value
-                if (goleadores.isEmpty()) {
-                    Text("No hay goleadores disponibles de la temporada $temporadaSeleccionada", modifier = Modifier.padding(16.dp))
-                } else {
-                    TablaGoleadores(goleadores)
-                }
-            }
-            4 -> {
-                val asistidores = viewModel.asistidores.value
-                if (asistidores.isEmpty()) {
-                    Text("No hay asistidores disponibles de la temporada $temporadaSeleccionada", modifier = Modifier.padding(16.dp))
-                } else {
-                    TopAssistsTab(asistidores)
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp)
+                ) {
+                    items(listOf(
+                        "Información general" to 0,
+                        "Partidos" to 1,
+                        "Clasificación" to 2,
+                        "Goleadores" to 3,
+                        "Asistidores" to 4
+                    )) { (text, index) ->
+                        NavigationOption(
+                            text = text,
+                            isSelected = selectedTab == index,
+                            onClick = { selectedTab = index }
+                        )
+                    }
                 }
             }
 
+            // Contenido principal
+            when (selectedTab) {
+                0 -> {
+                    val info = viewModel.infoLiga.value
+                    val equipos = viewModel.equipos.value
+
+                    if (info != null) {
+                        LigaInfoConEquiposTab(info = info, equipos = equipos)
+                    } else {
+                        Text(
+                            "Cargando información de la liga...",
+                            color = Color.White,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        )
+                    }
+                }
+                1 -> {
+                    val partidos = viewModel.partidos.value
+                    if (partidos.isEmpty()) {
+                        Text(
+                            "No hay equipos disponibles de la temporada $temporadaSeleccionada",
+                            color = Color.White,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        )
+                    } else {
+                        ListaDePartidos(partidos)
+                    }
+                }/*{  //Para mostrar la tabla de clasificacion completa
+                    val standings = viewModel.standings.value
+                    if (standings.isEmpty()) {
+                        Text("No hay equipos disponibles de la temporada $temporadaSeleccionada", modifier = Modifier.padding(16.dp))
+                    } else {
+                        TablaClasificacionCompleta(standings)
+                    }
+                }*/
+                2 -> {
+                    StandingsWidget(
+                        leagueId = leagueId,
+                        season = temporada
+                    )
+                }
+                3 -> {
+                    val goleadores = viewModel.topScorers.value
+                    if (goleadores.isEmpty()) {
+                        Text("No hay goleadores disponibles de la temporada $temporadaSeleccionada", modifier = Modifier.padding(16.dp))
+                    } else {
+                        TablaGoleadores(goleadores)
+                    }
+                }
+                4 -> {
+                    val asistidores = viewModel.asistidores.value
+                    if (asistidores.isEmpty()) {
+                        Text("No hay asistidores disponibles de la temporada $temporadaSeleccionada", modifier = Modifier.padding(16.dp))
+                    } else {
+                        TopAssistsTab(asistidores)
+                    }
+                }
+
+            }
         }
     }
 
@@ -502,7 +571,10 @@ fun LigaInfoConEquiposTab(
                 AsyncImage(
                     model = info.league.logo,
                     contentDescription = "Logo Liga",
-                    modifier = Modifier.size(80.dp)
+                    modifier = Modifier
+                        .size(80.dp)
+                        .background(Color.White.copy(alpha = 0.9f), shape = MaterialTheme.shapes.medium)
+                        .padding(8.dp)
                 )
                 Text(
                     text = info.league.name,
