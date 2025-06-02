@@ -49,17 +49,13 @@ fun TeamScreen(
     onBackClick: () -> Unit,
     viewModel: TeamViewModel = hiltViewModel()
 ) {
-    //val anioActual: Int = Calendar.getInstance().get(Calendar.YEAR)
-    // limitacion de la api solo se pueden consultar datos entre 2021 y 2023 en el plan gratis papu sad :C
     val anioActual = 2023
     LaunchedEffect(Unit) {
-        //Log.d("TeamScreen", "teamId: ${team.id}, season: $anioActual")
         viewModel.cargarEstadisticasDeTodasLasLigas(team.id,anioActual)
     }
 
     val resultadoState by viewModel.statsList.collectAsState()
     val resultado = resultadoState ?: emptyList()
-    //var isFavorite by remember { mutableStateOf(false) }
 
     val favoritos by viewModel.favoritos.collectAsState()
     val isFavorite = favoritos.any { it.team.id == team.id }
@@ -70,130 +66,128 @@ fun TeamScreen(
 
     val coroutineScope = rememberCoroutineScope()
 
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        // Fondo base
-        Image(
-            painter = painterResource(id = R.drawable.wikifutfondo1),
-            contentDescription = "Background",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.FillBounds
-        )
-
-        // Box con blur que coincide con el header
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(180.dp)
-                .graphicsLayer {
-                    clip = true
-                }
-                .blur(radius = 20.dp)
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.wikifutfondo1),
-                contentDescription = "Blurred Background",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.FillBounds
-            )
-        }
-
-        // Sombra semitransparente
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(180.dp)
-                .background(Color.Black.copy(alpha = 0.4f))
-        )
-
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            // Sección con imagen de fondo
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp) // Altura del fondo
-            ) {
-                // TopAppBar
-                TopAppBar(
-                    modifier = Modifier.height(61.dp),
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent
-                    ),
-                    title = {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                modifier = Modifier.height(70.dp),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
+                ),
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxWidth()
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
+                            IconButton(
+                                onClick = onBackClick,
+                                modifier = Modifier.size(36.dp)
                             ) {
-                                IconButton(
-                                    onClick = onBackClick,
-                                    modifier = Modifier.size(36.dp)
-                                ) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.ic_back_24),
-                                        contentDescription = "Volver",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                                Text(
-                                    text = team.name,
-                                    color = Color.White,
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(start = 8.dp)
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_back_24),
+                                    contentDescription = "Volver",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(24.dp)
                                 )
                             }
-                            
-                            Row {
-                                IconButton(
-                                    onClick = {
-                                        if (isFavorite) {
-                                            Log.d("TeamScreen", "Se elimino el favorito")
-                                            coroutineScope.launch {
-                                                viewModel.removeFromFavorites(team.id)
-                                            }
-                                        } else {
-                                            coroutineScope.launch {
-                                                viewModel.agregarAFavoritos(
-                                                    FavoriteTeam(
-                                                        team = team,
-                                                        venue = venue
-                                                    )
-                                                )
-                                            }
-                                            Log.d("TeamScreen", "Se agrego el favorito teamId: ${team.id}")
+                            Text(
+                                text = "Detalles de Equipo",
+                                color = Color.White,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
+                        }
+                        
+                        Row {
+                            IconButton(
+                                onClick = {
+                                    if (isFavorite) {
+                                        Log.d("TeamScreen", "Se elimino el favorito")
+                                        coroutineScope.launch {
+                                            viewModel.removeFromFavorites(team.id)
                                         }
+                                    } else {
+                                        coroutineScope.launch {
+                                            viewModel.agregarAFavoritos(
+                                                FavoriteTeam(
+                                                    team = team,
+                                                    venue = venue
+                                                )
+                                            )
+                                        }
+                                        Log.d("TeamScreen", "Se agrego el favorito teamId: ${team.id}")
                                     }
-                                ) {
-                                    Icon(
-                                        imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
-                                        contentDescription = "Favorito",
-                                        tint = if (isFavorite) Color.Yellow else Color.White,
-                                    )
                                 }
+                            ) {
+                                Icon(
+                                    imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
+                                    contentDescription = "Favorito",
+                                    tint = if (isFavorite) Color.Yellow else Color.White,
+                                )
                             }
                         }
                     }
-                )
+                }
+            )
+        },
+        containerColor = Color.Transparent
+    ) { paddingValues ->
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Fondo base
+            Image(
+                painter = painterResource(id = R.drawable.wikifutfondo1),
+                contentDescription = "Background",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.FillBounds
+            )
 
-                // Contenido sobre la imagen
-                Column(
+            // Box con blur
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(170.dp)
+                    .graphicsLayer {
+                        clip = true
+                    }
+                    .blur(radius = 20.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.wikifutfondo1),
+                    contentDescription = "Blurred Background",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.FillBounds
+                )
+            }
+
+            // Sombra semitransparente
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(170.dp)
+                    .background(Color.Black.copy(alpha = 0.4f))
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = paddingValues.calculateTopPadding())
+            ) {
+                // Box para el header con logo y nombre
+                Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(10.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceBetween
+                        .height(100.dp)
+                        .background(Color.Transparent)
                 ) {
-                    // Logo y nombre del equipo centrado
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(top = 61.dp)
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxSize()
                     ) {
                         Image(
                             painter = rememberAsyncImagePainter(team.logo),
@@ -207,6 +201,7 @@ fun TeamScreen(
 
                         Spacer(modifier = Modifier.width(30.dp))
                         Column(
+                            horizontalAlignment = Alignment.Start
                         ){
                             Text(
                                 text = team.name,
@@ -222,44 +217,45 @@ fun TeamScreen(
                         }
                     }
                 }
-            }
-            // vista estadio y estadisticas
-            LazyColumn {
-                item {
-                    Spacer(modifier = Modifier.height(20.dp))
-                }
 
-                item {
-                    TextoCentradoIcono(text = "Estadio", icon = R.drawable.sport)
-                }
-
-                item {
-                    VenueCard(venue = venue)
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(20.dp))
-                }
-
-                item {
-                    TextoCentradoIcono(text = "Estadísticas", icon = R.drawable.analytics)
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(20.dp))
-                }
-
-                if (resultado.isEmpty()) {
+                // Contenido scrolleable
+                LazyColumn {
                     item {
-                        Text(
-                            text = "No hay resultados de ligas",
-                            color = Color.White,
-                            modifier = Modifier.padding(16.dp)
-                        )
+                        Spacer(modifier = Modifier.height(20.dp))
                     }
-                } else {
-                    items(resultado) { statsResponse ->
-                        LeagueStatsCardModern(statsResponse.response)
+
+                    item {
+                        TextoCentradoIcono(text = "Estadio", icon = R.drawable.sport)
+                    }
+
+                    item {
+                        VenueCard(venue = venue)
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+
+                    item {
+                        TextoCentradoIcono(text = "Estadísticas", icon = R.drawable.analytics)
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+
+                    if (resultado.isEmpty()) {
+                        item {
+                            Text(
+                                text = "No hay resultados de ligas",
+                                color = Color.White,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+                    } else {
+                        items(resultado) { statsResponse ->
+                            LeagueStatsCardModern(statsResponse.response)
+                        }
                     }
                 }
             }
@@ -348,7 +344,7 @@ fun LeagueStatsCardModern(stats: TeamStatsResponse) {
         modifier = Modifier
             .padding(16.dp)
             .fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFD700)),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFE3B505)),
         elevation = CardDefaults.cardElevation(8.dp),
         shape = RoundedCornerShape(20.dp)
     ) {

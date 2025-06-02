@@ -54,7 +54,12 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
-
+import androidx.compose.ui.window.Dialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.TextButton
 
 @Composable
 fun HomeScreenWithDrawer(
@@ -165,14 +170,14 @@ fun DrawerContent(
             if (userName != null && avatar != null) {
                 Spacer(modifier = Modifier.height(32.dp))
                 Text(
-                    text = "¡Hola,",
+                    text = "¡ Hola !",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
                     modifier = Modifier.padding(bottom = 16.dp).align(Alignment.CenterHorizontally),
                 )
                 Text(
-                    text = "$userName!",
+                    text = userName,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -185,6 +190,10 @@ fun DrawerContent(
                     "cristiano" -> R.drawable.cristiano
                     "bruyne" -> R.drawable.bruyne
                     "mbape" -> R.drawable.mbape
+                    "sam_kerr" -> R.drawable.sam_kerr
+                    "linda_caicedo" -> R.drawable.linda_caicedo
+                    "aitana_bonmati" -> R.drawable.aitana_bonmati
+                    "alexia_putellas" -> R.drawable.alexia_putellas
                     else -> R.drawable.bruyne
                 }
                 Box(

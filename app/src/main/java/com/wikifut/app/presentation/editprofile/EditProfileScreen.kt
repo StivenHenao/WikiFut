@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +47,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.text.style.TextAlign
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,13 +60,23 @@ fun EditProfileScreen(
     var selectedAvatar by remember { mutableStateOf<String?>(null) }
     var showError by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
+    var selectedGender by remember { mutableStateOf(0) } // 0 para masculino, 1 para femenino
 
-    val profileImages = remember {
+    val maleProfileImages = remember {
         listOf<Pair<String, Int>>(
-            "bruyne" to R.drawable.bruyne,
-            "cristiano" to R.drawable.cristiano,
-            "messi" to R.drawable.messi,
-            "mbape" to R.drawable.mbape
+            "bruyne" to R.drawable.bruyne,      // Hombre
+            "cristiano" to R.drawable.cristiano, // Hombre
+            "messi" to R.drawable.messi,        // Hombre
+            "mbape" to R.drawable.mbape         // Hombre
+        )
+    }
+
+    val femaleProfileImages = remember {
+        listOf<Pair<String, Int>>(
+            "sam_kerr" to R.drawable.sam_kerr,      // Mujer
+            "linda_caicedo" to R.drawable.linda_caicedo, // Mujer
+            "aitana_bonmati" to R.drawable.aitana_bonmati, // Mujer
+            "alexia_putellas" to R.drawable.alexia_putellas // Mujer
         )
     }
 
@@ -82,7 +94,7 @@ fun EditProfileScreen(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    modifier = Modifier.height(70.dp),
+                    modifier = Modifier.height(80.dp),
                     title = { 
                         Box(
                             modifier = Modifier.fillMaxHeight(),
@@ -135,7 +147,7 @@ fun EditProfileScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(70.dp)
+                        .height(80.dp)
                         .graphicsLayer {
                             clip = true
                         }
@@ -153,7 +165,7 @@ fun EditProfileScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(70.dp)
+                        .height(80.dp)
                         .background(Color.Black.copy(alpha = 0.4f))
                 )
 
@@ -183,6 +195,7 @@ fun EditProfileScreen(
                                 text = "Nombre de usuario",
                                 fontSize = 18.sp,
                                 color = Color.White,
+                                fontWeight = FontWeight.Bold,
                                 style = TextStyle(
                                     shadow = Shadow(
                                         color = Color.Black,
@@ -196,14 +209,23 @@ fun EditProfileScreen(
                             TextField(
                                 value = username,
                                 onValueChange = { newValue ->
-                                    username = newValue
+                                    username = newValue.split(" ").joinToString(" ") { word ->
+                                        if (word.isNotEmpty()) {
+                                            word.first().uppercase() + word.substring(1)
+                                        } else {
+                                            word
+                                        }
+                                    }
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .heightIn(min = 56.dp)
                                     .padding(bottom = 24.dp),
                                 shape = RoundedCornerShape(20.dp),
-                                textStyle = LocalTextStyle.current.copy(color = Color.Black),
+                                textStyle = LocalTextStyle.current.copy(
+                                    color = Color.Black,
+                                    fontWeight = FontWeight.Bold
+                                ),
                                 singleLine = true,
                                 maxLines = 1,
                                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -218,6 +240,7 @@ fun EditProfileScreen(
                                 text = "Selecciona tu avatar",
                                 fontSize = 18.sp,
                                 color = Color.White,
+                                fontWeight = FontWeight.Bold,
                                 style = TextStyle(
                                     shadow = Shadow(
                                         color = Color.Black,
@@ -228,6 +251,69 @@ fun EditProfileScreen(
                                 modifier = Modifier.padding(vertical = 24.dp)
                             )
 
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(48.dp)
+                            ) {
+                                // Box con blur
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .graphicsLayer {
+                                            clip = true
+                                        }
+                                        .blur(radius = 20.dp)
+                                ) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.wikifutfondo1),
+                                        contentDescription = "Background Blur",
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.FillBounds
+                                    )
+                                }
+
+                                // Sombra semitransparente
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color.Black.copy(alpha = 0.4f))
+                                )
+
+                                TabRow(
+                                    selectedTabIndex = selectedGender,
+                                    containerColor = Color.Transparent,
+                                    contentColor = Color.White,
+                                    indicator = { tabPositions ->
+                                        TabRowDefaults.SecondaryIndicator(
+                                            modifier = Modifier.tabIndicatorOffset(tabPositions[selectedGender]),
+                                            color = Color(0xFF4CAF50)
+                                        )
+                                    }
+                                ) {
+                                    Tab(
+                                        selected = selectedGender == 0,
+                                        onClick = { selectedGender = 0 },
+                                        text = {
+                                            Text(
+                                                "Masculino",
+                                                color = if (selectedGender == 0) Color.White else Color.Gray
+                                            )
+                                        }
+                                    )
+                                    Tab(
+                                        selected = selectedGender == 1,
+                                        onClick = { selectedGender = 1 },
+                                        text = {
+                                            Text(
+                                                "Femenino",
+                                                color = if (selectedGender == 1) Color.White else Color.Gray
+                                            )
+                                        }
+                                    )
+                                }
+                            }
+
                             LazyVerticalGrid(
                                 columns = GridCells.Fixed(2),
                                 modifier = Modifier
@@ -236,7 +322,7 @@ fun EditProfileScreen(
                                 horizontalArrangement = Arrangement.spacedBy(24.dp),
                                 verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
-                                items(profileImages) { (avatarName, imageRes) ->
+                                items(if (selectedGender == 0) maleProfileImages else femaleProfileImages) { (avatarName, imageRes) ->
                                     val isSelected = selectedAvatar == avatarName
 
                                     // Animaciones
@@ -284,9 +370,12 @@ fun EditProfileScreen(
                                 )
                             }
 
+                            Spacer(modifier = Modifier.height(32.dp))
+
                             Button(
                                 onClick = {
-                                    if (username.isBlank()) {
+                                    val trimmedUsername = username.trim()
+                                    if (trimmedUsername.isBlank()) {
                                         showError = true
                                         errorMessage = "El nombre de usuario no puede estar vacío"
                                         return@Button
@@ -296,21 +385,21 @@ fun EditProfileScreen(
                                         errorMessage = "Debes seleccionar un avatar"
                                         return@Button
                                     }
-                                    viewModel.saveProfile(username, selectedAvatar!!)
+                                    viewModel.saveProfile(trimmedUsername, selectedAvatar!!)
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(50.dp),
                                 shape = RoundedCornerShape(20.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF0E0414)
+                                    containerColor = Color.White
                                 )
                             ) {
                                 Text(
                                     "Guardar cambios",
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color.White
+                                    color = Color.Black
                                 )
                             }
                         }

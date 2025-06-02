@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
@@ -21,6 +22,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,6 +32,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
@@ -156,19 +160,44 @@ fun PlayerScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
+        // Fondo base
         Image(
             painter = painterResource(id = R.drawable.wikifutfondo1),
             contentDescription = "Background",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.FillBounds
         )
-        Column(
+
+        // Box con blur
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFF1F1235))
+                .fillMaxWidth()
+                .height(175.dp)
         ) {
+            Image(
+                painter = painterResource(id = R.drawable.wikifutfondo1),
+                contentDescription = "Background Blur",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .blur(radius = 10.dp),
+                contentScale = ContentScale.FillBounds
+            )
+        }
+
+        // Box con sombra
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(175.dp)
+                .background(Color.Black.copy(alpha = 0.3f))
+        )
+
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // TopAppBar
             TopAppBar(
-                modifier = Modifier.height(70.dp),
+                modifier = Modifier.height(80.dp),
                 title = { 
                     Box(
                         modifier = Modifier.fillMaxHeight(),
@@ -176,23 +205,35 @@ fun PlayerScreen(
                     ) {
                         Text(
                             "Detalles del Jugador",
-                            color = Color.White,
                             fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            style = TextStyle(
+                                shadow = Shadow(
+                                    color = Color.Black,
+                                    offset = Offset(2f, 2f),
+                                    blurRadius = 6f
+                                )
+                            ),
+                            color = Color.White
                         )
                     }
                 },
                 navigationIcon = {
-                    IconButton(
-                        onClick = { navController.popBackStack() },
-                        modifier = Modifier.size(48.dp)
+                    Box(
+                        modifier = Modifier.fillMaxHeight(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Atrás",
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
+                        IconButton(
+                            onClick = { navController.popBackStack() },
+                            modifier = Modifier.size(48.dp)
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Atrás",
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
                     }
                 },
                 actions = {
@@ -206,75 +247,52 @@ fun PlayerScreen(
                             viewModel.cargarJugadoresFavoritos()
                         }
 
-                        IconButton(
-                            onClick = {
-                                if (isFavorite) {
-                                    Log.d("TeamScreen", "Se elimino el favorito")
-                                    coroutineScope.launch {
-                                        viewModel.eliminarJugadorDeFavoritos(player)
-                                        viewModel.cargarJugadoresFavoritos()
-                                    }
-                                } else {
-                                    coroutineScope.launch {
-                                        viewModel.agregarJugadorAFavoritos(player)
-                                        viewModel.cargarJugadoresFavoritos()
-                                    }
-                                    Log.d("TeamScreen", "Se agrego el favorito teamId: ${player.id}")
-                                }
-                            }
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .padding(end = 8.dp),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
-                                contentDescription = "Favorito",
-                                tint = if (isFavorite) Color.Yellow else Color.White,
-                            )
+                            IconButton(
+                                onClick = {
+                                    if (isFavorite) {
+                                        Log.d("TeamScreen", "Se elimino el favorito")
+                                        coroutineScope.launch {
+                                            viewModel.eliminarJugadorDeFavoritos(player)
+                                            viewModel.cargarJugadoresFavoritos()
+                                        }
+                                    } else {
+                                        coroutineScope.launch {
+                                            viewModel.agregarJugadorAFavoritos(player)
+                                            viewModel.cargarJugadoresFavoritos()
+                                        }
+                                        Log.d("TeamScreen", "Se agrego el favorito teamId: ${player.id}")
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
+                                    contentDescription = "Favorito",
+                                    tint = if (isFavorite) Color.Yellow else Color.White,
+                                )
+                            }
                         }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF1F1235),
+                    containerColor = Color.Transparent,
                     titleContentColor = Color.White,
                     navigationIconContentColor = Color.White
                 )
             )
 
-            when {
-                loading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            color = Color.White
-                        )
-                    }
-                }
-                error != null -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = error ?: "",
-                            color = Color.Red
-                        )
-                    }
-                }
-                playerDataState != null -> {
-                    PlayerDetails(
-                        playerDataResponse = playerDataState!!, 
-                        viewModel = viewModel,
-                        navController = navController
-                    )
-                }
-                else -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "No se encontraron datos", color = Color.White)
-                    }
-                }
+            // Card del jugador
+            if (playerDataState != null) {
+                PlayerDetails(
+                    playerDataResponse = playerDataState!!, 
+                    viewModel = viewModel,
+                    navController = navController
+                )
             }
         }
     }
@@ -312,85 +330,131 @@ fun PlayerDetails(
     val position = playerData.statistics?.firstOrNull()?.games?.position ?: "N/A"
     val numberPlayer = statisticGame?.number ?: 0
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
+    Box(
+        modifier = Modifier.fillMaxSize()
     ) {
-        item {
-            if (team_player != null) {
-                headerVistaPlayer(name = player.name, player.photo, team_player, rating)
-            }
+        // Card fija del jugador pegada al TopAppBar
+        if (team_player != null) {
+            headerVistaPlayer(
+                name = player.name, 
+                photo = player.photo, 
+                team = team_player, 
+                rating = rating
+            )
         }
 
-        item {
-            Spacer(Modifier.height(8.dp))
-        }
-
-        item {
-            if (statisticTeamPlayer != null) {
-                if (team_player != null) {
-                    player.weight?.let {
-                        containerBasicInfo(
-                            team = team_player,
-                            imageTeam = statisticTeamPlayer.logo,
-                            nacionalidad = player.nationality,
-                            nacimiento = player.age,
-                            altura = player.height,
-                            posicion = position,
-                            camiseta = numberPlayer,
-                            peso = it
-                        )
+        // Contenido scrolleable debajo de la card
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 95.dp) // Espacio para la card del jugador
+        ) {
+            item {
+                if (statisticTeamPlayer != null) {
+                    if (team_player != null) {
+                        player.weight?.let {
+                            containerBasicInfo(
+                                team = team_player,
+                                imageTeam = statisticTeamPlayer.logo,
+                                nacionalidad = player.nationality,
+                                nacimiento = player.age,
+                                altura = player.height,
+                                posicion = position,
+                                camiseta = numberPlayer,
+                                peso = it
+                            )
+                        }
                     }
                 }
             }
-        }
 
-        item {
-            Spacer(Modifier.height(8.dp))
-        }
-
-        item {
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    "TEMPORADA",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
-                )
+            item {
+                Spacer(Modifier.height(8.dp))
             }
-        }
 
-        item {
-            Spacer(Modifier.height(8.dp))
-        }
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 60.dp)
+                ) {
+                    // Box con blur
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(40.dp)
+                            .clip(RoundedCornerShape(topStart = 25.dp, bottomEnd = 25.dp))
+                            .blur(radius = 20.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.wikifutfondo1),
+                            contentDescription = "Background Blur",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.FillBounds
+                        )
+                    }
 
-        item {
-            if (statistic != null) {
-                containerStatisticInfo(
-                    statistic.shots,
-                    statistic.goals,
-                    statistic.passes,
-                    statistic.tackles,
-                    statistic.duels,
-                    statistic.dribbles,
-                    statistic.fouls,
-                    statistic.cards,
-                    statistic.penalty
-                )
+                    // Sombra semitransparente
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(40.dp)
+                            .clip(RoundedCornerShape(topStart = 25.dp, bottomEnd = 25.dp))
+                            .background(Color.Black.copy(alpha = 0.5f))
+                    )
+
+                    // Surface con el contenido
+                    Surface(
+                        color = Color.Transparent,
+                        contentColor = Color.White,
+                        shape = RoundedCornerShape(topStart = 25.dp, bottomEnd = 25.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(40.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "TEMPORADA",
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 20.sp
+                            )
+                        }
+                    }
+                }
             }
-        }
 
-        item {
-            Spacer(Modifier.height(8.dp))
-        }
+            item {
+                Spacer(Modifier.height(8.dp))
+            }
 
-        item {
-            if (statisticPlayerLeague != null) {
-                containerResume(statisticPlayerLeague, statisticGame)
+            item {
+                if (statistic != null) {
+                    containerStatisticInfo(
+                        statistic.shots,
+                        statistic.goals,
+                        statistic.passes,
+                        statistic.tackles,
+                        statistic.duels,
+                        statistic.dribbles,
+                        statistic.fouls,
+                        statistic.cards,
+                        statistic.penalty
+                    )
+                }
+            }
+
+            item {
+                Spacer(Modifier.height(8.dp))
+            }
+
+            item {
+                if (statisticPlayerLeague != null) {
+                    containerResume(statisticPlayerLeague, statisticGame)
+                }
             }
         }
     }
@@ -398,13 +462,14 @@ fun PlayerDetails(
 
 @Composable
 fun headerVistaPlayer(name: String, photo: String, team: String ,rating: String?){
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .background(Color(0xFF1E1E1E))
-        .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically)
-    {
-
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(95.dp)
+            .background(Color.Transparent)
+            .padding(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 0.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Image(
             painter = rememberImagePainter(photo),
             contentDescription = "Foto del Jugador",
@@ -425,8 +490,7 @@ fun headerVistaPlayer(name: String, photo: String, team: String ,rating: String?
                 fontSize = 15.sp)
 
             Text(text = team?: "No team",
-                color = Color.White,
-
+                color = Color.White
                 )
         }
 
@@ -435,9 +499,8 @@ fun headerVistaPlayer(name: String, photo: String, team: String ,rating: String?
         val ratingValue = rating?.toFloatOrNull()
         val isLowRating = ratingValue?.let { it < 7.0 } ?: false
         val formattedRating = ratingValue?.let {
-            "%.1f".format(it) // Limita a 1 decimal y redondea
+            "%.1f".format(it)
         } ?: "N/A"
-
 
         Text(
             text = formattedRating ?: "N/A",
@@ -447,11 +510,7 @@ fun headerVistaPlayer(name: String, photo: String, team: String ,rating: String?
             style = TextStyle(
                 shadow = Shadow(color = Color.Black)
             )
-
         )
-
-
-
     }
 }
 
@@ -466,22 +525,18 @@ fun containerBasicInfo(
     camiseta: Int,
     peso: String
 ) {
-
-
     Surface(
-        color = Color(0xFF1E1E1E),
+        color = Color(0xFF2E0854),
         contentColor = Color.White,
         shape = RoundedCornerShape(8.dp),
         shadowElevation = 4.dp,
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
-
     ) {
         Column(
             modifier = Modifier
                 .padding(16.dp)
-
         ) {
             //---------- Equipo ----------
             Row(
@@ -491,7 +546,7 @@ fun containerBasicInfo(
                 Image(
                     painter = rememberImagePainter(imageTeam),
                     contentDescription = "Escudo del equipo",
-                    modifier = Modifier.size(40.dp) // Tamaño definido
+                    modifier = Modifier.size(40.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = team,
@@ -522,7 +577,7 @@ fun containerBasicInfo(
                 ) {
                     Text("EDAD", fontWeight = FontWeight.Bold, fontSize = 15.sp)
                     Spacer(Modifier.height(4.dp))
-                    Text(text = nacimiento.toString()) // Corregido: Usar la edad real del jugador
+                    Text(text = nacimiento.toString())
                 }
 
                 Column(
@@ -568,8 +623,6 @@ fun containerBasicInfo(
                     Spacer(Modifier.height(4.dp))
                     Text(peso)
                 }
-
-
             }
         }
     }
@@ -589,7 +642,7 @@ fun containerStatisticInfo(
 ) {
     var expanded by remember { mutableStateOf(false) }
     Surface(
-        color = Color(0xFF1E1E1E),
+        color = Color(0xFF2E0854),
         contentColor = Color.White,
         shape = RoundedCornerShape(8.dp),
         shadowElevation = 4.dp,
@@ -617,13 +670,11 @@ fun containerStatisticInfo(
 
                     Spacer(Modifier.height(20.dp))
 
-
                     StatisticBar(label = "(%) PASES:",
                         value = (passes?.accuracy ?: 0).toInt(),
                         maxValue = 100)
 
                     Spacer(Modifier.height(20.dp))
-
 
                     StatisticBar(label = "DRIBBLES:",
                         value = (dribbles?.success ?: 0),
@@ -637,13 +688,11 @@ fun containerStatisticInfo(
 
                     Spacer(Modifier.height(20.dp))
 
-
                     StatisticBar(label = "DISPAROS:",
                         value = shoots?.on ?: 0,
                         maxValue = shoots?.total ?: 0)
 
                     Spacer(Modifier.height(20.dp))
-
 
                     StatisticBar(label = "TACKLES:",
                         value = (tackles?.interceptions ?: 0),
@@ -677,7 +726,6 @@ fun containerStatisticInfo(
 
                     Spacer(Modifier.height(20.dp))
 
-
                     Column(verticalArrangement = Arrangement.SpaceBetween) {
                         Text("PASES CLAVES:",
                             fontWeight = FontWeight.Bold,
@@ -685,8 +733,6 @@ fun containerStatisticInfo(
                         Text(text = passes?.key.toString())
                     }
                 }
-
-
 
                 Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
                     Column(verticalArrangement = Arrangement.SpaceBetween) {
@@ -698,7 +744,6 @@ fun containerStatisticInfo(
 
                     Spacer(Modifier.height(20.dp))
 
-
                     Column(verticalArrangement = Arrangement.SpaceBetween) {
                         Text("AMARILLAS:",
                             fontWeight = FontWeight.Bold,
@@ -707,7 +752,6 @@ fun containerStatisticInfo(
                     }
 
                     Spacer(Modifier.height(20.dp))
-
 
                     Column(verticalArrangement = Arrangement.SpaceBetween) {
                         Text("ROJAS:",
@@ -721,11 +765,10 @@ fun containerStatisticInfo(
     }
 }
 
-
 @Composable
 fun containerResume( league: PlayerLeague, games: PlayerGames? ){
     Surface(
-        color = Color(0xFF1E1E1E),
+        color = Color(0xFF2E0854),
         contentColor = Color.White,
         shape = RoundedCornerShape(8.dp),
         shadowElevation = 4.dp,
@@ -743,7 +786,7 @@ fun containerResume( league: PlayerLeague, games: PlayerGames? ){
                 Image(
                     painter = rememberImagePainter(league.logo),
                     contentDescription = "Escudo de la liga",
-                    modifier = Modifier.size(40.dp) // Tamaño definido
+                    modifier = Modifier.size(40.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
 
@@ -759,7 +802,6 @@ fun containerResume( league: PlayerLeague, games: PlayerGames? ){
 
             Spacer(Modifier.height(30.dp))
 
-
             //-------Games----------
             Row(
                 modifier = Modifier
@@ -772,14 +814,12 @@ fun containerResume( league: PlayerLeague, games: PlayerGames? ){
                     Text(
                         "APARICIONES",
                         modifier = Modifier.fillMaxWidth(),
-                        color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp
                     )
                     Text(
                         games?.appearences?.toString() ?: "-",
-                        modifier = Modifier.fillMaxWidth(),
-                        color = Color.White
+                        modifier = Modifier.fillMaxWidth()
                     )
 
                     Spacer(Modifier.height(20.dp))
@@ -787,14 +827,12 @@ fun containerResume( league: PlayerLeague, games: PlayerGames? ){
                     Text(
                         "MINUTOS",
                         modifier = Modifier.fillMaxWidth(),
-                        color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp
                     )
                     Text(
                         games?.minutes?.toString() ?: "-",
-                        modifier = Modifier.fillMaxWidth(),
-                        color = Color.White
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
                 // Columna derecha
@@ -802,15 +840,13 @@ fun containerResume( league: PlayerLeague, games: PlayerGames? ){
                     Text(
                         "TITULAR",
                         modifier = Modifier.fillMaxWidth(),
-                        color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp
                     )
 
                     Text(
                         games?.lineups?.toString() ?: "-",
-                        modifier = Modifier.fillMaxWidth(),
-                        color = Color.White
+                        modifier = Modifier.fillMaxWidth()
                     )
 
                     Spacer(Modifier.height(20.dp))
@@ -818,20 +854,16 @@ fun containerResume( league: PlayerLeague, games: PlayerGames? ){
                     Text(
                         "CAPITAN",
                         modifier = Modifier.fillMaxWidth(),
-                        color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp
                     )
 
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = games?.captain?.let { if (it) "Sí" else "No" } ?: "-",
-                        color = Color.White
+                        text = games?.captain?.let { if (it) "Sí" else "No" } ?: "-"
                     )
                 }
             }
-
         }
     }
-
 }

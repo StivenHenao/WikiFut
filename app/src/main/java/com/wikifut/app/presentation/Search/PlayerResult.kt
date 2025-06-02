@@ -32,6 +32,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.layout.ContentScale
 import com.wikifut.app.R
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+
+private val GrisMorado = Color(0xFF3A2C4A)
 
 @Composable
 fun PlayerResult(viewModel: SearchViewModel, onPlayerNavigate: (playerId: String, season: String) -> Unit) {
@@ -82,7 +86,7 @@ fun PlayerItem(player: Player, onPlayerNavigate: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        colors = CardDefaults.cardColors(containerColor = MoradoClaro),
+        colors = CardDefaults.cardColors(containerColor = MoradoOscuro),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
@@ -92,24 +96,35 @@ fun PlayerItem(player: Player, onPlayerNavigate: () -> Unit) {
                 .clickable{onPlayerNavigate()},
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AsyncImage(
-                model = player.photo,
-                contentDescription = "Foto de ${player.name}",
-                modifier = Modifier.size(48.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(Color.White, shape = RoundedCornerShape(12.dp))
+            ) {
+                AsyncImage(
+                    model = player.photo,
+                    contentDescription = "Foto de ${player.name}",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .align(Alignment.Center)
+                )
+            }
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(
                     text = player.name,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White
                 )
                 Text(
                     text = "${player.age} años - ${player.nationality}",
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White
                 )
                 Text(
                     text = "Posición: ${player.position}",
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White
                 )
             }
         }

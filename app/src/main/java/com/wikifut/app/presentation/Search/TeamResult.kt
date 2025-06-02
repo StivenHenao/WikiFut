@@ -33,6 +33,8 @@ import com.wikifut.app.R
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.Image
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 @Composable
 fun EquiposResult(viewModel: SearchViewModel, onTeamNavigate: (team: Team, venue: Venue) -> Unit) {
@@ -80,8 +82,8 @@ fun TeamItem(team: Team, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clickable{onClick()}, // Hacer el Card clickeable
-        colors = CardDefaults.cardColors(containerColor = MoradoClaro),
+            .clickable{onClick()},
+        colors = CardDefaults.cardColors(containerColor = MoradoOscuro),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
@@ -90,15 +92,23 @@ fun TeamItem(team: Team, onClick: () -> Unit) {
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AsyncImage(
-                model = team.logo,
-                contentDescription = "Logo ${team.name}",
-                modifier = Modifier.size(48.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(Color.White, shape = RoundedCornerShape(12.dp))
+            ) {
+                AsyncImage(
+                    model = team.logo,
+                    contentDescription = "Logo ${team.name}",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .align(Alignment.Center)
+                )
+            }
             Spacer(modifier = Modifier.width(16.dp))
             Column {
-                Text(text = team.name, style = MaterialTheme.typography.bodyMedium)
-                Text(text = team_country, style = MaterialTheme.typography.bodySmall)
+                Text(text = team.name, style = MaterialTheme.typography.bodyMedium, color = Color.White)
+                Text(text = team_country, style = MaterialTheme.typography.bodySmall, color = Color.White)
             }
         }
     }

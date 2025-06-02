@@ -33,6 +33,10 @@ import com.wikifut.app.R
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.Image
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+
+private val GrisMorado = Color(0xFF3A2C4A)
 
 @Composable
 fun LigasResult(viewModel: SearchViewModel, onLigasNavigate: (leagueId: League, season: Int) -> Unit) {
@@ -92,7 +96,7 @@ fun LeagueItem(league: League, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        colors = CardDefaults.cardColors(containerColor = MoradoClaro),
+        colors = CardDefaults.cardColors(containerColor = MoradoOscuro),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
@@ -102,15 +106,23 @@ fun LeagueItem(league: League, onClick: () -> Unit) {
                 .clickable{onClick()},
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AsyncImage(
-                model = logo,
-                contentDescription = "Logo $name",
-                modifier = Modifier.size(48.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(Color.White, shape = RoundedCornerShape(12.dp))
+            ) {
+                AsyncImage(
+                    model = logo,
+                    contentDescription = "Logo $name",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .align(Alignment.Center)
+                )
+            }
             Spacer(modifier = Modifier.width(16.dp))
             Column {
-                Text(text = name, style = MaterialTheme.typography.bodyMedium)
-                Text(text = country, style = MaterialTheme.typography.bodySmall)
+                Text(text = name, style = MaterialTheme.typography.bodyMedium, color = Color.White)
+                Text(text = country, style = MaterialTheme.typography.bodySmall, color = Color.White)
             }
         }
     }

@@ -23,9 +23,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -63,7 +65,6 @@ fun MatchScreen(
     viewModel: MatchViewModel = hiltViewModel(),
     navController: NavHostController
 ) {
-
     val match: MatchResponse? by viewModel.match.collectAsState()
 
     // Refrescar el partido cada 60 segundos
@@ -107,22 +108,49 @@ fun MatchScreen(
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = DarkPurpleBackground,
+                        containerColor = Color.Transparent,
                         titleContentColor = TextColorLight,
                         navigationIconContentColor = TextColorLight
                     )
                 )
             },
-            containerColor = DarkPurpleBackground
+            containerColor = Color.Transparent
         ) { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = paddingValues.calculateTopPadding())
-                    .background(DarkPurpleBackground)
-            ) {
-                MatchHeader(match = currentMatchData)
-                MatchTabs(match = currentMatchData)
+            Box(modifier = Modifier.fillMaxSize()) {
+                // Box con blur que cubre TopAppBar + MatchHeader + TabRow
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(288.dp) // 70dp TopAppBar + 170dp MatchHeader + 48dp TabRow
+                        .graphicsLayer {
+                            clip = true
+                        }
+                        .blur(radius = 20.dp)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.wikifutfondo1),
+                        contentDescription = "Background Blur",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.FillBounds
+                    )
+                }
+
+                // Sombra semitransparente que cubre TopAppBar + MatchHeader + TabRow
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(288.dp) // 70dp TopAppBar + 170dp MatchHeader + 48dp TabRow
+                        .background(Color.Black.copy(alpha = 0.4f))
+                )
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = paddingValues.calculateTopPadding())
+                ) {
+                    MatchHeader(match = currentMatchData)
+                    MatchTabs(match = currentMatchData)
+                }
             }
         }
     } ?: run {
@@ -163,6 +191,7 @@ fun MatchHeader(match: MatchResponse) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .height(170.dp)
             .padding(horizontal = 16.dp)
     ) {
         Row(
@@ -184,26 +213,19 @@ fun MatchHeader(match: MatchResponse) {
                     fontSize = 11.sp
                 )
             }
-
-            IconButton(onClick = { /* TODO: Lógica de favorito */ }) {
-                Icon(Icons.Default.StarBorder, contentDescription = "Favorito", tint = TextColorLight)
-            }
-            IconButton(onClick = { /* TODO: Lógica de compartir */ }) {
-                Icon(Icons.Default.Share, contentDescription = "Compartir", tint = TextColorLight)
-            }
         }
         
         Spacer(modifier = Modifier.height(4.dp))
         
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceAround
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             TeamDisplay(team = teams.home, alignment = Alignment.CenterHorizontally)
-            Spacer(Modifier.width(8.dp))
             ScoreDisplay(fixture = fixture, score = score)
-            Spacer(Modifier.width(8.dp))
             TeamDisplay(team = teams.away, alignment = Alignment.CenterHorizontally)
         }
     }
@@ -213,7 +235,10 @@ fun MatchHeader(match: MatchResponse) {
 fun TeamDisplay(team: MRTeam, alignment: Alignment.Horizontal) {
     Column(
         horizontalAlignment = alignment,
-        modifier = Modifier.widthIn(max = 100.dp)
+        modifier = Modifier
+            .widthIn(max = 100.dp)
+            .fillMaxHeight(),
+        verticalArrangement = Arrangement.Center
     ) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
@@ -245,7 +270,11 @@ fun TeamDisplay(team: MRTeam, alignment: Alignment.Horizontal) {
 
 @Composable
 fun ScoreDisplay(fixture: MRFixture, score: MRScore) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxHeight(),
+        verticalArrangement = Arrangement.Center
+    ) {
         Text(
             text = "${score.fulltime.home ?: "-"} - ${score.fulltime.away ?: "-"}",
             color = TextColorLight,
@@ -273,10 +302,10 @@ fun MatchTabs(match: MatchResponse) {
     val pagerState = rememberPagerState { tabTitles.size }
     val coroutineScope = rememberCoroutineScope()
 
-    Column(modifier = Modifier.background(TabRowBackground)) {
+    Column(modifier = Modifier.background(Color.Transparent)) {
         TabRow(
             selectedTabIndex = pagerState.currentPage,
-            containerColor = TabRowBackground,
+            containerColor = Color.Transparent,
             contentColor = AccentYellow,
             indicator = { tabPositions ->
                 if (pagerState.currentPage < tabPositions.size) {
@@ -302,7 +331,7 @@ fun MatchTabs(match: MatchResponse) {
             state = pagerState,
             modifier = Modifier
                 .fillMaxSize()
-                .background(DarkPurpleBackground)
+                .background(Color.Transparent)
         ) { page ->
             when (page) {
                 0 -> LineupsScreen(
@@ -343,6 +372,7 @@ fun LineupsScreen(
                 .fillMaxSize()
                 .padding(8.dp)
                 .verticalScroll(rememberScrollState())
+                .background(Color.Transparent)
         ) {
             homeLineup?.let { lineup ->
                 TeamLineupDetail(
@@ -524,7 +554,8 @@ fun StatisticsScreen(
         Box(
             modifier = modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(16.dp)
+                .background(Color.Transparent),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -577,7 +608,8 @@ fun StatisticsScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .background(Color.Transparent),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Posesion

@@ -33,9 +33,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.graphicsLayer
 
-val MoradoOscuro = Color(0xFF2E0854)    // Morado oscuro
-val MoradoClaro = Color(0xFF7E57C2)    // Morado más claro para el Card
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
