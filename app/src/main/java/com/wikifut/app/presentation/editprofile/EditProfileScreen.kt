@@ -255,6 +255,7 @@ fun EditProfileScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(48.dp)
+                                    .clip(RoundedCornerShape(12.dp))
                             ) {
                                 // Box con blur
                                 Box(
@@ -263,7 +264,7 @@ fun EditProfileScreen(
                                         .graphicsLayer {
                                             clip = true
                                         }
-                                        .blur(radius = 20.dp)
+                                        .blur(radius = 15.dp)
                                 ) {
                                     Image(
                                         painter = painterResource(id = R.drawable.wikifutfondo1),
@@ -277,7 +278,7 @@ fun EditProfileScreen(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .background(Color.Black.copy(alpha = 0.4f))
+                                        .background(Color.Black.copy(alpha = 0.5f))
                                 )
 
                                 TabRow(
@@ -289,7 +290,10 @@ fun EditProfileScreen(
                                             modifier = Modifier.tabIndicatorOffset(tabPositions[selectedGender]),
                                             color = Color(0xFF4CAF50)
                                         )
-                                    }
+                                    },
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(Color(0xFF2D1B45).copy(alpha = 0.8f))
                                 ) {
                                     Tab(
                                         selected = selectedGender == 0,

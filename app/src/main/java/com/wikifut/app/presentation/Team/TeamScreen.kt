@@ -300,7 +300,7 @@ fun VenueCard(venue: Venue) {
     Row(
         modifier = Modifier
             .padding(16.dp)
-            .background(Color(0xFFE3B505))
+            .background(Color(0xFF2E0854))
             .padding(16.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -319,19 +319,19 @@ fun VenueCard(venue: Venue) {
                 text = venue.name ?: "Nombre desconocido",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black
+                color = Color.White
             )
             Text(
                 text = "Ciudad: ${venue.city ?: "-"}",
-                color = Color.Black
+                color = Color.White
             )
             Text(
                 text = "Dirección: ${venue.address ?: "-"}",
-                color = Color.Black
+                color = Color.White
             )
             Text(
                 text = "Capacidad: ${venue.capacity?.toString() ?: "-"}",
-                color = Color.Black
+                color = Color.White
             )
         }
     }
@@ -344,7 +344,7 @@ fun LeagueStatsCardModern(stats: TeamStatsResponse) {
         modifier = Modifier
             .padding(16.dp)
             .fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFE3B505)),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF2E0854)),
         elevation = CardDefaults.cardElevation(8.dp),
         shape = RoundedCornerShape(20.dp)
     ) {
@@ -352,16 +352,24 @@ fun LeagueStatsCardModern(stats: TeamStatsResponse) {
             modifier = Modifier.padding(16.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                AsyncImage(
-                    model = stats.league.logo,
-                    contentDescription = null,
-                    modifier = Modifier.size(40.dp)
-                )
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(Color.White, shape = RoundedCornerShape(8.dp))
+                ) {
+                    AsyncImage(
+                        model = stats.league.logo,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(32.dp)
+                            .align(Alignment.Center)
+                    )
+                }
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = stats.league.name,
                     style = MaterialTheme.typography.titleLarge,
-                    color = Color.Black
+                    color = Color.White
                 )
             }
             SectionTitle("⚽ Juegos")

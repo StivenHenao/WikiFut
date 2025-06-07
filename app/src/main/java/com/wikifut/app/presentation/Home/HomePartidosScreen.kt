@@ -150,13 +150,13 @@ fun DrawerContent(
     Box(
         modifier = Modifier
             .fillMaxHeight()
-            .fillMaxWidth(0.85f) //
+            .fillMaxWidth(0.85f)
             .clip(RoundedCornerShape(topEnd = 0.dp, bottomEnd = 0.dp, topStart = 32.dp, bottomStart = 32.dp))
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF2D1B45).copy(alpha = 0.97f), // Morado oscuro con 97% opacidad
-                        Color(0xFF4A256F).copy(alpha = 0.97f)  // Morado claro con 97% opacidad
+                        Color(0xFF2D1B45).copy(alpha = 0.97f),
+                        Color(0xFF4A256F).copy(alpha = 0.97f)
                     )
                 )
             )
@@ -167,83 +167,83 @@ fun DrawerContent(
                 .padding(top = 60.dp, start = 12.dp, end = 12.dp, bottom = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (userName != null && avatar != null) {
-                Spacer(modifier = Modifier.height(32.dp))
-                Text(
-                    text = "¡ Hola !",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    modifier = Modifier.padding(bottom = 16.dp).align(Alignment.CenterHorizontally),
-                )
-                Text(
-                    text = userName,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                )
-                Spacer(modifier = Modifier.height(28.dp))
-                val avatarImage = when (avatar) {
-                    "messi" -> R.drawable.messi
-                    "cristiano" -> R.drawable.cristiano
-                    "bruyne" -> R.drawable.bruyne
-                    "mbape" -> R.drawable.mbape
-                    "sam_kerr" -> R.drawable.sam_kerr
-                    "linda_caicedo" -> R.drawable.linda_caicedo
-                    "aitana_bonmati" -> R.drawable.aitana_bonmati
-                    "alexia_putellas" -> R.drawable.alexia_putellas
-                    else -> R.drawable.bruyne
-                }
-                Box(
-                    modifier = Modifier
-                        .size(120.dp)
-                        .clip(CircleShape)
-                        .background(Color.White)
-                        .border(3.dp, Color(0xFF8E44AD), CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = avatarImage),
-                        contentDescription = "Avatar",
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-                Spacer(modifier = Modifier.height(70.dp))
-
-                DrawerOption(
-                    icon = Icons.Default.Edit,
-                    label = "Editar perfil",
-                    onClick = {
-                        navigateToEditProfile()
-                        closeDrawer()
-                    }
-                )
-
-                DrawerOption(
-                    icon = Icons.Default.Star,
-                    label = "Favoritos",
-                    onClick = {
-                        closeDrawer()
-                        onFavoritosNavigate() }
-                )
-
-                DrawerOption(
-                    icon = Icons.Default.Home,
-                    label = "Inicio",
-                    onClick = { closeDrawer() }
-                )
-
-                Spacer(modifier = Modifier.height(200.dp))
+            Spacer(modifier = Modifier.height(32.dp))
+            Text(
+                text = "¡ Hola !",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            Text(
+                text = userName ?: "Usuario",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            Spacer(modifier = Modifier.height(28.dp))
+            
+            val avatarImage = when (avatar) {
+                "messi" -> R.drawable.messi
+                "cristiano" -> R.drawable.cristiano
+                "bruyne" -> R.drawable.bruyne
+                "mbape" -> R.drawable.mbape
+                "sam_kerr" -> R.drawable.sam_kerr
+                "linda_caicedo" -> R.drawable.linda_caicedo
+                "aitana_bonmati" -> R.drawable.aitana_bonmati
+                "alexia_putellas" -> R.drawable.alexia_putellas
+                else -> R.drawable.bruyne
             }
+            
+            Box(
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(CircleShape)
+                    .background(Color.White)
+                    .border(3.dp, Color(0xFF8E44AD), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = avatarImage),
+                    contentDescription = "Avatar",
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(70.dp))
+
+            DrawerOption(
+                icon = Icons.Default.Edit,
+                label = "Editar perfil",
+                onClick = {
+                    navigateToEditProfile()
+                    closeDrawer()
+                }
+            )
+
+            DrawerOption(
+                icon = Icons.Default.Star,
+                label = "Favoritos",
+                onClick = {
+                    onFavoritosNavigate()
+                    closeDrawer()
+                }
+            )
+
+            DrawerOption(
+                icon = Icons.Default.Home,
+                label = "Inicio",
+                onClick = { closeDrawer() }
+            )
+
+            Spacer(modifier = Modifier.height(200.dp))
+
             DrawerOption(
                 icon = Icons.Default.Logout,
                 label = "Cerrar sesión",
-
                 onClick = {
                     FirebaseAuth.getInstance().signOut()
                     navigateToInitial()
