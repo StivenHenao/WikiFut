@@ -437,7 +437,7 @@ fun StatTable(headers: List<String>, rows: List<Pair<String, List<Any>>>) {
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
-                    color = Color.Black
+                    color = Color.White
                 )
             }
         }
