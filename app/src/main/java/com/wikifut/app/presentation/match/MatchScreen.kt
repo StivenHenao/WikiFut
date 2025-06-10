@@ -331,7 +331,7 @@ fun MatchTabs(match: MatchResponse) {
             state = pagerState,
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Transparent)
+                .background(Color(0xFF13131b))
         ) { page ->
             when (page) {
                 0 -> LineupsScreen(
@@ -609,7 +609,7 @@ fun StatisticsScreen(
         modifier = modifier
             .fillMaxSize()
             .padding(16.dp)
-            .background(Color.Transparent),
+            .background(Color(0xFF13131b)),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Posesion
