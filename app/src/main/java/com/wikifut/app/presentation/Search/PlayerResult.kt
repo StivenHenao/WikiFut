@@ -72,7 +72,7 @@ fun PlayerResult(viewModel: SearchViewModel, onPlayerNavigate: (playerId: String
                 items(resultado.response) { jugadorResponse ->
                     PlayerItem(
                         player = jugadorResponse.player,
-                        onPlayerNavigate = { onPlayerNavigate(jugadorResponse.player.id.toString(), "2023") }
+                        onPlayerNavigate = { onPlayerNavigate(jugadorResponse.player.id.toString(), "2025") }
                     )
                 }
             }
