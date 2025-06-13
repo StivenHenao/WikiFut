@@ -40,7 +40,7 @@ import com.wikifut.app.utils.Constans.CLIENT_ID_FIREBASE
 
 @Composable
 fun LoginScreen(
-    auth: FirebaseAuth? = null,
+    auth: FirebaseAuth,
     navigateToInitial: () -> Unit = {},
     navigateToSignUp: () -> Unit = {},
     navigateToHome: () -> Unit = {}
@@ -51,6 +51,7 @@ fun LoginScreen(
     var rememberPassword by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var showResetDialog by remember { mutableStateOf(false) }
 
     val oneTapClient = remember { Identity.getSignInClient(context) }
     val signInRequest = remember {
@@ -229,6 +230,20 @@ fun LoginScreen(
                     color = White
                 )
             }
+            TextButton(onClick = { showResetDialog = true }) {
+                Text(
+                    "¿Olvidaste tu contraseña?",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = White
+                )
+            }
+            ResetPasswordDialog(
+                show = showResetDialog,
+                onDismiss = { showResetDialog = false },
+                auth = auth
+            )
+
         }
     }
 }
@@ -267,8 +282,66 @@ fun PasswordTextField(
     )
 }
 
-@Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun LoginScreenPreview() {
-    LoginScreen()
+fun ResetPasswordDialog(
+    show: Boolean,
+    onDismiss: () -> Unit,
+    auth: FirebaseAuth
+) {
+    var email by remember { mutableStateOf("") }
+    var statusMessage by remember { mutableStateOf<String?>(null) }
+
+    if (show) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text("Recuperar contraseña") },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = email,
+                        onValueChange = { email = it },
+                        label = { Text("Correo electrónico") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Email,
+                            imeAction = ImeAction.Done
+                        )
+                    )
+                    if (statusMessage != null) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(statusMessage ?: "", color = Color.Red, fontSize = 13.sp)
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    if (email.isBlank()) {
+                        statusMessage = "Por favor ingresa un correo válido."
+                        return@TextButton
+                    }
+
+                    auth.sendPasswordResetEmail(email)
+                        .addOnCompleteListener { task ->
+                            statusMessage = if (task.isSuccessful) {
+                                "Correo enviado. Revisa tu bandeja de entrada."
+                            } else {
+                                "Error al enviar el correo. Verifica el correo ingresado."
+                            }
+                        }
+                }) {
+                    Text("Enviar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 }
+//@Preview(showSystemUi = true, showBackground = true)
+//@Composable
+//fun LoginScreenPreview() {
+//    LoginScreen()
+//}

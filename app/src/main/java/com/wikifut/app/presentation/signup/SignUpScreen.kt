@@ -94,10 +94,10 @@ fun SignUpScreen(
     // Avatar selection
     val profileImages = remember {
         listOf(
-            R.drawable.bruyne,
-            R.drawable.cristiano,
-            R.drawable.messi,
-            R.drawable.mbape
+            R.drawable.bruyne,      // Hombre
+            R.drawable.sam_kerr,    // Mujer
+            R.drawable.cristiano,   // Hombre
+            R.drawable.linda_caicedo // Mujer
         )
     }
     var selectedImage by remember { mutableStateOf<Int?>(null) }
@@ -313,7 +313,7 @@ fun SignUpScreen(
                             else {
                                 errorMessage = when {
                                     task.exception?.message?.contains("email address") == true -> "Correo inválido o en uso"
-                                    password.length < 6 -> "La contraseña debe tener al menos 6 caracteres"
+                                    password.length < 8 -> "La contraseña debe tener al menos 8 caracteres"
                                     else -> "Error al registrar"
                                 }
                             }
@@ -323,12 +323,15 @@ fun SignUpScreen(
                     .fillMaxWidth()
                     .height(50.dp),
                 shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0E0414))
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF0E0414),
+                    contentColor = Color.White
+                )
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(color = White, modifier = Modifier.size(20.dp))
                 } else {
-                    Text("Registrarse", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text("Registrarse", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
                 }
             }
 

@@ -3,19 +3,25 @@ package com.wikifut.app.presentation.Header
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -35,12 +41,14 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import com.wikifut.app.R
 import com.wikifut.app.model.TipoBusqueda
 
 fun noHacerNada(tipoBusqueda: TipoBusqueda  , string: String) {
-    // No hace nada
 }
 
 
@@ -49,25 +57,37 @@ fun Header(
     searchQuery: String,
     onSearchChange: (String) -> Unit,
     onBuscar: (TipoBusqueda, String) -> Unit,
-    actions: @Composable () -> Unit = {}
+    actions: @Composable () -> Unit = {},
+    backgroundColor: Color = Color.Transparent,
+    applyStatusBarPadding: Boolean = true
 ) {
     var dropdownExpanded by remember { mutableStateOf(false) }
     var selectedOption by remember { mutableStateOf("Equipos") }
+    var modoBusquedaActiva by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
-    val menuOptions = listOf("Equipos", "Ligas", "Partidos","Jugador")
+    val menuOptions = listOf("Equipos", "Ligas", "Partidos", "Jugador")
     val dropdownBackgroundColor = Color(0xFF4A148C)
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0x991F1235))
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .background(backgroundColor)
+            .then(
+                if (applyStatusBarPadding) {
+                    Modifier.windowInsetsPadding(WindowInsets.statusBars)
+                } else {
+                    Modifier
+                }
+            )
+            .padding(horizontal = 4.dp, vertical = 4.dp)
+            .height(60.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         // Logo
         Box(
             modifier = Modifier
-                .size(50.dp)
+                .size(40.dp)
                 .background(Color.White, shape = CircleShape)
                 .clip(CircleShape),
             contentAlignment = Alignment.Center
@@ -75,24 +95,29 @@ fun Header(
             Image(
                 painter = painterResource(id = R.drawable.wikifutlogo),
                 contentDescription = "Logo",
-                modifier = Modifier.size(50.dp)
+                modifier = Modifier.size(40.dp)
             )
         }
-
-        Spacer(modifier = Modifier.width(8.dp))
 
         // Buscador + Dropdown
         Row(
             modifier = Modifier
                 .weight(1f)
+                .padding(horizontal = 4.dp)
                 .background(Color.White, shape = RoundedCornerShape(8.dp))
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .padding(horizontal = 3.dp, vertical = 2.dp)
+                .height(60.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             TextField(
                 value = searchQuery,
                 onValueChange = onSearchChange,
-                placeholder = { Text("Buscar $selectedOption...") },
+                placeholder = { 
+                    Text(
+                        "🔍 Buscar $selectedOption",
+                        style = MaterialTheme.typography.bodyLarge
+                    ) 
+                },
                 modifier = Modifier
                     .weight(1f)
                     .onKeyEvent { keyEvent ->
@@ -102,11 +127,10 @@ fun Header(
                                 "Ligas" -> TipoBusqueda.Ligas
                                 "Partidos" -> TipoBusqueda.Partidos
                                 "Jugador" -> TipoBusqueda.Jugadores
-                                else -> TipoBusqueda.Equipos
+                                "Equipos" -> TipoBusqueda.Equipos
+                                else -> TipoBusqueda.Jugadores
                             }
-                            Log.d("TipoBusqueda", tipoBusqueda.toString())
                             onBuscar(tipoBusqueda, searchQuery)
-                            //noHacerNada(tipoBusqueda, searchQuery)
                             true
                         } else false
                     },
@@ -118,19 +142,40 @@ fun Header(
                     focusedTextColor = Color.Black,
                     unfocusedTextColor = Color.Black
                 ),
+                textStyle = MaterialTheme.typography.bodyLarge,
                 singleLine = true,
                 maxLines = 1,
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Search
+                ),
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+                        focusManager.clearFocus()
+                        val tipoBusqueda = when (selectedOption) {
+                            "Ligas" -> TipoBusqueda.Ligas
+                            "Partidos" -> TipoBusqueda.Partidos
+                            "Jugador" -> TipoBusqueda.Jugadores
+                            "Equipos" -> TipoBusqueda.Equipos
+                            else -> TipoBusqueda.Jugadores
+                        }
+                        onBuscar(tipoBusqueda, searchQuery)
+                    }
+                )
             )
 
             Box(
                 modifier = Modifier
                     .background(dropdownBackgroundColor, shape = RoundedCornerShape(6.dp))
             ) {
-                IconButton(onClick = { dropdownExpanded = true }) {
+                IconButton(
+                    onClick = { dropdownExpanded = true },
+                    modifier = Modifier.size(32.dp)
+                ) {
                     Icon(
                         painter = painterResource(id = R.drawable.arrow_drop_down),
                         contentDescription = "Seleccionar tipo",
-                        tint = Color.White
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
@@ -151,9 +196,12 @@ fun Header(
             }
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
-
-
-        actions()
+        // Iconos de acción
+        Row(
+            modifier = Modifier.padding(start = 2.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            actions()
+        }
     }
 }

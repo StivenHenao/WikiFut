@@ -33,25 +33,26 @@ class SearchViewModel @Inject constructor(
 
     fun buscar(tipo: TipoBusqueda, query: String) {
         viewModelScope.launch {
+            val queryTrimmed = query.trim()
+            
             when(tipo) {
                 TipoBusqueda.Equipos -> {
-                    _resultadoEquipos.value = searchRepository.buscarEquipo(query)
+                    _resultadoEquipos.value = searchRepository.buscarEquipo(queryTrimmed)
                     _resultadoLigas.value = null
                     _resultadoPartidos.value = null
                 }
                 TipoBusqueda.Ligas -> {
-                    // en un futuro
-                    _resultadoLigas.value = searchRepository.buscarLiga(query)
+                    _resultadoLigas.value = searchRepository.buscarLiga(queryTrimmed)
                     _resultadoEquipos.value = null
                     _resultadoPartidos.value = null
                 }
                 TipoBusqueda.Partidos -> {
-                    //_resultadoPartidos.value = searchRepository.buscarPartido(query)
+                    //_resultadoPartidos.value = searchRepository.buscarPartido(queryTrimmed)
                     _resultadoEquipos.value = null
                     _resultadoLigas.value = null
                 }
                 TipoBusqueda.Jugadores -> {
-                    _resultadoJugadores.value = searchRepository.buscarPlayer(query)
+                    _resultadoJugadores.value = searchRepository.buscarPlayer(queryTrimmed)
                     _resultadoEquipos.value = null
                     _resultadoLigas.value = null
                     _resultadoPartidos.value = null
