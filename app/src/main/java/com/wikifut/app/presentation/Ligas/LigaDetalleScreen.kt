@@ -319,14 +319,7 @@ fun LigaDetalleScreen(
                     } else {
                         ListaDePartidos(partidos)
                     }
-                }/*{  //Para mostrar la tabla de clasificacion completa
-                    val standings = viewModel.standings.value
-                    if (standings.isEmpty()) {
-                        Text("No hay equipos disponibles de la temporada $temporadaSeleccionada", modifier = Modifier.padding(16.dp))
-                    } else {
-                        TablaClasificacionCompleta(standings)
-                    }
-                }*/
+                }
                 2 -> {
                     StandingsWidget(
                         leagueId = leagueId,
@@ -393,37 +386,6 @@ fun TopAssistsTab(asistidores: List<TopAssistItem>) {
                         Text("Asistencias: ${item.statistics.firstOrNull()?.goals?.assists ?: 0}")
                         Text("Posición: ${item.statistics.firstOrNull()?.games?.position ?: "?"}")
                     }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun TablaClasificacionCompleta(standings: List<StandingTeam>) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(standings) { team ->
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(2.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("${team.rank}. ${team.team.name}")
-                    Text("Pts: ${team.points}")
-                    Text("PJ: ${team.all.played}")
-                    Text("G: ${team.all.win} E: ${team.all.draw} P: ${team.all.lose}")
                 }
             }
         }

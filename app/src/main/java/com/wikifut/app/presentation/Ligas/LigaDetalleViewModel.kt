@@ -85,26 +85,6 @@ class LigaDetalleViewModel @Inject constructor(
         }
     }
 
-    fun cargarStandings(leagueId: Int, season: Int) {
-        viewModelScope.launch {
-            try {
-                val response = ligaDetalleApi.getTablaPosiciones(leagueId, season)
-                if (response.isSuccessful) {
-                    val standingsData = response.body()?.response?.firstOrNull()?.league
-                    standingsData?.let { league ->
-                        _standings.value = league.standings.firstOrNull() ?: emptyList()
-                        _nombreLiga.value = league.name
-                    }
-                    Log.d("Standings", "✅ Datos de standings cargados correctamente")
-                } else {
-                    Log.e("Standings", "❌ Error al obtener standings: ${response.code()} ${response.message()}")
-                }
-            } catch (e: Exception) {
-                Log.e("Standings", "❌ Excepción al obtener standings: ${e.message}")
-            }
-        }
-    }
-
     fun obtenerTemporadaActual(leagueId: Int) {
         viewModelScope.launch {
             val result = ligaDetalleApi.getLigaDetalle(leagueId)
