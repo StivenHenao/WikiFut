@@ -12,16 +12,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
 import com.wikifut.app.api.LigaDetalleApi
 import com.wikifut.app.api.SeasonApi
+import com.wikifut.app.model.FavoriteTeam
+import com.wikifut.app.model.League
 import com.wikifut.app.model.LeagueDetailItem
+import com.wikifut.app.model.LigaResponse
 import com.wikifut.app.model.TeamBasicInfo
 import com.wikifut.app.repository.PartidosRepository
 import com.wikifut.app.model.Partido
 import com.wikifut.app.model.TopAssistItem
 import com.wikifut.app.model.TopScorerItem
+import com.wikifut.app.repository.FavoritesRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 @HiltViewModel
 class LigaDetalleViewModel @Inject constructor(
-    private val repository: LigaDetalleRepository
+    private val repository: LigaDetalleRepository,
+    private val favoritesRepository: FavoritesRepository
 ): ViewModel() {
 
     @Inject lateinit var seasonApi: SeasonApi
@@ -58,6 +65,13 @@ class LigaDetalleViewModel @Inject constructor(
 
     private val _asistidores = mutableStateOf<List<TopAssistItem>>(emptyList())
     val asistidores: State<List<TopAssistItem>> = _asistidores
+
+    // variables para favoritos
+    private val _error = mutableStateOf<String?>(null)
+    val error: State<String?> = _error
+
+    private val _favoritos = MutableStateFlow<List<League>>(emptyList())
+    val favoritos: StateFlow<List<League>> = _favoritos
 
 
     fun cargarTabla(leagueId: Int, season: Int) {
@@ -167,4 +181,37 @@ class LigaDetalleViewModel @Inject constructor(
         }
     }
 
+    // funciones para favoritos
+
+    fun cargarFavoritos() {
+        viewModelScope.launch {
+            try {
+                _favoritos.value = favoritesRepository.obtenerLigasFavoritas()
+            } catch (e: Exception) {
+                _error.value = "Error al cargar favoritos: ${e.message}"
+            }
+        }
+    }
+
+    fun agregarLigaAFavoritos(LigaFavorita: League) {
+        viewModelScope.launch {
+            try {
+                favoritesRepository.agregarLigaAFavoritos(LigaFavorita)
+                cargarFavoritos()
+            } catch (e: Exception) {
+                _error.value = "Error al agregar a favoritos: ${e.message}"
+            }
+        }
+    }
+
+    fun removeFromFavorites(leagueId: Int) {
+        viewModelScope.launch {
+            try {
+                favoritesRepository.eliminarLigaFavorita(leagueId)
+                cargarFavoritos()
+            } catch (e: Exception) {
+                _error.value = "Error al eliminar favorito: ${e.message}"
+            }
+        }
+    }
 }

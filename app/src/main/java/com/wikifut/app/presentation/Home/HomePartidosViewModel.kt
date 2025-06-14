@@ -1,15 +1,21 @@
 package com.wikifut.app.presentation.Home
 
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.wikifut.app.model.Partido
+import com.wikifut.app.model.TipoBusqueda
 import com.wikifut.app.repository.PartidosRepository
 import com.wikifut.app.utils.obtenerFechaActual
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -22,12 +28,39 @@ import java.util.TimeZone
 class HomePartidosViewModel @Inject constructor(
     private val partidosRepository: PartidosRepository
 ) : ViewModel() {
+    private val _userName = MutableStateFlow<String?>(null)
+    val userName: StateFlow<String?> = _userName
+
+    private val _avatar = MutableStateFlow<String?>(null)
+    val avatar: StateFlow<String?> = _avatar
 
     private val _state = MutableStateFlow(emptyList<Partido>())
     val state: StateFlow<List<Partido>>
         get() = _state
 
+    fun cargarUsuario() {
+        viewModelScope.launch {
+            try {
+                val email = FirebaseAuth.getInstance().currentUser?.email
+                if (!email.isNullOrEmpty()) {
+                    val document = FirebaseFirestore.getInstance()
+                        .collection("users")
+                        .document(email)
+                        .get()
+                        .await()
 
+                    if (document.exists()) {
+                        _userName.value = document.getString("username") ?: "UsuarioDesconocido"
+                        _avatar.value = document.getString("avatar") ?: "default_avatar_url"
+                    }
+                }
+                Log.d("Usuario", "Se cargó: ${_userName.value} ${_avatar.value}")
+            } catch (e: Exception) {
+                Log.e("Usuario", "Error al cargar usuario", e)
+            }
+        }
+
+    }
     private val ligasImportantes = setOf(
 
         45, // FA Cup (Inglaterra)
@@ -85,7 +118,6 @@ class HomePartidosViewModel @Inject constructor(
 
     fun cargarPartidosPorFecha(fechaColombia: String) {
         viewModelScope.launch {
-
             val fechaHoy = fechaColombia
             val fechaManana = obtenerFechaSiguiente(fechaColombia)
 
@@ -98,7 +130,7 @@ class HomePartidosViewModel @Inject constructor(
 
 
             val partidosFiltrados = partidosTotales.filter { partido ->
-                partido.league.id in ligasImportantes && partidoEnFechaColombiana(partido, fechaHoy)
+            partido.league.id in ligasImportantes && partidoEnFechaColombiana(partido, fechaHoy)
             }
 
             _state.value = partidosFiltrados

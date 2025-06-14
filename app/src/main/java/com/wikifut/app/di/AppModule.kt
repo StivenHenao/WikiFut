@@ -1,10 +1,10 @@
 package com.wikifut.app.di
 
-import com.wikifut.app.api.LigaApi
-import com.wikifut.app.api.LigaDetalleApi
 import com.wikifut.app.api.PartidosApi
 import com.wikifut.app.api.PlayerApi
 import com.wikifut.app.api.SeasonApi
+import com.wikifut.app.api.LigaDetalleApi
+import com.wikifut.app.api.LigaApi
 import com.wikifut.app.utils.Constans
 import dagger.Module
 import dagger.Provides
@@ -51,7 +51,6 @@ object AppModule {
         return retrofit.create(PartidosApi::class.java)
     }
 
-    // Nuevo provider para PlayerApi
     @Provides
     @Singleton
     fun providePlayerApi(retrofit: Retrofit): PlayerApi {
@@ -79,4 +78,6 @@ object AppModule {
             return chain.proceed(newRequest)
         }
     }
+
+
 }
