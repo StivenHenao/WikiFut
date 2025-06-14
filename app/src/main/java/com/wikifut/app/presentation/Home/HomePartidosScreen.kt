@@ -635,4 +635,3 @@ fun getEstadoPartido(partido: Partido): String {
         else -> partido.fixture.status.long
     }
 }
-

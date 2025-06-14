@@ -35,34 +35,34 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         auth = Firebase.auth
         enableEdgeToEdge()
-        
+
         // Configurar la barra de navegación
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        
+
         // Establecer el color de fondo de la barra de navegación
         window.navigationBarColor = AndroidColor.TRANSPARENT
-        
+
         setContent {
             navHostController = rememberNavController()
             val view = LocalView.current
             val isDarkTheme = isSystemInDarkTheme()
-            
+
             DisposableEffect(isDarkTheme) {
                 val window = (view.context as android.app.Activity).window
                 val insetsController = WindowInsetsControllerCompat(window, view)
-                
+
                 // Configurar la apariencia de la barra de navegación para que sea transparente en ambos modos
                 insetsController.isAppearanceLightNavigationBars = false
-                
+
                 // Configurar el color del texto de la barra de estado
                 insetsController.isAppearanceLightStatusBars = false
-                
+
                 // Asegurar que la barra de navegación sea transparente
                 window.navigationBarColor = AndroidColor.TRANSPARENT
-                
+
                 onDispose {}
             }
-            
+
             WikifutTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
