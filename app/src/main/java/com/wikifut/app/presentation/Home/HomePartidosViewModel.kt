@@ -110,6 +110,8 @@ class HomePartidosViewModel @Inject constructor(
 
         // 667, // Friendly Clubs HAY MUCHOS
         10, // Friendly International
+        15, // World Cup Clubs
+
 
 
 

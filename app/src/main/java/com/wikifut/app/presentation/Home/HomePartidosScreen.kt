@@ -60,6 +60,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.Button
 import androidx.compose.material3.TextButton
+import androidx.compose.ui.window.DialogProperties
 
 @Composable
 fun HomeScreenWithDrawer(
@@ -295,7 +296,7 @@ fun HomePartidosScreen(
 
 
     if (showDatePicker) {
-        DatePickerDialog(
+        FixedDatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             onDateSelected = { date ->
                 selectedDate = formatFechaParaApi(date)
@@ -471,7 +472,7 @@ fun HomePartidosScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DatePickerDialog(
+fun FixedDatePickerDialog(
     onDismissRequest: () -> Unit,
     onDateSelected: (Date) -> Unit
 ) {
@@ -479,31 +480,53 @@ fun DatePickerDialog(
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = calendar.timeInMillis
     )
-    val selectedDateMillis = datePickerState.selectedDateMillis
-    AlertDialog(
+
+    Dialog(
         onDismissRequest = onDismissRequest,
-        confirmButton = {
-            Button(
-                onClick = {
-                    if (selectedDateMillis != null) {
-                        onDateSelected(Date(selectedDateMillis))
-                    }
-                    onDismissRequest()
-                }
+        properties = DialogProperties(usePlatformDefaultWidth = false) // 👈 Desactiva el ancho por defecto
+    ) {
+        Surface(
+            modifier = Modifier
+                .width(500.dp)  // 👈 Aumenta el ancho para evitar cortes
+                .wrapContentHeight(),
+            shape = MaterialTheme.shapes.extraLarge,
+            tonalElevation = 6.dp
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Seleccionar")
+                DatePicker(
+                    state = datePickerState,
+                    title = {
+                        Text("Seleccionar fecha", style = MaterialTheme.typography.titleLarge)
+                    },
+                    headline = null,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = onDismissRequest) {
+                        Text("Cancelar")
+                    }
+                    Spacer(Modifier.width(16.dp))
+                    Button(
+                        onClick = {
+                            datePickerState.selectedDateMillis?.let {
+                                val date = Date(it)
+                                onDateSelected(date)
+                            }
+                        }
+                    ) {
+                        Text("Seleccionar")
+                    }
+                }
             }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text("Cancelar")
-            }
-        },
-        title = { Text("Seleccionar fecha") },
-        text = {
-            DatePicker(state = datePickerState)
         }
-    )
+    }
 }
 
 @Composable
