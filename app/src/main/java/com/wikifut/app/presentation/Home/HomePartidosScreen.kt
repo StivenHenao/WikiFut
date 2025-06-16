@@ -277,7 +277,7 @@ fun HomePartidosScreen(
     var showDatePicker by remember { mutableStateOf(false) }
 
     // Fecha seleccionada, inicia con la fecha actual
-    var selectedDate by remember { mutableStateOf(obtenerFechaActual()) }
+    val selectedDate by viewModel.selectedDate.collectAsState()
 
 
 
@@ -299,7 +299,7 @@ fun HomePartidosScreen(
         FixedDatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             onDateSelected = { date ->
-                selectedDate = formatFechaParaApi(date)
+                viewModel.updateSelectedDate(formatFechaParaApi(date)) // Actualiza en el ViewModel
                 showDatePicker = false
             }
         )
