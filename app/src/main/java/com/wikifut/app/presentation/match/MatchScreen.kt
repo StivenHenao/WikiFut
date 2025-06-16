@@ -257,14 +257,6 @@ fun TeamDisplay(team: MRTeam, alignment: Alignment.Horizontal) {
             textAlign = TextAlign.Center,
             maxLines = 2
         )
-        if (team.winner == true) {
-            Icon(
-                painterResource(id = R.drawable.ic_star_filled),
-                contentDescription = "Ganador",
-                tint = AccentYellow,
-                modifier = Modifier.size(16.dp).padding(top = 4.dp)
-            )
-        }
     }
 }
 
@@ -358,6 +350,26 @@ fun LineupsScreen(
     val homeLineup = lineups.find { it.team.id == teams.home.id }
     val awayLineup = lineups.find { it.team.id == teams.away.id }
 
+    // Mostrar mensaje si no hay alineaciones
+    if (homeLineup == null && awayLineup == null) {
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .background(Color.Transparent),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Alineaciones no disponibles.",
+                color = TextColorSecondary,
+                fontSize = 16.sp,
+                textAlign = TextAlign.Center
+            )
+        }
+        return
+    }
+
+    // Fondo y contenido normal si hay al menos una alineación
     Box(modifier = modifier.fillMaxSize()) {
         Image(
             painter = painterResource(id = R.drawable.football_pitch_background),
@@ -400,6 +412,7 @@ fun LineupsScreen(
         }
     }
 }
+
 
 fun parseGrid(gridString: String?): Pair<Int, Int>? {
     return gridString?.split(':')

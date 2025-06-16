@@ -122,7 +122,7 @@ class HomePartidosViewModel @Inject constructor(
         32, // UEFA - Qualifiers
 
         // 667, // Friendly Clubs HAY MUCHOS
-        10, // Friendly International
+        //10, // Friendly International
         15, // World Cup Clubs
 
 
