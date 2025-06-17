@@ -38,6 +38,19 @@ class HomePartidosViewModel @Inject constructor(
     val state: StateFlow<List<Partido>>
         get() = _state
 
+    private val _selectedDate = MutableStateFlow(obtenerFechaActual())
+
+    val selectedDate: StateFlow<String> = _selectedDate
+
+    fun updateSelectedDate(newDate: String) {
+        _selectedDate.value = newDate
+        cargarPartidosPorFecha(newDate) // Recargar partidos con la nueva fecha
+    }
+
+    init {
+        cargarPartidosPorFecha(_selectedDate.value) // Usar la fecha guardada en lugar de obtenerFechaActual()
+    }
+
     fun cargarUsuario() {
         viewModelScope.launch {
             try {
@@ -109,7 +122,12 @@ class HomePartidosViewModel @Inject constructor(
         32, // UEFA - Qualifiers
 
         // 667, // Friendly Clubs HAY MUCHOS
-        10, // Friendly International
+        //10, // Friendly International
+        15, // World Cup Clubs
+
+
+
+
     )
 
     init {

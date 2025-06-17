@@ -15,3 +15,4 @@ fun formatFechaParaApi(date: Date): String {
     val outputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     return outputFormat.format(date)
 }
+
