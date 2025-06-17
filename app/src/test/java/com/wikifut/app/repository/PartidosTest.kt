@@ -1,30 +1,47 @@
+// Indica que esta clase está dentro del paquete com.wikifut.app.repository
 package com.wikifut.app.repository
 
+// Importa la interfaz que simula la API de partidos
 import com.wikifut.app.api.PartidosApi
+// Importa todos los modelos usados en los tests
 import com.wikifut.app.model.*
+// Permite ejecutar funciones suspendidas dentro de pruebas normales
 import kotlinx.coroutines.runBlocking
+// Función para hacer aserciones en los tests
 import org.junit.Assert.assertEquals
+// Anotación que indica que este método se ejecuta antes de cada test
 import org.junit.Before
+// Anotación que marca métodos como pruebas
 import org.junit.Test
+// Importa métodos para crear mocks
 import org.mockito.kotlin.mock
+// Importa función para definir comportamiento de mocks
 import org.mockito.kotlin.whenever
 
+// Clase de prueba para probar PartidosRepository
 class PartidosTest {
 
+    // Crea un mock de la API de partidos
     private val partidosApi: PartidosApi = mock()
 
+    // Declaración del repositorio que se va a testear
     private lateinit var partidosRepository: PartidosRepository
 
+    // Inicializa el repositorio antes de cada prueba
     @Before
     fun setup() {
         partidosRepository = PartidosRepository(partidosApi)
     }
 
+    // ---------------------- PRUEBA: getPartidos(fecha) ----------------------
     @Test
     fun `cuando se obtienen partidos por fecha exitosamente, retorna los datos correctos`() {
+        // Ejecuta el código suspendido dentro de un contexto bloqueante
         runBlocking {
-            // Arrange
-            val fecha = "2024-06-14"
+            // ------- Arrange: Prepara datos y comportamiento esperado -------
+            val fecha = "2024-06-14" // Fecha para buscar partidos
+
+            // Datos simulados que la API debería devolver
             val expectedResponse = ListaPartidos(
                 response = listOf(
                     Partido(
@@ -87,20 +104,22 @@ class PartidosTest {
                 )
             )
 
+            // Simula que el mock de la API retorna la respuesta esperada
             whenever(partidosApi.getPartidos(fecha)).thenReturn(expectedResponse)
 
-            // Act
+            // ------- Act: Ejecuta el método real que se va a probar -------
             val result = partidosRepository.getPartidos(fecha)
 
-            // Assert
+            // ------- Assert: Compara el resultado real con el esperado -------
             assertEquals(expectedResponse, result)
         }
     }
 
+    // ---------------------- PRUEBA: getPartidosPorLigaYTemporada() ----------------------
     @Test
     fun `cuando se obtienen partidos por liga y temporada exitosamente, retorna los datos correctos`() {
         runBlocking {
-            // Arrange
+            // ------- Arrange -------
             val leagueId = 39
             val season = 2023
 
@@ -166,12 +185,13 @@ class PartidosTest {
                 )
             )
 
+            // Define el comportamiento simulado de la API para esta prueba
             whenever(partidosApi.getPartidosPorLigaYTemporada(leagueId, season)).thenReturn(expectedResponse)
 
-            // Act
+            // ------- Act -------
             val result = partidosRepository.getPartidosPorLigaYTemporada(leagueId, season)
 
-            // Assert
+            // ------- Assert -------
             assertEquals(expectedResponse, result)
         }
     }
