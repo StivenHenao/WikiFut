@@ -61,6 +61,7 @@ fun EditProfileScreen(
     var showError by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     var selectedGender by remember { mutableStateOf(0) } // 0 para masculino, 1 para femenino
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val maleProfileImages = remember {
         listOf<Pair<String, Int>>(
@@ -140,6 +141,7 @@ fun EditProfileScreen(
                     )
                 )
             },
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             containerColor = Color.Transparent
         ) { paddingValues ->
             Box(modifier = Modifier.fillMaxSize()) {
@@ -409,6 +411,7 @@ fun EditProfileScreen(
                         }
                         is EditProfileState.Saved -> {
                             LaunchedEffect(Unit) {
+                                snackbarHostState.showSnackbar("Cambios guardados")
                                 onBack()
                             }
                         }
