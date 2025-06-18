@@ -19,7 +19,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 // Clase de prueba para probar PartidosRepository
-class PartidosTest {
+class PartidosRepositoryTest {
 
     // Crea un mock de la API de partidos
     private val partidosApi: PartidosApi = mock()
