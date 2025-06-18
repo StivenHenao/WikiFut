@@ -69,13 +69,34 @@ fun PlayerResult(viewModel: SearchViewModel, onPlayerNavigate: (playerId: String
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(bottom = 80.dp)
             ) {
-                items(resultado.response) { jugadorResponse ->
+                items(
+                    resultado.response.filter { jugadorResponse ->
+                        runCatching {
+                            val p = jugadorResponse.player
+                            p.name.isNotBlank() &&
+                                    p.firstname.isNotBlank() &&
+                                    p.lastname.isNotBlank() &&
+                                    p.age > 0 &&
+                                    p.birth.date.isNotBlank() &&
+                                    p.nationality.isNotBlank() &&
+                                    p.height.isNotBlank() &&
+                                    (p.weight?.isNotBlank() == true) &&
+                                    p.number > 0 &&
+                                    p.position.isNotBlank() &&
+                                    p.photo.isNotBlank() &&
+                                    p.photo.startsWith("http")
+                        }.getOrDefault(false)
+                    }
+                ) { jugadorResponse ->
                     PlayerItem(
                         player = jugadorResponse.player,
-                        onPlayerNavigate = { onPlayerNavigate(jugadorResponse.player.id.toString(), "2025") }
+                        onPlayerNavigate = {
+                            onPlayerNavigate(jugadorResponse.player.id.toString(), "2025")
+                        }
                     )
                 }
             }
+
         }
     }
 }
