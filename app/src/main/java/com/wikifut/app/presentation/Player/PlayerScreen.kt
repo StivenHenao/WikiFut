@@ -237,8 +237,7 @@ fun PlayerScreen(
                     }
                 },
                 actions = {
-                    if (playerDataState != null) {
-                        val player = playerDataState!!.response.first().player
+                    playerDataState?.response?.firstOrNull()?.player?.let { player ->
                         val favoritos by viewModel.favoritePlayersList.collectAsState()
                         val isFavorite = favoritos.any { it.id == player.id }
                         val coroutineScope = rememberCoroutineScope()
@@ -255,18 +254,15 @@ fun PlayerScreen(
                         ) {
                             IconButton(
                                 onClick = {
-                                    if (isFavorite) {
-                                        Log.d("TeamScreen", "Se elimino el favorito")
-                                        coroutineScope.launch {
+                                    coroutineScope.launch {
+                                        if (isFavorite) {
+                                            Log.d("TeamScreen", "Se eliminó el favorito")
                                             viewModel.eliminarJugadorDeFavoritos(player)
-                                            viewModel.cargarJugadoresFavoritos()
-                                        }
-                                    } else {
-                                        coroutineScope.launch {
+                                        } else {
                                             viewModel.agregarJugadorAFavoritos(player)
-                                            viewModel.cargarJugadoresFavoritos()
+                                            Log.d("TeamScreen", "Se agregó el favorito teamId: ${player.id}")
                                         }
-                                        Log.d("TeamScreen", "Se agrego el favorito teamId: ${player.id}")
+                                        viewModel.cargarJugadoresFavoritos()
                                     }
                                 }
                             ) {
@@ -278,6 +274,7 @@ fun PlayerScreen(
                             }
                         }
                     }
+
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent,
