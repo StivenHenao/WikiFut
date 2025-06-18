@@ -6,7 +6,8 @@ import com.wikifut.app.api.PartidosApi
 import com.wikifut.app.model.*
 // Importamos runBlocking para ejecutar funciones suspendidas en pruebas
 import kotlinx.coroutines.runBlocking
-// Importamos funciones de prueba de JUnit
+// Importamos funciones de prueba de JUnit 
+//prueba
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
