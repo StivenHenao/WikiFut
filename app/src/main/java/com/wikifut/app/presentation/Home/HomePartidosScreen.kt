@@ -60,6 +60,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.Button
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.window.DialogProperties
 
 @Composable
@@ -272,6 +273,8 @@ fun HomePartidosScreen(
 
     // Estado para la búsqueda de texto
     var searchQuery by remember { mutableStateOf("") }
+    var selectedOption: TipoBusqueda by remember { mutableStateOf(TipoBusqueda.Equipos) }
+
 
     // Estado para mostrar el selector de fecha
     var showDatePicker by remember { mutableStateOf(false) }
@@ -362,7 +365,13 @@ fun HomePartidosScreen(
                     Header(
                         searchQuery = searchQuery,
                         onSearchChange = { searchQuery = it },
-                        onBuscar = onSearchNavigate,
+                        selectedOption = selectedOption,
+                        onSelectedOptionChange = { selectedOption = it},
+                        onBuscar = { tipoBusqueda, query ->
+                            selectedOption = tipoBusqueda
+                            searchQuery = query
+                            onSearchNavigate(tipoBusqueda, query)
+                        },
                         actions = {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -483,11 +492,11 @@ fun FixedDatePickerDialog(
 
     Dialog(
         onDismissRequest = onDismissRequest,
-        properties = DialogProperties(usePlatformDefaultWidth = false) // 👈 Desactiva el ancho por defecto
+        properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Surface(
             modifier = Modifier
-                .width(500.dp)  // 👈 Aumenta el ancho para evitar cortes
+                .width(500.dp)
                 .wrapContentHeight(),
             shape = MaterialTheme.shapes.extraLarge,
             tonalElevation = 6.dp
@@ -541,28 +550,39 @@ fun PartidoCard(
             .clickable {
                 onMatchClick(partido.fixture.id.toLong())
             },
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF4A256F))
+        elevation = CardDefaults.cardElevation(6.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF3B1E5E).copy(alpha = 0.9f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // Liga
             Row(
-                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
             ) {
                 AsyncImage(
                     model = partido.league.logo,
                     contentDescription = "Liga",
-                    modifier = Modifier.size(30.dp),
+                    modifier = Modifier.size(24.dp),
                     contentScale = ContentScale.Fit
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = partido.league.name,
-                    fontSize = 14.sp,
-                    color = Color.White
-                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Column(horizontalAlignment = Alignment.Start) {
+                    Text(
+                        text = partido.league.name,
+                        fontSize = 14.sp,
+                        color = Color.White,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = partido.league.country,
+                        fontSize = 11.sp,
+                        color = Color.LightGray
+                    )
+                }
             }
+
 
             Spacer(modifier = Modifier.height(8.dp))
 

@@ -159,7 +159,6 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth) 
 
             val tipo = when (tipoString) {
                 "Ligas" -> TipoBusqueda.Ligas
-                "Partidos" -> TipoBusqueda.Partidos
                 "Jugadores" -> TipoBusqueda.Jugadores
                 "Equipos" -> TipoBusqueda.Equipos
                 else -> TipoBusqueda.Equipos

@@ -25,9 +25,6 @@ class SearchViewModel @Inject constructor(
     private val _resultadoLigas = MutableStateFlow<ListaLigas?>(null)
     val resultadoLigas: StateFlow<ListaLigas?> = _resultadoLigas
 
-    private val _resultadoPartidos = MutableStateFlow<ListaPartidos?>(null)
-    val resultadoPartidos: StateFlow<ListaPartidos?> = _resultadoPartidos
-
     private val _resultadoJugadores = MutableStateFlow<ListaPlayers?>(null)
     val resultadoJugadores: StateFlow<ListaPlayers?> = _resultadoJugadores
 
@@ -39,29 +36,20 @@ class SearchViewModel @Inject constructor(
                 TipoBusqueda.Equipos -> {
                     _resultadoEquipos.value = searchRepository.buscarEquipo(queryTrimmed)
                     _resultadoLigas.value = null
-                    _resultadoPartidos.value = null
                 }
                 TipoBusqueda.Ligas -> {
                     _resultadoLigas.value = searchRepository.buscarLiga(queryTrimmed)
                     _resultadoEquipos.value = null
-                    _resultadoPartidos.value = null
-                }
-                TipoBusqueda.Partidos -> {
-                    //_resultadoPartidos.value = searchRepository.buscarPartido(queryTrimmed)
-                    _resultadoEquipos.value = null
-                    _resultadoLigas.value = null
                 }
                 TipoBusqueda.Jugadores -> {
                     _resultadoJugadores.value = searchRepository.buscarPlayer(queryTrimmed)
                     _resultadoEquipos.value = null
                     _resultadoLigas.value = null
-                    _resultadoPartidos.value = null
                 }
                 else -> {
                     print("El tipo de búsqueda no es válido")
                     _resultadoEquipos.value = null
                     _resultadoLigas.value = null
-                    _resultadoPartidos.value = null
                 }
             }
         }

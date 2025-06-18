@@ -48,24 +48,21 @@ import androidx.compose.ui.unit.dp
 import com.wikifut.app.R
 import com.wikifut.app.model.TipoBusqueda
 
-fun noHacerNada(tipoBusqueda: TipoBusqueda  , string: String) {
-}
-
 
 @Composable
 fun Header(
     searchQuery: String,
     onSearchChange: (String) -> Unit,
+    selectedOption: TipoBusqueda,
+    onSelectedOptionChange: (TipoBusqueda) -> Unit,
     onBuscar: (TipoBusqueda, String) -> Unit,
     actions: @Composable () -> Unit = {},
     backgroundColor: Color = Color.Transparent,
     applyStatusBarPadding: Boolean = true
 ) {
     var dropdownExpanded by remember { mutableStateOf(false) }
-    var selectedOption by remember { mutableStateOf("Equipos") }
-    var modoBusquedaActiva by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
-    val menuOptions = listOf("Equipos", "Ligas", "Partidos", "Jugador")
+    val menuOptions = listOf("Equipos", "Ligas", "Jugador")
     val dropdownBackgroundColor = Color(0xFF4A148C)
 
     Row(
@@ -112,25 +109,23 @@ fun Header(
             TextField(
                 value = searchQuery,
                 onValueChange = onSearchChange,
-                placeholder = { 
-                    Text(
-                        "🔍 Buscar $selectedOption",
-                        style = MaterialTheme.typography.bodyLarge
-                    ) 
+                placeholder = {
+                    val tipoTexto = when (selectedOption) {
+                        TipoBusqueda.Equipos -> "Equipos"
+                        TipoBusqueda.Ligas -> "Ligas"
+                        TipoBusqueda.Jugadores -> "Jugador"
+                        else -> "Buscar"
+                    }
+
+                    Text("🔍 Buscar $tipoTexto")
+
                 },
                 modifier = Modifier
                     .weight(1f)
                     .onKeyEvent { keyEvent ->
                         if (keyEvent.key == Key.Enter && keyEvent.type == KeyEventType.KeyUp) {
                             focusManager.clearFocus()
-                            val tipoBusqueda = when (selectedOption) {
-                                "Ligas" -> TipoBusqueda.Ligas
-                                "Partidos" -> TipoBusqueda.Partidos
-                                "Jugador" -> TipoBusqueda.Jugadores
-                                "Equipos" -> TipoBusqueda.Equipos
-                                else -> TipoBusqueda.Jugadores
-                            }
-                            onBuscar(tipoBusqueda, searchQuery)
+                            onBuscar(selectedOption, searchQuery)
                             true
                         } else false
                     },
@@ -151,14 +146,7 @@ fun Header(
                 keyboardActions = KeyboardActions(
                     onSearch = {
                         focusManager.clearFocus()
-                        val tipoBusqueda = when (selectedOption) {
-                            "Ligas" -> TipoBusqueda.Ligas
-                            "Partidos" -> TipoBusqueda.Partidos
-                            "Jugador" -> TipoBusqueda.Jugadores
-                            "Equipos" -> TipoBusqueda.Equipos
-                            else -> TipoBusqueda.Jugadores
-                        }
-                        onBuscar(tipoBusqueda, searchQuery)
+                        onBuscar(selectedOption, searchQuery)
                     }
                 )
             )
@@ -188,7 +176,13 @@ fun Header(
                     DropdownMenuItem(
                         text = { Text(option) },
                         onClick = {
-                            selectedOption = option
+                            val tipoBusqueda = when (option) {
+                                "Ligas" -> TipoBusqueda.Ligas
+                                "Jugador" -> TipoBusqueda.Jugadores
+                                "Equipos" -> TipoBusqueda.Equipos
+                                else -> TipoBusqueda.Jugadores
+                            }
+                            onSelectedOptionChange(tipoBusqueda)
                             dropdownExpanded = false
                         }
                     )

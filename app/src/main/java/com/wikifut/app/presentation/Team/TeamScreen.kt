@@ -428,13 +428,28 @@ fun SectionTitle(title: String) {
 
 @Composable
 fun StatTable(headers: List<String>, rows: List<Pair<String, List<Any>>>) {
-    Column {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Spacer(modifier = Modifier.weight(1f))
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        // Encabezado
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFF4A148C), shape = RoundedCornerShape(8.dp))
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "",
+                modifier = Modifier.weight(1f),
+                color = Color.Transparent
+            )
             headers.forEach {
                 Text(
                     text = it,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
                     color = Color.White
@@ -442,38 +457,44 @@ fun StatTable(headers: List<String>, rows: List<Pair<String, List<Any>>>) {
             }
         }
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        rows.forEach { (label, values) ->
+        // Filas
+        rows.forEachIndexed { index, (label, values) ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .background(
+                        if (index % 2 == 0) Color(0xFF2D1B45) else Color(0xFF3C2A5D),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .padding(vertical = 8.dp, horizontal = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = label,
                     modifier = Modifier
                         .weight(1f)
-                        .background(Color(0xFFE0E0E0), shape = RoundedCornerShape(8.dp))
                         .padding(4.dp),
                     textAlign = TextAlign.Center,
-                    color = Color.Black
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodySmall
                 )
+
                 values.forEach {
                     Text(
                         text = it.toString(),
                         modifier = Modifier
                             .weight(1f)
-                            .background(Color(0xFFE0E0E0), shape = RoundedCornerShape(8.dp))
                             .padding(4.dp),
                         textAlign = TextAlign.Center,
-                        color = Color.Black
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodySmall
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(6.dp))
         }
     }
 }
-
-

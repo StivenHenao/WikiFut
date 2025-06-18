@@ -36,6 +36,8 @@ import com.wikifut.app.model.TopAssistItem
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
@@ -56,6 +58,7 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -354,14 +357,15 @@ fun TopAssistsTab(asistidores: List<TopAssistItem>) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         items(asistidores) { item ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(2.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                elevation = CardDefaults.cardElevation(4.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF3B1E5E).copy(alpha = 0.9f)) // morado oscuro
             ) {
                 Row(
                     modifier = Modifier
@@ -370,21 +374,44 @@ fun TopAssistsTab(asistidores: List<TopAssistItem>) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
+                    // Foto + nombre
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         AsyncImage(
                             model = item.player.photo,
                             contentDescription = item.player.name,
-                            modifier = Modifier.size(40.dp)
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
-                            Text(item.player.name, fontWeight = FontWeight.Bold)
-                            Text("Equipo: ${item.statistics.firstOrNull()?.team?.name ?: "Desconocido"}")
+                            Text(
+                                text = item.player.name,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Text(
+                                text = "Equipo: ${item.statistics.firstOrNull()?.team?.name ?: "Desconocido"}",
+                                color = Color.LightGray,
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
                     }
+
+                    // Asistencias + Posición
                     Column(horizontalAlignment = Alignment.End) {
-                        Text("Asistencias: ${item.statistics.firstOrNull()?.goals?.assists ?: 0}")
-                        Text("Posición: ${item.statistics.firstOrNull()?.games?.position ?: "?"}")
+                        Text(
+                            text = "🎯 ${item.statistics.firstOrNull()?.goals?.assists ?: 0} asistencias",
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            text = "📍 ${item.statistics.firstOrNull()?.games?.position ?: "?"}",
+                            color = Color.LightGray,
+                            style = MaterialTheme.typography.bodySmall
+                        )
                     }
                 }
             }
@@ -392,18 +419,22 @@ fun TopAssistsTab(asistidores: List<TopAssistItem>) {
     }
 }
 
+
 @Composable
 fun TablaGoleadores(goleadores: List<TopScorerItem>) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         items(goleadores) { item ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(2.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-            ) {
+                elevation = CardDefaults.cardElevation(4.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF3B1E5E).copy(alpha = 0.9f)) // morado oscuro
+            )  {
                 Row(
                     modifier = Modifier
                         .padding(12.dp)
@@ -411,21 +442,36 @@ fun TablaGoleadores(goleadores: List<TopScorerItem>) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
+                    // Foto + nombre + equipo
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         AsyncImage(
                             model = item.player.photo,
                             contentDescription = item.player.name,
-                            modifier = Modifier.size(40.dp).padding(end = 8.dp)
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
                         )
                         Column {
-                            Text(text = item.player.name, fontWeight = FontWeight.Bold)
-                            Text(text = item.statistics.firstOrNull()?.team?.name.orEmpty())
+                            Text(
+                                text = item.player.name,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Text(
+                                text = item.statistics.firstOrNull()?.team?.name.orEmpty(),
+                                color = Color.LightGray,
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
                     }
+
+                    // Goles
                     Text(
-                        text = "${item.statistics.firstOrNull()?.goals?.total ?: 0} goles",
+                        text = "⚽ ${item.statistics.firstOrNull()?.goals?.total ?: 0}",
                         style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White
                     )
                 }
             }
@@ -433,19 +479,23 @@ fun TablaGoleadores(goleadores: List<TopScorerItem>) {
     }
 }
 
+
 @Composable
 fun ListaDePartidos(partidos: List<Partido>) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(partidos) { partido ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(2.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                elevation = CardDefaults.cardElevation(7.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFF3B1E5E).copy(alpha = 0.9f) // morado oscuro translúcido
+                )
             ) {
                 Row(
                     modifier = Modifier
@@ -470,7 +520,8 @@ fun ListaDePartidos(partidos: List<Partido>) {
                             style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center,
                             maxLines = 2,
-                            modifier = Modifier.padding(top = 4.dp)
+                            modifier = Modifier.padding(top = 4.dp),
+                            color = Color.White
                         )
                     }
 
@@ -482,12 +533,13 @@ fun ListaDePartidos(partidos: List<Partido>) {
                         Text(
                             text = "${partido.goals?.home ?: "-"} - ${partido.goals?.away ?: "-"}",
                             style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
                         )
                         Text(
                             text = partido.fixture.status.long,
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = Color.LightGray
                         )
                     }
 
@@ -507,7 +559,8 @@ fun ListaDePartidos(partidos: List<Partido>) {
                             style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center,
                             maxLines = 2,
-                            modifier = Modifier.padding(top = 4.dp)
+                            modifier = Modifier.padding(top = 4.dp),
+                            color = Color.White
                         )
                     }
                 }
@@ -515,6 +568,7 @@ fun ListaDePartidos(partidos: List<Partido>) {
         }
     }
 }
+
 
 @Composable
 fun LigaInfoConEquiposTab(
@@ -530,14 +584,20 @@ fun LigaInfoConEquiposTab(
         // Info de la liga
         item {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                AsyncImage(
-                    model = info.league.logo,
-                    contentDescription = "Logo Liga",
-                    modifier = Modifier
-                        .size(80.dp)
-                        .background(Color.White.copy(alpha = 0.9f), shape = MaterialTheme.shapes.medium)
-                        .padding(8.dp)
-                )
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF9559DD).copy(alpha = 0.9f)),
+                    shape = MaterialTheme.shapes.medium,
+                    elevation = CardDefaults.cardElevation(7.dp)
+                ) {
+                    AsyncImage(
+                        model = info.league.logo,
+                        contentDescription = "Logo Liga",
+                        modifier = Modifier
+                            .size(80.dp)
+                            .padding(12.dp)
+                    )
+                }
+
                 Text(
                     text = info.league.name,
                     style = MaterialTheme.typography.titleLarge,
@@ -545,6 +605,7 @@ fun LigaInfoConEquiposTab(
                     modifier = Modifier.padding(top = 8.dp),
                     color = Color.White
                 )
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
@@ -566,7 +627,8 @@ fun LigaInfoConEquiposTab(
                     )
                     Text(
                         text = info.country.name,
-                        color = Color.White
+                        color = Color.White,
+                        modifier = Modifier.padding(start = 8.dp)
                     )
                 }
             }
@@ -584,7 +646,7 @@ fun LigaInfoConEquiposTab(
             )
         }
 
-        // Equipos en formato de grillas
+        // Equipos en grilla
         item {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(3),
@@ -600,8 +662,11 @@ fun LigaInfoConEquiposTab(
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(1f),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                        elevation = CardDefaults.cardElevation(defaultElevation = 7.dp),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFF3B1E5E).copy(alpha = 0.9f)
+                        )
                     ) {
                         Column(
                             modifier = Modifier
@@ -623,6 +688,7 @@ fun LigaInfoConEquiposTab(
                                 style = MaterialTheme.typography.bodySmall,
                                 maxLines = 2,
                                 textAlign = TextAlign.Center,
+                                color = Color.White, // importante para contraste
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
@@ -632,6 +698,7 @@ fun LigaInfoConEquiposTab(
         }
     }
 }
+
 
 @Composable
 private fun NavigationOption(
