@@ -41,12 +41,30 @@ class PlayerViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val response = playerRepository.getPlayer(playerId, season)
-                _playerData.value = response
-                _error.value = null
+                
+                // Siempre mostrar los datos disponibles, sin importar si están completos o no
+                if (response.response.isNotEmpty()) {
+                    _playerData.value = response
+                    _error.value = null
+                } else {
+                    // Si no hay respuesta, probar con temporada anterior
+                    val previousSeason = season - 1
+                    try {
+                        val responsePrevious = playerRepository.getPlayer(playerId, previousSeason)
+                        if (responsePrevious.response.isNotEmpty()) {
+                            _playerData.value = responsePrevious
+                            _error.value = null
+                        } else {
+                            _error.value = "No se encontraron datos para este jugador"
+                        }
+                    } catch (e: Exception) {
+                        _error.value = "No se encontraron datos para este jugador"
+                    }
+                }
             } catch (e: Exception) {
                 _error.value = "Error al obtener datos: ${e.message}"
             } finally {
-                _loading.value = false // Se desactiva el loading
+                _loading.value = false
             }
         }
     }

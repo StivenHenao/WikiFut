@@ -60,6 +60,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.animation.core.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,6 +79,24 @@ fun LigaDetalleScreen(
     val temporadas = viewModel.temporadasDisponibles.value
     var temporadaSeleccionada by remember { mutableStateOf(season) }
     var expanded by remember { mutableStateOf(false) }
+    
+    // Estado para el parpadeo del selector de temporada
+    var hasBeenClicked by remember { mutableStateOf(false) }
+    
+    // Animación de parpadeo usando infiniteTransition
+    val infiniteTransition = rememberInfiniteTransition(label = "blink")
+    val blinkAnimation by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 800),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "blink"
+    )
+    
+    // Solo parpadear si no se ha hecho clic
+    val finalBlinkValue = if (hasBeenClicked) 0f else blinkAnimation
 
     // variables para favoritos
     val favoritos by viewModel.favoritos.collectAsState()
@@ -236,14 +255,24 @@ fun LigaDetalleScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(36.dp)
-                    .padding(horizontal = 12.dp, vertical = 8.dp)
-                    .clickable { expanded = true }
+                    .padding(start = 12.dp, end = 12.dp, top = 2.dp, bottom = 4.dp)
             ) {
                 Text(
                     "Temporada: $temporadaSeleccionada",
-                    color = Color.White
+                    color = Color.White,
+                    modifier = Modifier
+                        .padding(start = 0.dp, end = 28.dp, top = 4.dp, bottom = 4.dp)
+                        .background(
+                            color = Color.White.copy(alpha = finalBlinkValue * 0.3f),
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                        .clickable { 
+                            expanded = true
+                            hasBeenClicked = true
+                        }
                 )
+                
+                // Dropdown menu
                 DropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false }
@@ -269,7 +298,7 @@ fun LigaDetalleScreen(
                 LazyRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp),
+                        .padding(vertical = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(horizontal = 12.dp)
                 ) {
